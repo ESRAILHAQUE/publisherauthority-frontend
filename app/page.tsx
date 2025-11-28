@@ -13,16 +13,10 @@ export default function HomePage() {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[#3F207F] via-[#5A2F9F] to-[#3F207F] text-white py-20 md:py-32 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-            backgroundSize: '40px 40px'
-          }}></div>
-        </div>
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center space-y-6 animate-fade-in">
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight drop-shadow-lg">
+      <section className="bg-[#3F207F] text-white py-20 md:py-32">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center space-y-6">
+            <h1 className="text-4xl md:text-6xl font-bold leading-tight">
               The Easiest Way To Monetize Your Blog Without Annoying Ads
             </h1>
             <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto leading-relaxed">
@@ -30,9 +24,9 @@ export default function HomePage() {
             </p>
             <div className="pt-6">
               <Link href="/apply">
-                <Button variant="primary" size="lg" className="text-lg px-8 py-4 shadow-2xl hover:shadow-teal-500/50">
+                <button className="px-8 py-4 bg-[#2EE6B7] hover:bg-[#26D1A6] text-white font-semibold rounded-lg text-lg transition-colors shadow-lg">
                   Apply Now
-                </Button>
+                </button>
               </Link>
             </div>
           </div>
@@ -187,19 +181,19 @@ export default function HomePage() {
       {/* Start Earning Today Section - WHITE BACKGROUND */}
       <section className="py-16 md:py-24 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
+          <div className="max-w-3xl mx-auto text-center space-y-4">
             <h2 className="text-3xl md:text-4xl font-bold text-[#3F207F]">
               Start Earning Today
             </h2>
-            <div className="space-y-2">
-              <p className="text-lg text-gray-700">Ready to get started?</p>
-              <p className="text-lg text-gray-700">Click the button below to apply:</p>
+            <div>
+              <p className="text-base text-gray-700">Ready to get started?</p>
+              <p className="text-base text-gray-700">Click the button below to apply:</p>
             </div>
-            <div className="pt-4">
+            <div className="pt-2">
               <Link href="/apply">
-                <Button variant="primary" size="lg" className="text-lg px-8 py-4 shadow-xl hover:shadow-2xl">
+                <button className="px-8 py-3 bg-[#2EE6B7] hover:bg-[#26D1A6] text-white font-semibold rounded-lg transition-colors shadow-md">
                   Apply Now
-                </Button>
+                </button>
               </Link>
             </div>
           </div>

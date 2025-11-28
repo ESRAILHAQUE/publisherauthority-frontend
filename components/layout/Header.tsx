@@ -8,36 +8,35 @@ export const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-md">
+    <header className="sticky top-0 z-50 bg-[#3F207F]">
       <nav className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#3F207F] to-[#2EE6B7] rounded-lg flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
-              <span className="text-white font-bold text-xl">CM</span>
-            </div>
-            <span className="text-xl font-bold text-[#3F207F]">Content Manager</span>
+          <Link href="/" className="text-xl font-bold text-white hover:opacity-80 transition-opacity">
+            Content Manager
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link href="/about" className="text-gray-700 hover:text-[#3F207F] transition-colors font-medium">
+          <div className="hidden md:flex items-center space-x-6">
+            <Link href="/about" className="text-white hover:opacity-80 transition-opacity">
               About
             </Link>
-            <Link href="/blog" className="text-gray-700 hover:text-[#3F207F] transition-colors font-medium">
+            <Link href="/blog" className="text-white hover:opacity-80 transition-opacity">
               Blog
             </Link>
-            <Link href="/contact" className="text-gray-700 hover:text-[#3F207F] transition-colors font-medium">
+            <Link href="/contact" className="text-white hover:opacity-80 transition-opacity">
               Contact
             </Link>
-            <Link href="/terms" className="text-gray-700 hover:text-[#3F207F] transition-colors font-medium">
+            <Link href="/terms" className="text-white hover:opacity-80 transition-opacity">
               Terms And Conditions
             </Link>
-            <Link href="/auth/login">
-              <Button variant="outline" size="sm">Login</Button>
+            <Link href="/auth/login" className="text-white hover:opacity-80 transition-opacity">
+              Login
             </Link>
             <Link href="/apply">
-              <Button variant="primary" size="sm">Sign Up</Button>
+              <button className="px-5 py-2 bg-[#5A2F9F] hover:bg-[#6B3FB0] text-white rounded-lg font-medium transition-colors">
+                Sign Up
+              </button>
             </Link>
           </div>
 
