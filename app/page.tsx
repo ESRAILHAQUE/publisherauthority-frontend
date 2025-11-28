@@ -23,7 +23,7 @@ export default function HomePage() {
             </p>
             <div className="pt-6">
               <Link href="/apply">
-                <button className="px-10 py-4 bg-[#2EE6B7] hover:bg-[#26D1A6] text-white font-bold rounded-lg text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
+                <button className="px-10 py-4 bg-[#2EE6B7] hover:bg-[#26D1A6] text-white font-bold rounded-lg text-lg transition-all">
                   Apply Now
                 </button>
               </Link>
@@ -57,8 +57,8 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold text-[#3F207F] text-center mb-16">
               Your Blog, Amplified
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-              <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              <div className="text-center">
                 <h3 className="text-xl font-bold text-gray-900 mb-4">
                   Get Valuable Content, For Free
                 </h3>
@@ -70,7 +70,7 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2">
+              <div className="text-center">
                 <h3 className="text-xl font-bold text-gray-900 mb-4">
                   Grow Your Traffic
                 </h3>
@@ -82,7 +82,7 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2">
+              <div className="text-center">
                 <h3 className="text-xl font-bold text-gray-900 mb-4">
                   Monetize Your Blog
                 </h3>
@@ -104,20 +104,11 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold text-[#3F207F] text-center mb-16">
               How It Works
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               <div className="text-center">
-                <div className="w-24 h-24 bg-gradient-to-br from-[#E64980] to-[#FF6B9D] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <svg
-                    className="w-12 h-12 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
+                <div className="w-20 h-20 bg-[#E64980] rounded-full flex items-center justify-center mx-auto mb-6">
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
                 <div className="mb-4">
@@ -136,18 +127,9 @@ export default function HomePage() {
               </div>
 
               <div className="text-center">
-                <div className="w-24 h-24 bg-gradient-to-br from-[#E64980] to-[#FF6B9D] rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <svg
-                    className="w-12 h-12 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
+                <div className="w-20 h-20 bg-[#E64980] rounded-full flex items-center justify-center mx-auto mb-6">
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
                 <div className="mb-4">
@@ -166,18 +148,9 @@ export default function HomePage() {
               </div>
 
               <div className="text-center">
-                <div className="w-24 h-24 bg-gradient-to-br from-[#E64980] to-[#FF6B9D] rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <svg
-                    className="w-12 h-12 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
+                <div className="w-20 h-20 bg-[#E64980] rounded-full flex items-center justify-center mx-auto mb-6">
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div className="mb-4">
@@ -231,7 +204,7 @@ export default function HomePage() {
             </div>
             <div className="pt-4">
               <Link href="/apply">
-                <button className="px-10 py-4 bg-[#2EE6B7] hover:bg-[#26D1A6] text-white font-bold rounded-lg text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
+                <button className="px-10 py-4 bg-[#2EE6B7] hover:bg-[#26D1A6] text-white font-bold rounded-lg text-lg transition-all">
                   Apply Now
                 </button>
               </Link>
@@ -247,8 +220,8 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold text-[#3F207F] text-center mb-12">
               F.A.Q.
             </h2>
-            <div className="space-y-8 text-left">
-              <div className="border-l-4 border-[#3F207F] pl-6">
+            <div className="space-y-6 text-left">
+              <div>
                 <p className="font-bold text-lg text-gray-900 mb-2">
                   Q. What is the minimum Domain Authority you will accept?
                 </p>
@@ -256,7 +229,7 @@ export default function HomePage() {
                   A. Domain authority must be 20 or higher
                 </p>
               </div>
-              <div className="border-l-4 border-[#3F207F] pl-6">
+              <div>
                 <p className="font-bold text-lg text-gray-900 mb-2">
                   Q. Will the content we provide contain links?
                 </p>
@@ -265,7 +238,7 @@ export default function HomePage() {
                   links must be set as Do-follow.
                 </p>
               </div>
-              <div className="border-l-4 border-[#3F207F] pl-6">
+              <div>
                 <p className="font-bold text-lg text-gray-900 mb-2">
                   Q. Do you accept all sites?
                 </p>
@@ -274,7 +247,7 @@ export default function HomePage() {
                   English language
                 </p>
               </div>
-              <div className="border-l-4 border-[#3F207F] pl-6">
+              <div>
                 <p className="font-bold text-lg text-gray-900 mb-2">
                   Q. I do not currently have a blog or my blog is outdated is
                   that okay?
@@ -286,7 +259,7 @@ export default function HomePage() {
                   last 90 days.
                 </p>
               </div>
-              <div className="border-l-4 border-[#3F207F] pl-6">
+              <div>
                 <p className="font-bold text-lg text-gray-900 mb-2">
                   Q. Any other URL restrictions?
                 </p>
@@ -295,7 +268,7 @@ export default function HomePage() {
                   sponsored tags, or guest post advertising.
                 </p>
               </div>
-              <div className="border-l-4 border-[#3F207F] pl-6">
+              <div>
                 <p className="font-bold text-lg text-gray-900 mb-2">
                   Q. Do you accept sites in the XYZ niche?
                 </p>
@@ -304,7 +277,7 @@ export default function HomePage() {
                   grey niches.
                 </p>
               </div>
-              <div className="border-l-4 border-[#3F207F] pl-6">
+              <div>
                 <p className="font-bold text-lg text-gray-900 mb-2">
                   Q. What is the minimum monthly traffic you will accept?
                 </p>
