@@ -74,13 +74,25 @@ export default function ApplyPage() {
       
       <main className="flex-1 py-12">
         <div className="container mx-auto px-4 max-w-4xl">
+          {/* Book a call button */}
+          <div className="mb-6">
+            <a
+              href="https://calendar.app.google/gZYy6vD1PM8A8c8d6"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+            >
+              Book a call to fast track application
+            </a>
+          </div>
+
           {/* Header */}
-          <div className="text-center mb-12">
+          <div className="mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-[#3F207F] mb-4">
               Publisher Application
             </h1>
             <div className="space-y-4 text-gray-700">
-              <p className="text-xl">🎉 Welcome to ContentManager.io! 🎉</p>
+              <p className="text-lg">🎉 Welcome to ContentManager.io! 🎉</p>
               <p>
                 Since our inception, we have proudly paid out over $5,000,000 to our incredible users, 
                 and we are always excited to welcome new members to our growing community.

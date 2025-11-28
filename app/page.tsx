@@ -184,100 +184,20 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Start Earning Today Section - WHITE BACKGROUND */}
       <section className="py-16 md:py-24 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#3F207F] text-center mb-12">
-              What Our Publishers Say
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card hover>
-                <div className="flex items-center mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-4">
-                  "Content Manager has transformed how I monetize my blog. The content quality is excellent 
-                  and payments are always on time. Highly recommended!"
-                </p>
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-gray-300 rounded-full mr-3"></div>
-                  <div>
-                    <p className="font-semibold text-gray-900">Sarah Johnson</p>
-                    <p className="text-sm text-gray-500">Tech Blogger</p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card hover>
-                <div className="flex items-center mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-4">
-                  "I've been working with Content Manager for over a year. The process is smooth, 
-                  and I've earned significantly more than with traditional ad networks."
-                </p>
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-gray-300 rounded-full mr-3"></div>
-                  <div>
-                    <p className="font-semibold text-gray-900">Michael Chen</p>
-                    <p className="text-sm text-gray-500">Lifestyle Blogger</p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card hover>
-                <div className="flex items-center mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-4">
-                  "The team is professional, responsive, and the content always matches my site's style. 
-                  Best decision I made for my blog!"
-                </p>
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-gray-300 rounded-full mr-3"></div>
-                  <div>
-                    <p className="font-semibold text-gray-900">Emily Rodriguez</p>
-                    <p className="text-sm text-gray-500">Food Blogger</p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Start Earning Today Section */}
-      <section className="relative py-16 md:py-24 bg-gradient-to-br from-[#3F207F] to-[#5A2F9F] text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-            backgroundSize: '40px 40px'
-          }}></div>
-        </div>
-        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold drop-shadow-lg">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#3F207F]">
               Start Earning Today
             </h2>
-            <p className="text-xl text-gray-200">
-              Ready to get started? Click the button below to apply:
-            </p>
+            <div className="space-y-2">
+              <p className="text-lg text-gray-700">Ready to get started?</p>
+              <p className="text-lg text-gray-700">Click the button below to apply:</p>
+            </div>
             <div className="pt-4">
               <Link href="/apply">
-                <Button variant="primary" size="lg" className="text-lg px-8 py-4 shadow-2xl hover:shadow-teal-500/50">
+                <Button variant="primary" size="lg" className="text-lg px-8 py-4 shadow-xl hover:shadow-2xl">
                   Apply Now
                 </Button>
               </Link>
@@ -286,77 +206,49 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* FAQ Section */}
+      {/* FAQ Section - Direct Q&A format */}
       <section className="py-16 md:py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-[#3F207F] text-center mb-12">
               F.A.Q.
             </h2>
-            <div className="space-y-6">
-              <FAQItem
-                question="What is the minimum Domain Authority you will accept?"
-                answer="Domain authority must be 20 or higher"
-              />
-              <FAQItem
-                question="Will the content we provide contain links?"
-                answer="Yes, the average article will contain around 3 links. These links must be set as Do-follow."
-              />
-              <FAQItem
-                question="Do you accept all sites?"
-                answer="We only accept sites that are written primarily in the English language"
-              />
-              <FAQItem
-                question="I do not currently have a blog or my blog is outdated is that okay?"
-                answer="If you do not have a blog set up please start your blog by adding at least 1 blog post so we can get a feel for your site. We want to see blogs that have been updated within the last 90 days."
-              />
-              <FAQItem
-                question="Any other URL restrictions?"
-                answer="We do not accept Subdomains, forum/community sites, sponsored tags, or guest post advertising."
-              />
-              <FAQItem
-                question="Do you accept sites in the XYZ niche?"
-                answer="We are open to accepting sites in every niche including grey niches."
-              />
-              <FAQItem
-                question="What is the minimum monthly traffic you will accept?"
-                answer="Our minimum monthly traffic is based on the DA of the website. Domains with DA's 20-39 require a minimum of 150 organic traffic. Domains with DA's 40+ require a minimum of 500 organic traffic."
-              />
+            <div className="space-y-6 text-left">
+              <div>
+                <p className="font-bold text-gray-900 mb-2">Q. What is the minimum Domain Authority you will accept?</p>
+                <p className="text-gray-700">A. Domain authority must be 20 or higher</p>
+              </div>
+              <div>
+                <p className="font-bold text-gray-900 mb-2">Q. Will the content we provide contain links?</p>
+                <p className="text-gray-700">A. Yes, the average article will contain around 3 links. These links must be set as Do-follow.</p>
+              </div>
+              <div>
+                <p className="font-bold text-gray-900 mb-2">Q. Do you accept all sites?</p>
+                <p className="text-gray-700">A. We only accept sites that are written primarily in the English language</p>
+              </div>
+              <div>
+                <p className="font-bold text-gray-900 mb-2">Q. I do not currently have a blog or my blog is outdated is that okay?</p>
+                <p className="text-gray-700">A. If you do not have a blog set up please start your blog by adding at least 1 blog post so we can get a feel for your site. We want to see blogs that have been updated within the last 90 days.</p>
+              </div>
+              <div>
+                <p className="font-bold text-gray-900 mb-2">Q. Any other URL restrictions?</p>
+                <p className="text-gray-700">A. We do not accept Subdomains, forum/community sites, sponsored tags, or guest post advertising.</p>
+              </div>
+              <div>
+                <p className="font-bold text-gray-900 mb-2">Q. Do you accept sites in the XYZ niche?</p>
+                <p className="text-gray-700">A. We are open to accepting sites in every niche including grey niches.</p>
+              </div>
+              <div>
+                <p className="font-bold text-gray-900 mb-2">Q. What is the minimum monthly traffic you will accept?</p>
+                <p className="text-gray-700">Our minimum monthly traffic is based on the DA of the website. Domains with DA's 20-39 require a minimum of 150 organic traffic.</p>
+                <p className="text-gray-700 mt-1">Domains with DA's 40+ require a minimum of 500 organic traffic.</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       <Footer />
-    </div>
-  );
-}
-
-// FAQ Item Component
-function FAQItem({ question, answer }: { question: string; answer: string }) {
-  const [isOpen, setIsOpen] = React.useState(false);
-
-  return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
-      <button
-        className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <span className="font-semibold text-gray-900">{question}</span>
-        <svg
-          className={`w-5 h-5 text-[#3F207F] transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-      {isOpen && (
-        <div className="px-6 py-4 bg-gray-50 text-gray-700 border-t border-gray-200">
-          {answer}
-        </div>
-      )}
     </div>
   );
 }

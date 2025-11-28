@@ -21,17 +21,17 @@ export const Header: React.FC = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-gray-700 hover:text-[#3F207F] transition-colors font-medium">
-              Home
+            <Link href="/about" className="text-gray-700 hover:text-[#3F207F] transition-colors font-medium">
+              About
             </Link>
             <Link href="/blog" className="text-gray-700 hover:text-[#3F207F] transition-colors font-medium">
               Blog
             </Link>
-            <Link href="/support" className="text-gray-700 hover:text-[#3F207F] transition-colors font-medium">
-              Support
+            <Link href="/contact" className="text-gray-700 hover:text-[#3F207F] transition-colors font-medium">
+              Contact
             </Link>
-            <Link href="/apply" className="text-gray-700 hover:text-[#3F207F] transition-colors font-medium">
-              Apply as Publisher
+            <Link href="/terms" className="text-gray-700 hover:text-[#3F207F] transition-colors font-medium">
+              Terms And Conditions
             </Link>
             <Link href="/auth/login">
               <Button variant="outline" size="sm">Login</Button>
@@ -69,11 +69,11 @@ export const Header: React.FC = () => {
         {isMenuOpen && (
           <div className="md:hidden mt-4 pb-4 space-y-3 border-t pt-4">
             <Link
-              href="/"
+              href="/about"
               className="block py-2 text-gray-700 hover:text-[#3F207F] transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
-              Home
+              About
             </Link>
             <Link
               href="/blog"
@@ -83,18 +83,18 @@ export const Header: React.FC = () => {
               Blog
             </Link>
             <Link
-              href="/support"
+              href="/contact"
               className="block py-2 text-gray-700 hover:text-[#3F207F] transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
-              Support
+              Contact
             </Link>
             <Link
-              href="/apply"
+              href="/terms"
               className="block py-2 text-gray-700 hover:text-[#3F207F] transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
-              Apply as Publisher
+              Terms And Conditions
             </Link>
             <div className="flex flex-col space-y-2 pt-2">
               <Link href="/auth/login" onClick={() => setIsMenuOpen(false)}>
