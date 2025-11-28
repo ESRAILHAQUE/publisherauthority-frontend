@@ -3,8 +3,6 @@
 import React from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { Button } from '@/components/shared/Button';
-import { Card } from '@/components/shared/Card';
 import Link from 'next/link';
 
 export default function HomePage() {
@@ -40,7 +38,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-[#3F207F] mb-6">
               What Is Content Manager?
             </h2>
-            <p className="text-lg text-gray-700 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-base md:text-lg text-gray-700 leading-relaxed">
               Content manager connects well-established blogs with brands that need more attention. 
               Instead of plastering annoying ads on your site, these brands are more interested in being 
               mentioned in a valuable piece of content that's featured on your site. This is the future 
@@ -57,46 +55,31 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-[#3F207F] text-center mb-12">
               Your Blog, Amplified
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
-              <Card hover className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-[#E64980] to-[#FF6B9D] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Get Valuable Content, For Free</h3>
-                <p className="text-gray-600">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              <div className="text-left">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">Get Valuable Content, For Free</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
                   Once you're approved, we'll work with you to craft valuable content that speaks to your 
                   audience and mentions the brand. This is the same type of content most blogs pay just to have written.
                 </p>
-              </Card>
+              </div>
 
-              <Card hover className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-[#E64980] to-[#FF6B9D] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Grow Your Traffic</h3>
-                <p className="text-gray-600">
+              <div className="text-left">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">Grow Your Traffic</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
                   Every piece of content you post to your site is a chance to rank for more keywords and 
                   get more free traffic from Google. With our optimized content, you can sit back and watch 
                   your organic traffic grow.
                 </p>
-              </Card>
+              </div>
 
-              <Card hover className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-[#E64980] to-[#FF6B9D] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Monetize Your Blog</h3>
-                <p className="text-gray-600">
+              <div className="text-left">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">Monetize Your Blog</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
                   Not only will you be able to get awesome content that connects with your readers, 
                   you'll earn every time you post one of our blogs… no annoying ads necessary!
                 </p>
-              </Card>
+              </div>
             </div>
           </div>
         </div>
@@ -109,50 +92,50 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-[#3F207F] text-center mb-12">
               How It Works
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               <div className="text-center">
-                <div className="w-20 h-20 bg-[#E64980] rounded-full flex items-center justify-center mx-auto mb-6 transform hover:scale-110 transition-transform duration-300">
+                <div className="w-20 h-20 bg-[#E64980] rounded-full flex items-center justify-center mx-auto mb-6">
                   <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
                 <div className="mb-4">
                   <span className="text-sm font-semibold text-[#E64980]">Step 1:</span>
-                  <h3 className="text-xl font-bold text-gray-900 mt-2">Sign Up For Free</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mt-2">Sign Up For Free</h3>
                 </div>
-                <p className="text-gray-600">
+                <p className="text-sm text-gray-600 leading-relaxed">
                   Sign Up for a free account and submit your blog(s). Depending on the quality of your 
                   website, we'll tell you how much brands are willing to pay to be featured.
                 </p>
               </div>
 
               <div className="text-center">
-                <div className="w-20 h-20 bg-[#E64980] rounded-lg flex items-center justify-center mx-auto mb-6 transform hover:scale-110 transition-transform duration-300">
+                <div className="w-20 h-20 bg-[#E64980] rounded-lg flex items-center justify-center mx-auto mb-6">
                   <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
                 <div className="mb-4">
                   <span className="text-sm font-semibold text-[#E64980]">Step 2:</span>
-                  <h3 className="text-xl font-bold text-gray-900 mt-2">Post Our Valuable Content</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mt-2">Post Our Valuable Content</h3>
                 </div>
-                <p className="text-gray-600">
+                <p className="text-sm text-gray-600 leading-relaxed">
                   We'll send you content that matches your audience. Just post it to your blog and submit 
                   the URL in our portal. It's that easy.
                 </p>
               </div>
 
               <div className="text-center">
-                <div className="w-20 h-20 bg-[#E64980] rounded-lg flex items-center justify-center mx-auto mb-6 transform hover:scale-110 transition-transform duration-300">
+                <div className="w-20 h-20 bg-[#E64980] rounded-lg flex items-center justify-center mx-auto mb-6">
                   <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div className="mb-4">
                   <span className="text-sm font-semibold text-[#E64980]">Step 3:</span>
-                  <h3 className="text-xl font-bold text-gray-900 mt-2">Get Paid Bi-weekly</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mt-2">Get Paid Bi-weekly</h3>
                 </div>
-                <p className="text-gray-600">
+                <p className="text-sm text-gray-600 leading-relaxed">
                   Once the posts are live, we send out bi-weekly payments through your chosen payment method. 
                   We've already paid out over $1MM to publishers.
                 </p>
@@ -169,7 +152,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-[#3F207F] mb-6">
               How Much Can You Make?
             </h2>
-            <p className="text-lg text-gray-700 leading-relaxed">
+            <p className="text-base md:text-lg text-gray-700 leading-relaxed">
               Your earnings depend on the quality of your blog and the amount of posts you accept. 
               The more established your blog, the more the advertisers are willing to pay to be featured. 
               The more content you accept, the more you can get paid!
@@ -178,7 +161,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Start Earning Today Section - WHITE BACKGROUND */}
+      {/* Start Earning Today Section */}
       <section className="py-16 md:py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center space-y-4">
@@ -200,7 +183,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* FAQ Section - Direct Q&A format */}
+      {/* FAQ Section */}
       <section className="py-16 md:py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
