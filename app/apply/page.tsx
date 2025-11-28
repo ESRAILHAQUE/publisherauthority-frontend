@@ -251,7 +251,7 @@ export default function ApplyPage() {
                   onChange={(value) => setQuizAnswers({ ...quizAnswers, q3: value })}
                 />
                 <QuizQuestion
-                  statement="The articles should not be labeled as sponsored, guest posts, or guest author/contributor, and our links must not have link attributes such as rel=\"sponsored\"."
+                  statement='The articles should not be labeled as sponsored, guest posts, or guest author/contributor, and our links must not have link attributes such as rel="sponsored".'
                   question="What type of link attributes are not allowed for our articles?"
                   answer={quizAnswers.q4}
                   onChange={(value) => setQuizAnswers({ ...quizAnswers, q4: value })}
