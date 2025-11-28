@@ -13,18 +13,24 @@ export default function HomePage() {
       <Header />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-[#3F207F] via-[#5A2F9F] to-[#3F207F] text-white py-20 md:py-32">
-        <div className="container mx-auto px-4">
+      <section className="relative bg-gradient-to-br from-[#3F207F] via-[#5A2F9F] to-[#3F207F] text-white py-20 md:py-32 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+            backgroundSize: '40px 40px'
+          }}></div>
+        </div>
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-6 animate-fade-in">
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+            <h1 className="text-4xl md:text-6xl font-bold leading-tight drop-shadow-lg">
               The Easiest Way To Monetize Your Blog Without Annoying Ads
             </h1>
-            <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto leading-relaxed">
               Ready to join the content revolution? With Content Manager, we're changing the way blogs can be monetized.
             </p>
             <div className="pt-6">
               <Link href="/apply">
-                <Button variant="primary" size="lg" className="text-lg px-8 py-4">
+                <Button variant="primary" size="lg" className="text-lg px-8 py-4 shadow-2xl hover:shadow-teal-500/50">
                   Apply Now
                 </Button>
               </Link>
@@ -40,7 +46,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-[#3F207F] mb-6">
               What Is Content Manager?
             </h2>
-            <p className="text-lg text-gray-700 leading-relaxed">
+            <p className="text-lg text-gray-700 leading-relaxed max-w-2xl mx-auto">
               Content manager connects well-established blogs with brands that need more attention. 
               Instead of plastering annoying ads on your site, these brands are more interested in being 
               mentioned in a valuable piece of content that's featured on your site. This is the future 
@@ -57,7 +63,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-[#3F207F] text-center mb-12">
               Your Blog, Amplified
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
               <Card hover className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-[#E64980] to-[#FF6B9D] rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,7 +115,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-[#3F207F] text-center mb-12">
               How It Works
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
               <div className="text-center">
                 <div className="w-20 h-20 bg-[#E64980] rounded-full flex items-center justify-center mx-auto mb-6 transform hover:scale-110 transition-transform duration-300">
                   <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -254,10 +260,16 @@ export default function HomePage() {
       </section>
 
       {/* Start Earning Today Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-[#3F207F] to-[#5A2F9F] text-white">
-        <div className="container mx-auto px-4">
+      <section className="relative py-16 md:py-24 bg-gradient-to-br from-[#3F207F] to-[#5A2F9F] text-white overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+            backgroundSize: '40px 40px'
+          }}></div>
+        </div>
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold">
+            <h2 className="text-3xl md:text-4xl font-bold drop-shadow-lg">
               Start Earning Today
             </h2>
             <p className="text-xl text-gray-200">
@@ -265,7 +277,7 @@ export default function HomePage() {
             </p>
             <div className="pt-4">
               <Link href="/apply">
-                <Button variant="primary" size="lg" className="text-lg px-8 py-4">
+                <Button variant="primary" size="lg" className="text-lg px-8 py-4 shadow-2xl hover:shadow-teal-500/50">
                   Apply Now
                 </Button>
               </Link>

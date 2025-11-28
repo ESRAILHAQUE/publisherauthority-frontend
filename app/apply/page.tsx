@@ -282,7 +282,7 @@ export default function ApplyPage() {
                 />
                 <QuizQuestion
                   statement="We use a payment compliance company. You must use your real name, email, etc. throughout the application process. Any changing of information after applying is flagged in compliance, and your account will be banned."
-                  question="I hereby attest that all information provided on this application matches the information on my legal identification documents. Please state \"I do\"."
+                  question='I hereby attest that all information provided on this application matches the information on my legal identification documents. Please state "I do".'
                   answer={quizAnswers.q9}
                   onChange={(value) => setQuizAnswers({ ...quizAnswers, q9: value })}
                 />
