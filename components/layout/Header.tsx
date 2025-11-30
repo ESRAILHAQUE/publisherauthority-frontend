@@ -9,8 +9,8 @@ export const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-[#3F207F]">
-      <nav className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
+      <nav className="">
+        <div className="flex items-center justify-between w-4/5 mx-auto mt-12">
           {/* Logo */}
           <Link href="/" className="text-xl font-bold text-white hover:opacity-80 transition-opacity">
             Content Manager
