@@ -51,10 +51,10 @@ export const HowItWorksSection: React.FC = () => {
                   {step.icon}
                 </div>
                 <div className="mb-4">
-                  <span className="text-base font-bold text-accent-pink">
+                  <span className="text-2xl text-[#1E0E62]">
                     Step {step.step}:
                   </span>
-                  <h3 className="text-xl font-bold text-gray-900 mt-2">
+                  <h3 className="text-2xl text-[#1E0E62] ">
                     {step.title}
                   </h3>
                 </div>

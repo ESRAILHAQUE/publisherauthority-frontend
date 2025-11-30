@@ -2,10 +2,10 @@ import React from 'react';
 
 export const HowMuchCanYouMakeSection: React.FC = () => {
   return (
-    <section className="py-20 md:py-28 bg-gray-50">
+    <section className="py-20 md:py-28 bg-white">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-primary-purple mb-8">
+          <h2 className="text-3xl md:text-5xl font-bold text-[#1E0E62] mb-8">
             How Much Can You Make?
           </h2>
           <p className="text-lg md:text-xl text-gray-700 leading-relaxed">

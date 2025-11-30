@@ -6,7 +6,7 @@ export const StartEarningTodaySection: React.FC = () => {
     <section className="py-20 md:py-28 bg-white">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center space-y-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-primary-purple">
+          <h2 className="text-3xl md:text-5xl font-bold text-[#1E0E62]">
             Start Earning Today
           </h2>
           <div className="space-y-1">
@@ -17,7 +17,7 @@ export const StartEarningTodaySection: React.FC = () => {
           </div>
           <div className="pt-4">
             <Link href="/apply">
-              <button className="px-10 py-4 bg-accent-teal hover:bg-accent-teal-dark text-white font-bold rounded-lg text-lg transition-all">
+              <button className="px-10 py-4 bg-accent-teal hover:bg-accent-teal-dark text-white font-bold text-lg transition-all rounded-full cursor-pointer">
                 Apply Now
               </button>
             </Link>

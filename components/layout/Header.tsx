@@ -8,9 +8,9 @@ export const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-[#3F207F]">
+    <header className=" bg-[#3F207F]">
       <nav className="">
-        <div className="flex items-center justify-between w-4/5 mx-auto mt-12">
+        <div className="flex items-center justify-between w-4/5 mx-auto py-8">
           {/* Logo */}
           <Link href="/" className="text-xl font-bold text-white hover:opacity-80 transition-opacity">
             Content Manager
@@ -42,7 +42,7 @@ export const Header: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors bg-white"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
           >
@@ -66,7 +66,7 @@ export const Header: React.FC = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 space-y-3 border-t pt-4">
+          <div className="md:hidden mt-4 pb-4 space-y-3 border-t pt-4 text-white">
             <Link
               href="/about"
               className="block py-2 text-gray-700 hover:text-[#3F207F] transition-colors"

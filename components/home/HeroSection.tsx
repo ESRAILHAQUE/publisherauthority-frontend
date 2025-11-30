@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 export const HeroSection: React.FC = () => {
   return (
-    <section className="bg-primary-purple text-white py-16 md:py-24">
+    <section className="bg-primary-purple text-white py-8 md:">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
           {/* Left Column - Content */}
@@ -32,7 +32,7 @@ export const HeroSection: React.FC = () => {
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/apply">
-                <button className="inline-flex items-center justify-center px-4 py-2 bg-accent-teal hover:bg-accent-teal-dark text-white font-semibold rounded-lg transition-all group">
+                <button className="inline-flex w-full items-center justify-center px-4 py-2 bg-accent-teal hover:bg-accent-teal-dark text-white font-semibold rounded-lg transition-all group">
                   Get Started Free
                   <svg 
                     className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" 
@@ -45,7 +45,7 @@ export const HeroSection: React.FC = () => {
                 </button>
               </Link>
               <Link href="/dashboard">
-                <button className="inline-flex items-center justify-center px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white font-semibold rounded-lg transition-all">
+                <button className="inline-flex w-full items-center justify-center px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white font-semibold rounded-lg transition-all">
                   View Marketplace
                 </button>
               </Link>
