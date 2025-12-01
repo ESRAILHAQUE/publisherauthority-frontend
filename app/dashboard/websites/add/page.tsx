@@ -38,15 +38,15 @@ export default function AddWebsitePage() {
             <strong>Do you own one or several websites with impressive stats and healthy traffic?</strong> Looking 
             to monetize them effortlessly? We can help you turn those metrics into cash.
           </p>
-          <p><strong>Here's how it works:</strong></p>
+          <p><strong>Here&apos;s how it works:</strong></p>
           <ul className="list-disc pl-6 space-y-2">
             <li>We write the content.</li>
             <li>You post it.</li>
             <li>You earn money.</li>
           </ul>
           <p>
-            If your sites meet our criteria, we'd love to consider them for our portfolio. However, we are 
-            selective about the sites we collaborate with. <strong>Here's what we're looking for:</strong>
+            If your sites meet our criteria, we&apos;d love to consider them for our portfolio. However, we are 
+            selective about the sites we collaborate with. <strong>Here&apos;s what we&apos;re looking for:</strong>
           </p>
           <ul className="list-disc pl-6 space-y-2">
             <li>Links must be dofollow and easily identifiable within the article.</li>
@@ -54,10 +54,10 @@ export default function AddWebsitePage() {
             <li>Strict adherence to white-hat SEO practices. No black-hat tactics allowed.</li>
             <li>Predominantly informational content; no clear-cut affiliate sites.</li>
             <li>A clean history—no penalties.</li>
-            <li>No labels such as "sponsored," "guest post," or "guest author" on the post.</li>
+            <li>No labels such as &quot;sponsored,&quot; &quot;guest post,&quot; or &quot;guest author&quot; on the post.</li>
             <li>
-              Your site's header, footer, or sidebar must be free from phrases like "write for us," 
-              "guest post," or anything similar, and not contain spammy links like casino, essays, adult sites, etc.
+              Your site&apos;s header, footer, or sidebar must be free from phrases like &quot;write for us,&quot; 
+              &quot;guest post,&quot; or anything similar, and not contain spammy links like casino, essays, adult sites, etc.
             </li>
           </ul>
           <p>Fill out the form below with your domains for our review.</p>

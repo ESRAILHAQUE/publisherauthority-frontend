@@ -150,11 +150,21 @@ export default function BlogPage() {
   );
 }
 
+interface BlogPost {
+  id: number;
+  title: string;
+  excerpt: string;
+  category: string;
+  date: string;
+  readTime: string;
+  featured: boolean;
+}
+
 function BlogCard({
   post,
   featured = false,
 }: {
-  post: any;
+  post: BlogPost;
   featured?: boolean;
 }) {
   return (

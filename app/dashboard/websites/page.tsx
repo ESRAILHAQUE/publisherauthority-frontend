@@ -41,7 +41,7 @@ export default function WebsitesPage() {
   ];
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, any> = {
+    const variants: Record<string, 'success' | 'warning' | 'info' | 'danger' | 'default'> = {
       Active: 'success',
       Pending: 'warning',
       'Counter Offer': 'info',

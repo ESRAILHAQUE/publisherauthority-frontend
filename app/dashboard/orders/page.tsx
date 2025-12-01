@@ -29,7 +29,7 @@ export default function OrdersPage() {
     : orders.filter((o) => o.status.toLowerCase().replace(' ', '') === activeTab);
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, any> = {
+    const variants: Record<string, 'default' | 'info' | 'warning' | 'success' | 'danger'> = {
       'Pending': 'default',
       'Ready To Post': 'info',
       'Verifying': 'warning',

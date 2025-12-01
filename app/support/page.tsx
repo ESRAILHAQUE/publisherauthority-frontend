@@ -40,15 +40,15 @@ export default function SupportPage() {
     },
     {
       question: 'Can I reject an order?',
-      answer: 'Yes, you can decline orders that don\'t fit your site. However, consistently accepting orders helps build a good relationship with the platform.',
+      answer: 'Yes, you can decline orders that don&apos;t fit your site. However, consistently accepting orders helps build a good relationship with the platform.',
     },
     {
       question: 'What happens if I remove a link?',
-      answer: 'Links must stay live permanently. If a link is removed within 1 year, you\'ll have 72 hours to restore it, or payment penalties will apply.',
+      answer: 'Links must stay live permanently. If a link is removed within 1 year, you&apos;ll have 72 hours to restore it, or payment penalties will apply.',
     },
     {
       question: 'How do I verify my website?',
-      answer: 'After submitting your website, you\'ll receive verification instructions. You can either add a verification tag to your HTML head section or publish a temporary verification article.',
+      answer: 'After submitting your website, you&apos;ll receive verification instructions. You can either add a verification tag to your HTML head section or publish a temporary verification article.',
     },
   ];
 
@@ -58,7 +58,7 @@ export default function SupportPage() {
     // Handle form submission
     setTimeout(() => {
       setIsSubmitting(false);
-      alert('Message sent successfully! We\'ll get back to you soon.');
+      alert(`Message sent successfully! We'll get back to you soon.`);
       setContactForm({ name: '', email: '', subject: '', message: '' });
     }, 2000);
   };
@@ -74,7 +74,7 @@ export default function SupportPage() {
               Support & Help Center
             </h1>
             <p className="text-center text-gray-600 text-lg mb-12">
-              We're here to help! Find answers to common questions or contact us directly.
+              We&apos;re here to help! Find answers to common questions or contact us directly.
             </p>
 
             {/* FAQs Section */}
@@ -94,7 +94,7 @@ export default function SupportPage() {
               <Card>
                 <h2 className="text-2xl font-bold text-[#3F207F] mb-6">Contact Us</h2>
                 <p className="text-gray-600 mb-6">
-                  Can't find what you're looking for? Send us a message and we'll get back to you as soon as possible.
+                  Can&apos;t find what you&apos;re looking for? Send us a message and we&apos;ll get back to you as soon as possible.
                 </p>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

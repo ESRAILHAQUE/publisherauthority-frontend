@@ -23,7 +23,7 @@ export default function AdminDashboardPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-[#3F207F] mb-2">Admin Dashboard</h1>
-        <p className="text-gray-600">Welcome back! Here's your platform overview.</p>
+        <p className="text-gray-600">Welcome back! Here&apos;s your platform overview.</p>
       </div>
 
       {/* Stats Grid */}

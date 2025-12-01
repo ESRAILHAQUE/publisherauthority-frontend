@@ -47,7 +47,7 @@ export default function DashboardPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-[#3F207F] mb-2">Dashboard</h1>
-        <p className="text-gray-600">Welcome back! Here's your overview.</p>
+        <p className="text-gray-600">Welcome back! Here&apos;s your overview.</p>
       </div>
 
       {/* Account Level Badge */}
@@ -55,7 +55,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Account Level</h2>
-            <Badge variant={getLevelBadgeColor(stats.accountLevel) as any} size="md" className="text-lg px-4 py-2">
+            <Badge variant={getLevelBadgeColor(stats.accountLevel) as 'default' | 'warning' | 'purple'} size="md" className="text-lg px-4 py-2">
               {stats.accountLevel}
             </Badge>
             {stats.accountLevel !== 'Premium' && (

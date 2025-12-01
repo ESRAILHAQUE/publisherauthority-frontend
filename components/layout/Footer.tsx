@@ -1,25 +1,10 @@
 import React from 'react';
-import Link from 'next/link';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="bg-white py-12">
-      <div className="container mx-auto px-4 text-center">
-        <div className="flex justify-center space-x-8 mb-6">
-          <Link href="/about" className="text-primary-purple hover:text-accent-teal transition-colors text-sm">
-            About
-          </Link>
-          <Link href="/contact" className="text-primary-purple hover:text-accent-teal transition-colors text-sm">
-            Contact
-          </Link>
-          <Link href="/apply" className="text-primary-purple hover:text-accent-teal transition-colors text-sm">
-            Signup
-          </Link>
-          <Link href="/auth/login" className="text-primary-purple hover:text-accent-teal transition-colors text-sm">
-            Login
-          </Link>
-        </div>
-        <p className="text-sm text-gray-500">© ContentManager.io 2025</p>
+    <footer className="bg-gray-200 py-4 min-h-[60px] flex items-center mt-auto">
+      <div className="container mx-auto px-4 w-full">
+        <p className="text-sm text-gray-700">© ContentManager.io 2025</p>
       </div>
     </footer>
   );

@@ -3,16 +3,13 @@
 import React, { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { Button } from '@/components/shared/Button';
-import { Input } from '@/components/shared/Input';
-import { Card } from '@/components/shared/Card';
 import Link from 'next/link';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    rememberMe: false,
+    rememberMe: true,
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -28,37 +25,51 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-white">
       <Header />
       
-      <main className="flex-1 flex items-center justify-center py-12">
-        <div className="container mx-auto px-4 max-w-md w-full">
-          <Card>
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-[#3F207F] mb-2">Sign In</h1>
-              <p className="text-gray-600">Welcome back! Please sign in to your account.</p>
-            </div>
+      {/* Breadcrumbs */}
+      <div className="bg-[#F5F5F5] py-2 px-5 w-11/12 mx-auto mt-3">
+        <div className="">
+          <nav className="text-sm">
+            <Link href="/" className="text-blue-600 hover:text-blue-700 transition-colors">
+              Home
+            </Link>
+            <span className="mx-2 text-gray-400">/</span>
+            <span className="text-gray-600">Sign In</span>
+          </nav>
+        </div>
+      </div>
+      
+      <main className="flex items-center justify-center py-12 bg-white">
+        <div className="container mx-auto px-4 max-w-xl w-full">
+          <div className="bg-white">
+            <h1 className="text-3xl font-semibold text-gray-800 mb-8">Sign In</h1>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <Input
-                label="Email Address"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-                placeholder="your@email.com"
-              />
+              <div>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                  placeholder="Email"
+                  className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:border-[#3F207F] focus:ring-[#3F207F] transition-all duration-200"
+                />
+              </div>
 
-              <Input
-                label="Password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
-                placeholder="••••••••"
-              />
+              <div>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required
+                  placeholder="Password"
+                  className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:border-[#3F207F] focus:ring-[#3F207F] transition-all duration-200"
+                />
+              </div>
 
               <div className="flex items-center justify-between">
                 <label className="flex items-center">
@@ -72,29 +83,30 @@ export default function LoginPage() {
                 </label>
                 <Link
                   href="/auth/forgot-password"
-                  className="text-sm text-[#3F207F] hover:text-[#2EE6B7] transition-colors"
+                  className="text-sm font-semibold text-[#026a1885] hover:text-[#26D1A6] transition-colors"
                 >
                   Forgot password?
                 </Link>
               </div>
 
-              <Button type="submit" isLoading={isLoading} className="w-full" size="lg">
-                Sign In
-              </Button>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full px-4 py-3 bg-[#25DAC5] hover:bg-[#25DAC5] text-white font-semibold rounded-full cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#25DAC5 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Signing In...' : 'Sign In'}
+              </button>
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-gray-600">
-                Don't have an account?{' '}
-                <Link
-                  href="/apply"
-                  className="text-[#3F207F] hover:text-[#2EE6B7] font-semibold transition-colors"
-                >
-                  Create a new account
-                </Link>
-              </p>
+              <Link
+                href="/apply"
+                className="text-gray-700 hover:text-[#3F207F] transition-colors text-center"
+              >
+                Create a new account.
+              </Link>
             </div>
-          </Card>
+          </div>
         </div>
       </main>
 

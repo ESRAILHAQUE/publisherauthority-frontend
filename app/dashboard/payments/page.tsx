@@ -16,7 +16,7 @@ export default function PaymentsPage() {
   ];
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, any> = {
+    const variants: Record<string, 'success' | 'warning' | 'info' | 'danger' | 'default'> = {
       'Paid': 'success',
       'Pending': 'warning',
       'Processing': 'info',

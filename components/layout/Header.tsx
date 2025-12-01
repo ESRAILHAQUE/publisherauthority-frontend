@@ -8,35 +8,38 @@ export const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className=" bg-[#3F207F]">
-      <nav className="">
+    <header className="bg-[#3F207F] min-h-[80px] flex items-center">
+      <nav className="w-full">
         <div className="flex items-center justify-between w-4/5 mx-auto py-8">
           {/* Logo */}
           <Link href="/" className="text-xl font-bold text-white hover:opacity-80 transition-opacity">
-            Content Manager
+            ContentManager.io
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
+            <Link href="/" className="text-white hover:opacity-80 transition-opacity">
+              Home
+            </Link>
             <Link href="/about" className="text-white hover:opacity-80 transition-opacity">
               About
-            </Link>
-            <Link href="/blog" className="text-white hover:opacity-80 transition-opacity">
-              Blog
             </Link>
             <Link href="/contact" className="text-white hover:opacity-80 transition-opacity">
               Contact
             </Link>
             <Link href="/terms" className="text-white hover:opacity-80 transition-opacity">
-              Terms And Conditions
+              Terms and Conditions
             </Link>
-            <Link href="/auth/login" className="text-white hover:opacity-80 transition-opacity">
-              Login
+            <Link href="/blog" className="text-white hover:opacity-80 transition-opacity">
+              Blog
             </Link>
             <Link href="/apply">
               <button className="px-5 py-2 bg-[#5A2F9F] hover:bg-[#6B3FB0] text-white rounded-lg font-medium transition-colors">
                 Sign Up
               </button>
+            </Link>
+            <Link href="/auth/login" className="text-white hover:opacity-80 transition-opacity underline">
+              Login
             </Link>
           </div>
 
