@@ -4,66 +4,53 @@ export const HowItWorksSection: React.FC = () => {
   const steps = [
     {
       step: 1,
-      title: 'Sign Up For Free',
+      title: 'Apply once, add your sites',
       description:
-        "Sign Up for a free account and submit your blog(s). Depending on the quality of your website, we'll tell you how much brands are willing to pay to be featured.",
-      icon: (
-        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      ),
+        "Create a free account and submit the sites you want to monetize. We review authority, traffic, and quality so brands know they’re working with real publishers.",
     },
     {
       step: 2,
-      title: 'Post Our Valuable Content',
+      title: 'Accept briefs that fit',
       description:
-        "We'll send you content that matches your audience. Just post it to your blog and submit the URL in our portal. It's that easy.",
-      icon: (
-        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      ),
+        'When a campaign matches your sites, you’ll see the content, price, and requirements up front. Publish on your schedule and keep full editorial control.',
     },
     {
       step: 3,
-      title: 'Get Paid Bi-weekly',
+      title: 'Get paid on autopilot',
       description:
-        "Once the posts are live, we send out bi-weekly payments through your chosen payment method. We've already paid out over $1MM to publishers.",
-      icon: (
-        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
+        'Add your preferred payout method and receive bi‑weekly payments for approved posts. Track performance and lifetime earnings from a single dashboard.',
     },
   ];
 
   return (
-    <section className="py-20 md:py-28 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-primary-purple text-center mb-16">
-            How It Works
+    <section className="bg-white py-14 text-slate-900 md:py-20">
+      <div className="mx-auto w-full max-w-6xl px-4">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
+            How it works for publishers
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {steps.map((step) => (
-              <div key={step.step} className="text-center">
-                <div className="w-20 h-20 bg-accent-pink rounded-full flex items-center justify-center mx-auto mb-6">
-                  {step.icon}
-                </div>
-                <div className="mb-4">
-                  <span className="text-2xl text-[#1E0E62]">
-                    Step {step.step}:
-                  </span>
-                  <h3 className="text-2xl text-[#1E0E62] ">
-                    {step.title}
-                  </h3>
-                </div>
-                <p className="text-gray-600 leading-relaxed">
-                  {step.description}
-                </p>
+          <p className="mt-3 text-sm text-slate-600 md:text-base">
+            A simple, repeatable flow designed so you spend more time publishing and less time
+            negotiating.
+          </p>
+        </div>
+
+        <div className="mt-10 grid gap-6 md:mt-14 md:grid-cols-3">
+          {steps.map((step) => (
+            <div
+              key={step.step}
+              className="relative rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600 shadow-md shadow-slate-100 md:p-6 md:text-base"
+            >
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-sky-400 text-xs font-semibold text-white">
+                  {step.step}
+                </span>
+                Step {step.step}
               </div>
-            ))}
-          </div>
+              <h3 className="text-base font-semibold text-slate-900 md:text-lg">{step.title}</h3>
+              <p className="mt-3 text-xs text-slate-600 md:text-sm">{step.description}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

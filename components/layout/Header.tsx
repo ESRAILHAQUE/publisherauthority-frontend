@@ -7,50 +7,86 @@ import { Button } from '../shared/Button';
 export const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  return (
-    <header className="bg-[#3F207F] min-h-[80px] flex items-center">
-      <nav className="w-full">
-        <div className="flex items-center justify-between w-4/5 mx-auto py-8">
-          {/* Logo */}
-          <Link href="/" className="text-xl font-bold text-white hover:opacity-80 transition-opacity">
-            ContentManager.io
-          </Link>
+  const navItems = [
+    { href: '/', label: 'Home' },
+    { href: '/about', label: 'About' },
+    { href: '/blog', label: 'Blog' },
+    { href: '/support', label: 'Support' },
+    { href: '/contact', label: 'Contact' },
+    { href: '/terms', label: 'Terms' },
+  ];
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link href="/" className="text-white hover:opacity-80 transition-opacity">
-              Home
+  return (
+    <header className="sticky top-0 z-30 border-b border-[#243b6b] bg-[#12244f]/95 backdrop-blur-xl">
+      <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 md:py-5">
+        {/* Logo */}
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-base font-semibold tracking-tight text-white md:text-lg"
+        >
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/95 text-sm font-bold text-[#12244f] shadow-md shadow-slate-900/40 md:h-10 md:w-10">
+            PA
+          </span>
+          <span className="flex flex-col leading-tight">
+            <span>publisherauthority</span>
+            <span className="text-[11px] font-normal text-slate-200 md:text-xs">
+              Publisher Marketplace
+            </span>
+          </span>
+        </Link>
+
+        {/* Desktop nav */}
+        <div className="hidden items-center gap-6 md:flex">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-sm font-medium text-slate-100/90 transition-colors hover:text-white"
+            >
+              {item.label}
             </Link>
-            <Link href="/about" className="text-white hover:opacity-80 transition-opacity">
-              About
-            </Link>
-            <Link href="/contact" className="text-white hover:opacity-80 transition-opacity">
-              Contact
-            </Link>
-            <Link href="/terms" className="text-white hover:opacity-80 transition-opacity">
-              Terms and Conditions
-            </Link>
-            <Link href="/blog" className="text-white hover:opacity-80 transition-opacity">
-              Blog
+          ))}
+
+          <div className="ml-2 flex items-center gap-3">
+            <Link href="/auth/login">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-white/25 bg-transparent text-xs font-medium text-white hover:border-[#ff8a3c] hover:bg-[#ff8a3c]/10 hover:text-white"
+              >
+                Login
+              </Button>
             </Link>
             <Link href="/apply">
-              <button className="px-5 py-2 bg-[#5A2F9F] hover:bg-[#6B3FB0] text-white rounded-lg font-medium transition-colors">
+              <Button
+                variant="primary"
+                size="sm"
+                className="bg-[#ff8a3c] text-xs font-semibold text-white shadow-md shadow-slate-900/40 hover:brightness-110"
+              >
                 Sign Up
-              </button>
-            </Link>
-            <Link href="/auth/login" className="text-white hover:opacity-80 transition-opacity underline">
-              Login
+              </Button>
             </Link>
           </div>
+        </div>
 
-          {/* Mobile Menu Button */}
+        {/* Mobile actions */}
+        <div className="flex items-center gap-2 md:hidden">
+          <Link href="/auth/login">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-white/25 bg-transparent px-3 text-[11px] font-medium text-white hover:border-[#ff8a3c] hover:bg-[#ff8a3c]/10 hover:text-white"
+            >
+              Login
+            </Button>
+          </Link>
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors bg-white"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/25 bg-transparent text-white shadow-sm shadow-slate-900/40 hover:border-[#ff8a3c] hover:text-[#ff8a3c]"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
           >
             <svg
-              className="w-6 h-6"
+              className="h-5 w-5"
               fill="none"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -66,49 +102,47 @@ export const Header: React.FC = () => {
             </svg>
           </button>
         </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 space-y-3 border-t pt-4 text-white">
-            <Link
-              href="/about"
-              className="block py-2 text-gray-700 hover:text-[#3F207F] transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              href="/blog"
-              className="block py-2 text-gray-700 hover:text-[#3F207F] transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Blog
-            </Link>
-            <Link
-              href="/contact"
-              className="block py-2 text-gray-700 hover:text-[#3F207F] transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Contact
-            </Link>
-            <Link
-              href="/terms"
-              className="block py-2 text-gray-700 hover:text-[#3F207F] transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Terms And Conditions
-            </Link>
-            <div className="flex flex-col space-y-2 pt-2">
-              <Link href="/auth/login" onClick={() => setIsMenuOpen(false)}>
-                <Button variant="outline" size="sm" className="w-full">Login</Button>
-              </Link>
-              <Link href="/apply" onClick={() => setIsMenuOpen(false)}>
-                <Button variant="primary" size="sm" className="w-full">Sign Up</Button>
-              </Link>
-            </div>
-          </div>
-        )}
       </nav>
+
+      {/* Mobile menu with smooth animation */}
+      <div
+        className={`md:hidden border-t border-[#243b6b] bg-[#12244f] px-4 pt-1 overflow-hidden transform origin-top transition-all duration-200 ease-out ${
+          isMenuOpen ? 'max-h-96 opacity-100 scale-y-100 pb-4' : 'max-h-0 opacity-0 scale-y-95 pb-0 pointer-events-none'
+        }`}
+      >
+        <div className="mt-2 flex flex-col gap-2">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-md px-2 py-2 text-sm font-medium text-slate-100/90 transition-colors hover:bg-white/10 hover:text-white"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+        <div className="mt-4 flex gap-2">
+          <Link href="/auth/login" onClick={() => setIsMenuOpen(false)} className="flex-1">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full border-white/25 bg-transparent text-xs font-medium text-white hover:border-[#ff8a3c] hover:bg-[#ff8a3c]/10 hover:text-white"
+            >
+              Login
+            </Button>
+          </Link>
+          <Link href="/apply" onClick={() => setIsMenuOpen(false)} className="flex-1">
+            <Button
+              variant="primary"
+              size="sm"
+              className="w-full bg-[#ff8a3c] text-xs font-semibold text-white shadow-md shadow-slate-900/40 hover:brightness-110"
+            >
+              Sign Up
+            </Button>
+          </Link>
+        </div>
+      </div>
     </header>
   );
 };

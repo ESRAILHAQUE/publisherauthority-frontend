@@ -25,86 +25,107 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-slate-50">
       <Header />
-      
-      {/* Breadcrumbs */}
-      <div className="bg-[#F5F5F5] py-2 px-5 w-11/12 mx-auto mt-3">
-        <div className="">
-          <nav className="text-sm">
-            <Link href="/" className="text-blue-600 hover:text-blue-700 transition-colors">
-              Home
-            </Link>
-            <span className="mx-2 text-gray-400">/</span>
-            <span className="text-gray-600">Sign In</span>
-          </nav>
-        </div>
-      </div>
-      
-      <main className="flex items-center justify-center py-12 bg-white">
-        <div className="container mx-auto px-4 max-w-xl w-full">
-          <div className="bg-white">
-            <h1 className="text-3xl font-semibold text-gray-800 mb-8">Sign In</h1>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                  placeholder="Email"
-                  className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:border-[#3F207F] focus:ring-[#3F207F] transition-all duration-200"
-                />
+      <main className="flex-1 flex items-center justify-center py-10 md:py-14">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="grid gap-10 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] items-center">
+            {/* Left side intro */}
+            <div className="space-y-4 md:space-y-5">
+              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                <span className="h-5 w-5 rounded-full bg-[#ff8a3c] text-[11px] font-bold flex items-center justify-center text-white">
+                  CM
+                </span>
+                Sign in to your publisher dashboard
               </div>
-
-              <div>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                  placeholder="Password"
-                  className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:border-[#3F207F] focus:ring-[#3F207F] transition-all duration-200"
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.rememberMe}
-                    onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
-                    className="w-4 h-4 text-[#3F207F] border-gray-300 rounded focus:ring-[#3F207F]"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">Remember Me</span>
-                </label>
-                <Link
-                  href="/auth/forgot-password"
-                  className="text-sm font-semibold text-[#026a1885] hover:text-[#26D1A6] transition-colors"
-                >
-                  Forgot password?
+              <h1 className="text-3xl md:text-4xl font-semibold text-slate-900 leading-snug">
+                Welcome back to{' '}
+                <span className="bg-gradient-to-r from-emerald-500 to-sky-500 bg-clip-text text-transparent">
+                  publisherauthority
+                </span>
+              </h1>
+              <p className="text-sm md:text-base text-slate-600 max-w-md">
+                Access your sites, open jobs, and payouts in one place. Use the same email you used
+                when you applied as a publisher.
+              </p>
+              <p className="text-xs md:text-sm text-slate-500">
+                Don’t have an account yet?{' '}
+                <Link href="/apply" className="font-semibold text-emerald-600 hover:text-emerald-700">
+                  Apply to become a publisher
                 </Link>
-              </div>
+                .
+              </p>
+            </div>
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full px-4 py-3 bg-[#25DAC5] hover:bg-[#25DAC5] text-white font-semibold rounded-full cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#25DAC5 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? 'Signing In...' : 'Sign In'}
-              </button>
-            </form>
+            {/* Right side form */}
+            <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-md shadow-slate-100 p-6 md:p-8">
+              <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-1">Sign in</h2>
+              <p className="text-xs md:text-sm text-slate-500 mb-6">
+                Enter your email and password to continue.
+              </p>
 
-            <div className="mt-6 text-center">
-              <Link
-                href="/apply"
-                className="text-gray-700 hover:text-[#3F207F] transition-colors text-center"
-              >
-                Create a new account.
-              </Link>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
+                    placeholder="you@example.com"
+                    className="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Password</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    required
+                    placeholder="Your password"
+                    className="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between gap-3">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.rememberMe}
+                      onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
+                      className="w-4 h-4 text-emerald-500 border-slate-300 rounded focus:ring-emerald-400"
+                    />
+                    <span className="ml-2 text-xs md:text-sm text-slate-700">Remember me</span>
+                  </label>
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-xs md:text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full px-4 py-2.5 md:py-3 bg-[#ff8a3c] hover:bg-[#ff7a1f] text-white text-sm md:text-base font-semibold rounded-full cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ff8a3c] disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? 'Signing in…' : 'Sign in'}
+                </button>
+
+                <p className="text-[11px] md:text-xs text-slate-500 text-center">
+                  By signing in, you agree to our{' '}
+                  <Link href="/terms" className="underline hover:text-slate-700">
+                    Terms
+                  </Link>
+                  .
+                </p>
+              </form>
             </div>
           </div>
         </div>

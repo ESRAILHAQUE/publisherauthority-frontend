@@ -69,56 +69,53 @@ export default function ApplyPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-slate-50">
       <Header />
       
-      <main className="flex-1 py-12">
-        <div className="container mx-auto px-4 max-w-4xl">
-          {/* Book a call button */}
-          <div className="mb-6">
-            <a
-              href="https://calendar.app.google/gZYy6vD1PM8A8c8d6"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
-            >
-              Book a call to fast track application
-            </a>
-          </div>
-
-          {/* Header */}
-          <div className="mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-[#3F207F] mb-4">
-              Publisher Application
-            </h1>
-            <div className="space-y-4 text-gray-700">
-              <p className="text-lg">🎉 Welcome to ContentManager.io! 🎉</p>
-              <p>
-                Since our inception, we have proudly paid out over $5,000,000 to our incredible users, 
-                and we are always excited to welcome new members to our growing community.
+      <main className="flex-1 py-10 md:py-14">
+        <div className="container mx-auto px-4 max-w-5xl">
+          {/* Top call-to-action + intro */}
+          <div className="mb-10 flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-[#142854] via-[#12244f] to-[#0b1835] p-6 text-white shadow-lg shadow-slate-900/40 md:mb-12 md:flex-row md:items-center md:gap-8 md:p-8">
+            <div className="md:w-3/5 space-y-3 md:space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-100">
+                <span className="h-5 w-5 rounded-full bg-[#ff8a3c] text-[11px] font-bold flex items-center justify-center">
+                  ★
+                </span>
+                Exclusive publisher program
+              </div>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-semibold leading-snug">
+                Publisher application to join the publisherauthority network
+              </h1>
+              <p className="text-sm md:text-base text-slate-100/90">
+                We carefully vet every application to protect our advertisers and publishers. Take your
+                time – strong, accurate answers significantly increase your chances of approval.
               </p>
-              <p>
-                At ContentManager.io, we believe in fostering long-term relationships built on trust, 
-                mutual respect, and shared success. Since 2019, over 100,000 people have applied to join. 
-                Our platform is exclusive, and becoming a member is something we take very seriously. 
-                Our current application acceptance rate is 9%.
-              </p>
-              <p>
-                Please, do not rush the application process, as each answer will be carefully reviewed 
-                to determine if you are a good fit for our platform.
-              </p>
-              <p className="font-semibold text-[#3F207F]">
-                Please note, we use a payment compliance company and all answers below must match perfectly 
-                with the legal identification document(s) you will be asked to securely provide. Please do 
-                not use a VPN when applying or your application will be rejected.
+            </div>
+            <div className="md:w-2/5 flex flex-col items-start gap-3 md:items-end">
+              <a
+                href="https://calendar.app.google/gZYy6vD1PM8A8c8d6"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center rounded-full bg-[#ff8a3c] px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-slate-900/40 transition-transform hover:-translate-y-[1px] hover:brightness-110 md:px-6 md:py-3"
+              >
+                Book a call to fast track application
+              </a>
+              <p className="text-[11px] md:text-xs text-slate-200/90 text-left md:text-right">
+                Optional but recommended if you manage multiple sites or large inventories.
               </p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Personal Information */}
-            <Card>
-              <h2 className="text-2xl font-bold text-[#3F207F] mb-6">Personal Information</h2>
+            <Card className="border border-slate-200 bg-white/90 shadow-sm shadow-slate-100">
+              <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-2">
+                Personal information
+              </h2>
+              <p className="text-sm text-slate-600 mb-6">
+                Make sure these details match your legal identification documents exactly. This is
+                required for payment compliance.
+              </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Input
                   label="First Name (According to your legal identification document)"
@@ -171,8 +168,13 @@ export default function ApplyPage() {
             </Card>
 
             {/* Guest Post Experience */}
-            <Card>
-              <h2 className="text-2xl font-bold text-[#3F207F] mb-6">Publisher Experience</h2>
+            <Card className="border border-slate-200 bg-white/90 shadow-sm shadow-slate-100">
+              <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-2">
+                Publisher experience
+              </h2>
+              <p className="text-sm text-slate-600 mb-6">
+                Tell us how you currently work with guest posts and sponsored content.
+              </p>
               <Textarea
                 label="Please share your experience with guest posting."
                 name="guestPostExperience"
@@ -182,7 +184,7 @@ export default function ApplyPage() {
               />
               
               <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-800 mb-2">
                   Please provide 3 guest post URLs you were responsible for completing within the last 90 days. 
                   At least one link within each guest post must be do-follow.
                 </label>
@@ -213,7 +215,7 @@ export default function ApplyPage() {
 
               <div className="mt-6">
                 <Textarea
-                  label="Please provide referral information for a professional organization that can attest to your credibility in posting guest posts in a timely and professional manner (Name, email, and/or phone number. We reserve the right to contact the individual.)"
+                  label="Referral information (professional contact who can confirm your experience)"
                   name="referralInfo"
                   value={formData.referralInfo}
                   onChange={handleChange}
@@ -222,7 +224,7 @@ export default function ApplyPage() {
               </div>
 
               <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-800 mb-2">
                   Please upload a CSV file of your website(s) for guest posting. (For secure management review only. 
                   This helps us determine the quality of sites you are looking to utilize.)
                 </label>
@@ -235,9 +237,11 @@ export default function ApplyPage() {
             </Card>
 
             {/* Publisher Expectations Quiz */}
-            <Card>
-              <h2 className="text-2xl font-bold text-[#3F207F] mb-4">Publisher Expectations</h2>
-              <p className="text-gray-700 mb-6">
+            <Card className="border border-slate-200 bg-white/90 shadow-sm shadow-slate-100">
+              <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-2">
+                Publisher expectations
+              </h2>
+              <p className="text-sm text-slate-600 mb-6">
                 We sincerely appreciate your time on this application. We know this is a lengthy process and 
                 we promise it is worth it. Below are the expectations that all users will be held to if accepted 
                 to our platform. Please read and then answer the questions below to check for understanding.
@@ -302,7 +306,7 @@ export default function ApplyPage() {
             </Card>
 
             {/* Agreement */}
-            <Card>
+            <Card className="border border-slate-200 bg-white/90 shadow-sm shadow-slate-100">
               <div className="flex items-start space-x-3">
                 <input
                   type="checkbox"
@@ -312,16 +316,16 @@ export default function ApplyPage() {
                   className="mt-1 w-5 h-5 text-[#3F207F] border-gray-300 rounded focus:ring-[#3F207F]"
                   required
                 />
-                <label htmlFor="agree" className="text-gray-700">
+                <label htmlFor="agree" className="text-slate-700 text-sm">
                   I agree to the terms and conditions and confirm that all information provided is accurate and matches my legal identification documents.
                 </label>
               </div>
             </Card>
 
             {/* Requirements Display */}
-            <Card>
-              <h2 className="text-2xl font-bold text-[#3F207F] mb-4">Requirements</h2>
-              <ul className="space-y-2 text-gray-700">
+            <Card className="border border-amber-100 bg-amber-50/70 shadow-sm shadow-amber-100">
+              <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-3">Requirements</h2>
+              <ul className="space-y-2 text-sm text-slate-700">
                 <li>• Minimum Domain Authority: 20 or higher</li>
                 <li>• Minimum Monthly Traffic: DA 20-39 requires 150+ organic visitors, DA 40+ requires 500+ organic visitors</li>
                 <li>• English language only</li>
@@ -337,7 +341,7 @@ export default function ApplyPage() {
                 size="lg"
                 isLoading={isSubmitting}
                 disabled={!agreed}
-                className="px-12"
+                className="px-12 bg-[#ff8a3c] hover:bg-[#ff7a1f] text-white disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 Submit Application
               </Button>
@@ -364,9 +368,11 @@ function QuizQuestion({
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="border border-gray-200 rounded-lg p-6 bg-gray-50">
-      <p className="font-semibold text-gray-900 mb-2">Statement: {statement}</p>
-      <p className="text-gray-700 mb-4">Question: {question}</p>
+    <div className="border border-slate-200 rounded-xl p-5 bg-slate-50/80">
+      <p className="font-semibold text-slate-900 mb-2 text-sm md:text-base">
+        Statement: {statement}
+      </p>
+      <p className="text-slate-700 mb-4 text-sm md:text-base">Question: {question}</p>
       <Textarea
         value={answer}
         onChange={(e) => onChange(e.target.value)}
