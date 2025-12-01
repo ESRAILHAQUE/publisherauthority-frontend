@@ -7,7 +7,7 @@ export const HowMuchCanYouMakeSection: React.FC = () => {
         <div className="grid gap-10 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] md:items-center">
           <div>
             <h2 className="text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
-              How much can you make with{' '}
+              How much can you make with
               <span className="bg-gradient-to-r from-emerald-500 to-sky-500 bg-clip-text text-transparent">
                 publisherauthority
               </span>
@@ -17,6 +17,7 @@ export const HowMuchCanYouMakeSection: React.FC = () => {
               Your earnings depend on the authority and performance of your blogs, plus how many
               campaigns you choose to accept. Higher quality sites see higher rates and more
               frequent opportunities.
+
             </p>
             <p className="mt-3 text-sm text-slate-600 md:text-base">
               Many publishers start by filling a few open placements per month, then scale to a
