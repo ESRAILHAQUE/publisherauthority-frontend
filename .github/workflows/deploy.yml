@@ -24,17 +24,52 @@ jobs:
           npm install
           npm run build
 
+      - name: Verify Secrets Configuration
+        run: |
+          if [ -z "${{ secrets.VPS_HOST }}" ]; then
+            echo "❌ VPS_HOST secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPS_USERNAME }}" ]; then
+            echo "❌ VPS_USERNAME secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
+            echo "❌ VPS_SSH_KEY secret is not set"
+            exit 1
+          fi
+          echo "✓ All required secrets are configured"
+          echo "✓ Attempting to connect to: ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:22"
+
+      - name: Test Network Connectivity
+        run: |
+          echo "Testing basic network connectivity..."
+          if command -v nc &> /dev/null; then
+            if nc -z -v -w5 ${{ secrets.VPS_HOST }} 22 2>&1; then
+              echo "✓ Port 22 is reachable"
+            else
+              echo "⚠️  Cannot reach port 22 - this might be a firewall issue"
+            fi
+          else
+            echo "⚠️  netcat (nc) not available, skipping connectivity test"
+          fi
+
       - name: Test SSH Connection
+        continue-on-error: true
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT }}
+          port: 22
           timeout: 60s
+          debug: true
           script: |
             echo "SSH connection successful!"
+            echo "Server info:"
             uname -a
+            echo "Current user: $(whoami)"
+            echo "Current directory: $(pwd)"
 
       - name: Deploy to VPS
         uses: appleboy/scp-action@master
@@ -42,11 +77,11 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT }}
+          port: 22
           source: ".next,public,package.json,package-lock.json,next.config.ts"
           target: "/var/www/publisherauthority/frontend"
-          timeout: 60s
-          command_timeout: 15m
+          timeout: 120s
+          command_timeout: 20m
           debug: true
 
       - name: Restart Frontend
@@ -55,9 +90,9 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT }}
-          timeout: 60s
-          command_timeout: 15m
+          port: 22
+          timeout: 120s
+          command_timeout: 20m
           debug: true
           script: |
             cd /var/www/publisherauthority/frontend
