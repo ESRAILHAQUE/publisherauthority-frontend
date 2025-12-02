@@ -73,7 +73,9 @@ export default function PaymentsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-[#3F207F] mb-2">Payments</h1>
+        <h1 className="text-3xl font-bold text-primary-purple mb-2">
+          Payments
+        </h1>
         <p className="text-gray-600">
           Manage your payment settings and view invoice history.
         </p>
@@ -81,7 +83,7 @@ export default function PaymentsPage() {
 
       {/* Payment Settings */}
       <Card>
-        <h2 className="text-xl font-semibold text-[#3F207F] mb-6">
+        <h2 className="text-xl font-semibold text-primary-purple mb-6">
           Payment Settings
         </h2>
         <div className="space-y-6">
@@ -107,7 +109,7 @@ export default function PaymentsPage() {
 
       {/* Payment Information */}
       <Card>
-        <h2 className="text-xl font-semibold text-[#3F207F] mb-4">
+        <h2 className="text-xl font-semibold text-primary-purple mb-4">
           Payment Information
         </h2>
         <div className="prose max-w-none text-gray-700 space-y-3">
@@ -137,7 +139,7 @@ export default function PaymentsPage() {
 
       {/* Invoice History */}
       <Card>
-        <h2 className="text-xl font-semibold text-[#3F207F] mb-6">
+        <h2 className="text-xl font-semibold text-primary-purple mb-6">
           Invoice History
         </h2>
         <div className="overflow-x-auto">
@@ -218,7 +220,7 @@ export default function PaymentsPage() {
                             ).toLocaleDateString()
                           : "-"}
                       </td>
-                      <td className="py-4 px-4 font-semibold text-[#3F207F]">
+                      <td className="py-4 px-4 font-semibold text-primary-purple">
                         ${(invoice.amount || 0) as number}
                       </td>
                       <td className="py-4 px-4 text-gray-600">
@@ -247,7 +249,7 @@ export default function PaymentsPage() {
                             if (invoiceId)
                               paymentsApi.downloadInvoice(String(invoiceId));
                           }}
-                          className="text-[#3F207F] hover:text-[#2EE6B7] font-medium text-sm transition-colors">
+                          className="text-primary-purple hover:text-accent-teal font-medium text-sm transition-colors">
                           Download PDF
                         </button>
                       </td>

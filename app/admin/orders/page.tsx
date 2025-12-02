@@ -107,7 +107,7 @@ export default function AdminOrdersPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#3F207F] mb-2">
+          <h1 className="text-3xl font-bold text-primary-purple mb-2">
             Orders Management
           </h1>
           <p className="text-gray-600">Create and manage all orders.</p>
@@ -199,7 +199,7 @@ export default function AdminOrdersPage() {
                           ).toLocaleDateString()
                         : "-"}
                     </td>
-                    <td className="py-4 px-4 font-semibold text-[#3F207F]">
+                    <td className="py-4 px-4 font-semibold text-primary-purple">
                       ${order.earnings || order.amount || 0}
                     </td>
                     <td className="py-4 px-4 relative">

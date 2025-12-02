@@ -117,7 +117,7 @@ export default function OrdersPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-[#3F207F] mb-2">Orders</h1>
+        <h1 className="text-3xl font-bold text-primary-purple mb-2">Orders</h1>
         <p className="text-gray-600">Manage and track all your orders.</p>
       </div>
 
@@ -131,8 +131,8 @@ export default function OrdersPage() {
               px-4 py-2 font-medium transition-colors border-b-2
               ${
                 activeTab === tab.id
-                  ? "border-[#3F207F] text-[#3F207F]"
-                  : "border-transparent text-gray-600 hover:text-[#3F207F]"
+                  ? "border-[#3F207F] text-primary-purple"
+                  : "border-transparent text-gray-600 hover:text-primary-purple"
               }
             `}>
             {tab.label} ({tab.count})
@@ -210,7 +210,7 @@ export default function OrdersPage() {
                           ).toLocaleDateString()
                         : "-"}
                     </td>
-                    <td className="py-4 px-4 font-semibold text-[#3F207F]">
+                    <td className="py-4 px-4 font-semibold text-primary-purple">
                       ${(order.earnings || order.amount || 0) as number}
                     </td>
                     <td className="py-4 px-4">

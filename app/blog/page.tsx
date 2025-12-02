@@ -86,7 +86,7 @@ export default function BlogPage() {
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-[#3F207F] mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-primary-purple mb-4">
               Blog & Resources
             </h1>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
@@ -100,7 +100,7 @@ export default function BlogPage() {
             {categories.map((category) => (
               <button
                 key={category}
-                className="px-4 py-2 rounded-full bg-white border-2 border-gray-300 text-gray-700 hover:border-[#3F207F] hover:text-[#3F207F] transition-colors font-medium">
+                className="px-4 py-2 rounded-full bg-white border-2 border-gray-300 text-gray-700 hover:border-[#3F207F] hover:text-primary-purple transition-colors font-medium">
                 {category}
               </button>
             ))}
@@ -190,7 +190,7 @@ function BlogCard({
           {post.title}
         </h3>
         <p className="text-gray-600">{post.excerpt}</p>
-        <div className="mt-4 text-[#3F207F] font-semibold hover:text-[#2EE6B7] transition-colors">
+        <div className="mt-4 text-primary-purple font-semibold hover:text-[#2EE6B7] transition-colors">
           Read More →
         </div>
       </Card>

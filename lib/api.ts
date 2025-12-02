@@ -112,9 +112,10 @@ async function apiRequest<T>(
       const error = await response
         .json()
         .catch(() => ({ message: "An error occurred" }));
-      throw new Error(
-        error.message || `HTTP error! status: ${response.status}`
-      );
+      // Extract error message from backend response format
+      // Backend returns: { success: false, message: "...", error: {...} }
+      const errorMessage = error.message || error.error?.message || `HTTP error! status: ${response.status}`;
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
@@ -293,6 +294,12 @@ export const authApi = {
     apiRequest("/auth/forgot-password", {
       method: "POST",
       body: { email },
+      requiresAuth: false,
+    }),
+  resetPassword: (token: string, password: string) =>
+    apiRequest("/auth/reset-password", {
+      method: "POST",
+      body: { token, password },
       requiresAuth: false,
     }),
 };

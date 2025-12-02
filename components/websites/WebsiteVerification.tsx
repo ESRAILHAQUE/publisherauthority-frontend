@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Card } from '@/components/shared/Card';
-import { Button } from '@/components/shared/Button';
-import { Badge } from '@/components/shared/Badge';
+import React, { useState } from "react";
+import { Card } from "@/components/shared/Card";
+import { Button } from "@/components/shared/Button";
+import { Badge } from "@/components/shared/Badge";
 
 interface WebsiteVerificationProps {
   website: {
@@ -11,34 +11,42 @@ interface WebsiteVerificationProps {
     url: string;
     verificationCode: string;
     status: string;
-    verificationMethod?: 'tag' | 'article';
+    verificationMethod?: "tag" | "article";
   };
-  onVerify: (method: 'tag' | 'article') => Promise<void>;
+  onVerify: (method: "tag" | "article") => Promise<void>;
 }
 
-export function WebsiteVerification({ website, onVerify }: WebsiteVerificationProps) {
+export function WebsiteVerification({
+  website,
+  onVerify,
+}: WebsiteVerificationProps) {
   const [verifying, setVerifying] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState<'tag' | 'article' | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<
+    "tag" | "article" | null
+  >(null);
 
-  const handleVerify = async (method: 'tag' | 'article') => {
+  const handleVerify = async (method: "tag" | "article") => {
     setVerifying(true);
     try {
       await onVerify(method);
       setSelectedMethod(method);
     } catch (error) {
-      console.error('Verification failed:', error);
+      console.error("Verification failed:", error);
     } finally {
       setVerifying(false);
     }
   };
 
-  if (website.status === 'active') {
+  if (website.status === "active") {
     return (
       <Card>
         <div className="flex items-center space-x-3">
           <Badge variant="success">Verified</Badge>
           <span className="text-gray-600">
-            Verified via {website.verificationMethod === 'tag' ? 'HTML Tag' : 'Verification Article'}
+            Verified via{" "}
+            {website.verificationMethod === "tag"
+              ? "HTML Tag"
+              : "Verification Article"}
           </span>
         </div>
       </Card>
@@ -47,9 +55,12 @@ export function WebsiteVerification({ website, onVerify }: WebsiteVerificationPr
 
   return (
     <Card>
-      <h3 className="text-lg font-semibold text-[#3F207F] mb-4">Website Verification</h3>
+      <h3 className="text-lg font-semibold text-primary-purple mb-4">
+        Website Verification
+      </h3>
       <p className="text-gray-600 mb-6">
-        To verify ownership of <strong>{website.url}</strong>, choose one of the following methods:
+        To verify ownership of <strong>{website.url}</strong>, choose one of the
+        following methods:
       </p>
 
       <div className="space-y-6">
@@ -57,12 +68,15 @@ export function WebsiteVerification({ website, onVerify }: WebsiteVerificationPr
         <div className="border border-gray-200 rounded-lg p-6">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Method 1: HTML Tag Verification</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">
+                Method 1: HTML Tag Verification
+              </h4>
               <p className="text-sm text-gray-600">
-                Add a verification tag to your website&apos;s HTML &lt;head&gt; section
+                Add a verification tag to your website&apos;s HTML &lt;head&gt;
+                section
               </p>
             </div>
-            {selectedMethod === 'tag' && (
+            {selectedMethod === "tag" && (
               <Badge variant="success">Selected</Badge>
             )}
           </div>
@@ -82,10 +96,9 @@ export function WebsiteVerification({ website, onVerify }: WebsiteVerificationPr
 
           <Button
             variant="outline"
-            onClick={() => handleVerify('tag')}
+            onClick={() => handleVerify("tag")}
             disabled={verifying || selectedMethod !== null}
-            isLoading={verifying && selectedMethod === null}
-          >
+            isLoading={verifying && selectedMethod === null}>
             Verify via HTML Tag
           </Button>
         </div>
@@ -94,12 +107,14 @@ export function WebsiteVerification({ website, onVerify }: WebsiteVerificationPr
         <div className="border border-gray-200 rounded-lg p-6">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Method 2: Verification Article</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">
+                Method 2: Verification Article
+              </h4>
               <p className="text-sm text-gray-600">
                 Publish a temporary verification article with a specific link
               </p>
             </div>
-            {selectedMethod === 'article' && (
+            {selectedMethod === "article" && (
               <Badge variant="success">Selected</Badge>
             )}
           </div>
@@ -112,9 +127,9 @@ export function WebsiteVerification({ website, onVerify }: WebsiteVerificationPr
               href={`${website.url}/publisherauthority-verification-${website.verificationCode}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#3F207F] hover:underline break-all"
-            >
-              {website.url}/publisherauthority-verification-{website.verificationCode}
+              className="text-primary-purple hover:underline break-all">
+              {website.url}/publisherauthority-verification-
+              {website.verificationCode}
             </a>
           </div>
 
@@ -127,10 +142,9 @@ export function WebsiteVerification({ website, onVerify }: WebsiteVerificationPr
 
           <Button
             variant="outline"
-            onClick={() => handleVerify('article')}
+            onClick={() => handleVerify("article")}
             disabled={verifying || selectedMethod !== null}
-            isLoading={verifying && selectedMethod === null}
-          >
+            isLoading={verifying && selectedMethod === null}>
             Verify via Article
           </Button>
         </div>
@@ -138,11 +152,11 @@ export function WebsiteVerification({ website, onVerify }: WebsiteVerificationPr
 
       <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <p className="text-sm text-blue-800">
-          <strong>Note:</strong> After verification, our system will automatically check your website. 
-          This process may take a few minutes. You&apos;ll be notified once verification is complete.
+          <strong>Note:</strong> After verification, our system will
+          automatically check your website. This process may take a few minutes.
+          You&apos;ll be notified once verification is complete.
         </p>
       </div>
     </Card>
   );
 }
-

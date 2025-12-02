@@ -102,7 +102,7 @@ export default function OrderDetailPage() {
             onClick={() => router.push("/dashboard/orders")}>
             ← Back to Orders
           </Button>
-          <h1 className="text-3xl font-bold text-[#3F207F] mt-4 mb-2">
+          <h1 className="text-3xl font-bold text-primary-purple mt-4 mb-2">
             Order #
             {String(
               order.orderNumber ||
@@ -138,7 +138,7 @@ export default function OrderDetailPage() {
         {/* Order Details */}
         <div className="lg:col-span-2 space-y-6">
           <Card>
-            <h2 className="text-xl font-semibold text-[#3F207F] mb-4">
+            <h2 className="text-xl font-semibold text-primary-purple mb-4">
               Order Details
             </h2>
             <div className="space-y-4">
@@ -165,7 +165,7 @@ export default function OrderDetailPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Earnings</p>
-                <p className="font-semibold text-[#3F207F] text-lg">
+                <p className="font-semibold text-primary-purple text-lg">
                   ${(order.earnings || order.amount || 0) as number}
                 </p>
               </div>
@@ -195,7 +195,7 @@ export default function OrderDetailPage() {
           {/* Submission Form */}
           {canSubmit && !isCompleted && (
             <Card>
-              <h2 className="text-xl font-semibold text-[#3F207F] mb-4">
+              <h2 className="text-xl font-semibold text-primary-purple mb-4">
                 Submit Order
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -237,7 +237,7 @@ export default function OrderDetailPage() {
           {/* Submission Info */}
           {isVerifying || isCompleted ? (
             <Card>
-              <h2 className="text-xl font-semibold text-[#3F207F] mb-4">
+              <h2 className="text-xl font-semibold text-primary-purple mb-4">
                 Submission Details
               </h2>
               {order.submittedUrl ? (
@@ -252,7 +252,7 @@ export default function OrderDetailPage() {
                       }
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#3F207F] hover:underline">
+                      className="text-primary-purple hover:underline">
                       {typeof order.submittedUrl === "string"
                         ? order.submittedUrl
                         : String(order.submittedUrl || "")}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { Card } from "@/components/shared/Card";
 import { Input } from "@/components/shared/Input";
 import { Button } from "@/components/shared/Button";
@@ -135,17 +136,20 @@ export default function ProfilePage() {
 
       {/* Profile Information */}
       <Card>
-        <h2 className="text-xl font-semibold text-[#3F207F] mb-6">
+        <h2 className="text-xl font-semibold text-primary-purple mb-6">
           Profile Information
         </h2>
         <div className="space-y-6">
           {/* Profile Image */}
           <div className="flex items-center space-x-6">
             {profileData.profileImage ? (
-              <img
+              <Image
                 src={profileData.profileImage}
                 alt="Profile"
+                width={96}
+                height={96}
                 className="w-24 h-24 rounded-full object-cover"
+                unoptimized
               />
             ) : (
               <div className="w-24 h-24 bg-gradient-to-br from-[#3F207F] to-[#2EE6B7] rounded-full flex items-center justify-center text-white text-3xl font-bold">
@@ -207,7 +211,7 @@ export default function ProfilePage() {
 
       {/* Password Change */}
       <Card>
-        <h2 className="text-xl font-semibold text-[#3F207F] mb-6">
+        <h2 className="text-xl font-semibold text-primary-purple mb-6">
           Change Password
         </h2>
         <div className="space-y-6">
@@ -247,7 +251,7 @@ export default function ProfilePage() {
 
       {/* Account Overview */}
       <Card>
-        <h2 className="text-xl font-semibold text-[#3F207F] mb-6">
+        <h2 className="text-xl font-semibold text-primary-purple mb-6">
           Account Overview
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -259,19 +263,19 @@ export default function ProfilePage() {
           </div>
           <div>
             <p className="text-sm text-gray-600 mb-2">Total Orders Completed</p>
-            <p className="text-2xl font-bold text-[#3F207F]">
+            <p className="text-2xl font-bold text-primary-purple">
               {stats.totalOrders}
             </p>
           </div>
           <div>
             <p className="text-sm text-gray-600 mb-2">Total Earnings</p>
-            <p className="text-2xl font-bold text-[#3F207F]">
+            <p className="text-2xl font-bold text-primary-purple">
               ${stats.totalEarnings.toLocaleString()}
             </p>
           </div>
           <div>
             <p className="text-sm text-gray-600 mb-2">Active Websites</p>
-            <p className="text-2xl font-bold text-[#3F207F]">
+            <p className="text-2xl font-bold text-primary-purple">
               {stats.activeWebsites}
             </p>
           </div>

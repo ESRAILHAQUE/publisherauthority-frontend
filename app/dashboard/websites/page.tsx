@@ -34,18 +34,38 @@ export default function WebsitesPage() {
   const loadWebsites = async () => {
     try {
       setLoading(true);
-      const response = await websitesApi.getWebsites() as { data?: Website[] | { websites?: Website[]; [key: string]: unknown }; websites?: Website[]; [key: string]: unknown } | Website[];
+      const response = (await websitesApi.getWebsites()) as
+        | {
+            data?: Website[] | { websites?: Website[]; [key: string]: unknown };
+            websites?: Website[];
+            [key: string]: unknown;
+          }
+        | Website[];
       // Handle different response structures
       let websitesData: Website[] = [];
       if (Array.isArray(response)) {
         websitesData = response;
-      } else if (response && typeof response === "object" && "data" in response) {
+      } else if (
+        response &&
+        typeof response === "object" &&
+        "data" in response
+      ) {
         if (Array.isArray(response.data)) {
           websitesData = response.data;
-        } else if (response.data && typeof response.data === "object" && "websites" in response.data && Array.isArray(response.data.websites)) {
+        } else if (
+          response.data &&
+          typeof response.data === "object" &&
+          "websites" in response.data &&
+          Array.isArray(response.data.websites)
+        ) {
           websitesData = response.data.websites;
         }
-      } else if (response && typeof response === "object" && "websites" in response && Array.isArray(response.websites)) {
+      } else if (
+        response &&
+        typeof response === "object" &&
+        "websites" in response &&
+        Array.isArray(response.websites)
+      ) {
         websitesData = response.websites;
       }
       setWebsites(websitesData);
@@ -58,7 +78,10 @@ export default function WebsitesPage() {
     }
   };
 
-  const handleVerify = async (websiteId: string, method: "tag" | "article"): Promise<void> => {
+  const handleVerify = async (
+    websiteId: string,
+    method: "tag" | "article"
+  ): Promise<void> => {
     try {
       if (method === "tag") {
         await websitesApi.verifyWebsite(websiteId);
@@ -70,13 +93,14 @@ export default function WebsitesPage() {
       await loadWebsites();
       setSelectedWebsite(null);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Verification failed";
+      const errorMessage =
+        error instanceof Error ? error.message : "Verification failed";
       toast.error(errorMessage);
     }
   };
 
   const getStatusBadge = (status?: string) => {
-    if (!status) return 'default';
+    if (!status) return "default";
     const statusLower = status.toLowerCase();
     const variants: Record<
       string,
@@ -92,7 +116,7 @@ export default function WebsitesPage() {
   };
 
   const formatStatus = (status?: string) => {
-    if (!status) return 'Unknown';
+    if (!status) return "Unknown";
     return status
       .split("-")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -111,7 +135,7 @@ export default function WebsitesPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#3F207F] mb-2">
+          <h1 className="text-3xl font-bold text-primary-purple mb-2">
             My Websites
           </h1>
           <p className="text-gray-600">Manage all your submitted websites.</p>
@@ -125,10 +149,22 @@ export default function WebsitesPage() {
         <WebsiteVerification
           website={{
             _id: (selectedWebsite._id || selectedWebsite.id) as string,
-            url: typeof selectedWebsite.url === "string" ? selectedWebsite.url : "",
-            verificationCode: typeof selectedWebsite.verificationCode === "string" ? selectedWebsite.verificationCode : "",
-            status: typeof selectedWebsite.status === "string" ? selectedWebsite.status : "pending",
-            verificationMethod: typeof selectedWebsite.verificationMethod === "string" ? selectedWebsite.verificationMethod as "tag" | "article" : undefined,
+            url:
+              typeof selectedWebsite.url === "string"
+                ? selectedWebsite.url
+                : "",
+            verificationCode:
+              typeof selectedWebsite.verificationCode === "string"
+                ? selectedWebsite.verificationCode
+                : "",
+            status:
+              typeof selectedWebsite.status === "string"
+                ? selectedWebsite.status
+                : "pending",
+            verificationMethod:
+              typeof selectedWebsite.verificationMethod === "string"
+                ? (selectedWebsite.verificationMethod as "tag" | "article")
+                : undefined,
           }}
           onVerify={async (method) => {
             const websiteId = selectedWebsite._id || selectedWebsite.id;
@@ -171,7 +207,7 @@ export default function WebsitesPage() {
                     No websites added yet.{" "}
                     <Link
                       href="/dashboard/websites/add"
-                      className="text-[#3F207F] hover:underline">
+                      className="text-primary-purple hover:underline">
                       Add your first website
                     </Link>
                   </td>
@@ -183,20 +219,22 @@ export default function WebsitesPage() {
                     className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td className="py-4 px-4">
                       <a
-                        href={website.url || '#'}
+                        href={website.url || "#"}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#3F207F] hover:text-[#2EE6B7] font-medium">
-                        {website.url || 'N/A'}
+                        className="text-primary-purple hover:text-[#2EE6B7] font-medium">
+                        {website.url || "N/A"}
                       </a>
                     </td>
                     <td className="py-4 px-4 text-gray-700">
                       {website.domainAuthority || website.da || "-"}
                     </td>
                     <td className="py-4 px-4 text-gray-700">
-                      {((website.monthlyTraffic ||
-                        website.traffic ||
-                        0) as number).toLocaleString()}
+                      {(
+                        (website.monthlyTraffic ||
+                          website.traffic ||
+                          0) as number
+                      ).toLocaleString()}
                     </td>
                     <td className="py-4 px-4">
                       <Badge variant={getStatusBadge(website.status)}>
@@ -205,7 +243,9 @@ export default function WebsitesPage() {
                     </td>
                     <td className="py-4 px-4 text-gray-600">
                       {website.verifiedAt
-                        ? new Date(website.verifiedAt as string | Date).toLocaleDateString()
+                        ? new Date(
+                            website.verifiedAt as string | Date
+                          ).toLocaleDateString()
                         : "-"}
                     </td>
                     <td className="py-4 px-4">
@@ -217,7 +257,7 @@ export default function WebsitesPage() {
                               setSelectedWebsite(website);
                             }
                           }}
-                          className="text-[#3F207F] hover:text-[#2EE6B7] text-sm font-medium transition-colors">
+                          className="text-primary-purple hover:text-[#2EE6B7] text-sm font-medium transition-colors">
                           {website.status === "pending" ? "Verify" : "View"}
                         </button>
                       </div>

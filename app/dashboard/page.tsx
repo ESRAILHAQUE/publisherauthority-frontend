@@ -17,7 +17,9 @@ export default function DashboardPage() {
     accountLevel: "Silver",
     ordersForNextLevel: 0,
   });
-  const [recentOrders, setRecentOrders] = useState<Record<string, unknown>[]>([]);
+  const [recentOrders, setRecentOrders] = useState<Record<string, unknown>[]>(
+    []
+  );
   const [levelProgress, setLevelProgress] = useState({
     currentLevel: "silver",
     nextLevel: "gold",
@@ -32,21 +34,41 @@ export default function DashboardPage() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await dashboardApi.getStats() as { data?: { recentOrders?: Record<string, unknown>[]; levelProgress?: Record<string, unknown>; stats?: Record<string, unknown>; user?: Record<string, unknown> }; recentOrders?: Record<string, unknown>[]; levelProgress?: Record<string, unknown>; stats?: Record<string, unknown>; user?: Record<string, unknown>; [key: string]: unknown };
+      const response = (await dashboardApi.getStats()) as {
+        data?: {
+          recentOrders?: Record<string, unknown>[];
+          levelProgress?: Record<string, unknown>;
+          stats?: Record<string, unknown>;
+          user?: Record<string, unknown>;
+        };
+        recentOrders?: Record<string, unknown>[];
+        levelProgress?: Record<string, unknown>;
+        stats?: Record<string, unknown>;
+        user?: Record<string, unknown>;
+        [key: string]: unknown;
+      };
 
       // Handle API response structure: { success: true, data: {...} }
       const data = response?.data || response;
 
       const statsData = data?.stats as Record<string, unknown> | undefined;
-      const ordersData = statsData?.orders as Record<string, unknown> | undefined;
-      const websitesData = statsData?.websites as Record<string, unknown> | undefined;
-      const userData = (data as { user?: Record<string, unknown> })?.user as Record<string, unknown> | undefined;
-      const levelProgressData = data?.levelProgress as {
-        currentLevel?: string;
-        nextLevel?: string;
-        ordersNeeded?: number;
-        progressPercentage?: number;
-      } | undefined;
+      const ordersData = statsData?.orders as
+        | Record<string, unknown>
+        | undefined;
+      const websitesData = statsData?.websites as
+        | Record<string, unknown>
+        | undefined;
+      const userData = (data as { user?: Record<string, unknown> })?.user as
+        | Record<string, unknown>
+        | undefined;
+      const levelProgressData = data?.levelProgress as
+        | {
+            currentLevel?: string;
+            nextLevel?: string;
+            ordersNeeded?: number;
+            progressPercentage?: number;
+          }
+        | undefined;
 
       setStats({
         totalEarnings:
@@ -131,7 +153,9 @@ export default function DashboardPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-[#3F207F] mb-2">Dashboard</h1>
+        <h1 className="text-3xl font-bold text-primary-purple mb-2">
+          Dashboard
+        </h1>
         <p className="text-gray-600">
           Welcome back! Here&apos;s your overview.
         </p>
@@ -186,7 +210,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">Total Earnings</p>
-              <p className="text-2xl font-bold text-[#3F207F]">
+              <p className="text-2xl font-bold text-primary-purple">
                 ${stats.totalEarnings.toLocaleString()}
               </p>
             </div>
@@ -211,7 +235,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">Pending Orders</p>
-              <p className="text-2xl font-bold text-[#3F207F]">
+              <p className="text-2xl font-bold text-primary-purple">
                 {stats.pendingOrders}
               </p>
             </div>
@@ -236,7 +260,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">Ready To Post</p>
-              <p className="text-2xl font-bold text-[#3F207F]">
+              <p className="text-2xl font-bold text-primary-purple">
                 {stats.readyToPost}
               </p>
             </div>
@@ -261,7 +285,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">Completed</p>
-              <p className="text-2xl font-bold text-[#3F207F]">
+              <p className="text-2xl font-bold text-primary-purple">
                 {stats.completed}
               </p>
             </div>
@@ -321,50 +345,59 @@ export default function DashboardPage() {
               ) : (
                 recentOrders.map((order) => {
                   const orderId = order._id || order.id;
-                  const orderTitle = typeof order.title === "string" ? order.title : "Untitled Order";
-                  const orderStatus = typeof order.status === "string" ? order.status : undefined;
+                  const orderTitle =
+                    typeof order.title === "string"
+                      ? order.title
+                      : "Untitled Order";
+                  const orderStatus =
+                    typeof order.status === "string" ? order.status : undefined;
                   const orderDeadline = order.deadline;
-                  const orderEarnings = typeof order.earnings === "number" ? order.earnings : 0;
-                  
+                  const orderEarnings =
+                    typeof order.earnings === "number" ? order.earnings : 0;
+
                   return (
-                  <tr
-                    key={orderId ? String(orderId) : undefined}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="py-4 px-4">
-                      <p className="font-medium text-gray-900">
-                        {orderTitle}
-                      </p>
-                    </td>
-                    <td className="py-4 px-4">
-                      <Badge
-                        variant={
-                          orderStatus === "completed"
-                            ? "success"
-                            : orderStatus === "ready-to-post"
-                            ? "info"
-                            : orderStatus === "verifying"
-                            ? "warning"
-                            : "default"
-                        }>
-                        {orderStatus ? orderStatus.replace("-", " ") : "Pending"}
-                      </Badge>
-                    </td>
-                    <td className="py-4 px-4 text-gray-600">
-                      {orderDeadline && (typeof orderDeadline === "string" || orderDeadline instanceof Date)
-                        ? new Date(orderDeadline).toLocaleDateString()
-                        : "-"}
-                    </td>
-                    <td className="py-4 px-4 font-semibold text-[#3F207F]">
-                      ${orderEarnings}
-                    </td>
-                    <td className="py-4 px-4">
-                      <a
-                        href={`/dashboard/orders/${orderId || ""}`}
-                        className="text-[#3F207F] hover:text-[#2EE6B7] font-medium transition-colors">
-                        View →
-                      </a>
-                    </td>
-                  </tr>
+                    <tr
+                      key={orderId ? String(orderId) : undefined}
+                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                      <td className="py-4 px-4">
+                        <p className="font-medium text-gray-900">
+                          {orderTitle}
+                        </p>
+                      </td>
+                      <td className="py-4 px-4">
+                        <Badge
+                          variant={
+                            orderStatus === "completed"
+                              ? "success"
+                              : orderStatus === "ready-to-post"
+                              ? "info"
+                              : orderStatus === "verifying"
+                              ? "warning"
+                              : "default"
+                          }>
+                          {orderStatus
+                            ? orderStatus.replace("-", " ")
+                            : "Pending"}
+                        </Badge>
+                      </td>
+                      <td className="py-4 px-4 text-gray-600">
+                        {orderDeadline &&
+                        (typeof orderDeadline === "string" ||
+                          orderDeadline instanceof Date)
+                          ? new Date(orderDeadline).toLocaleDateString()
+                          : "-"}
+                      </td>
+                      <td className="py-4 px-4 font-semibold text-primary-purple">
+                        ${orderEarnings}
+                      </td>
+                      <td className="py-4 px-4">
+                        <a
+                          href={`/dashboard/orders/${orderId || ""}`}
+                          className="text-primary-purple hover:text-[#2EE6B7] font-medium transition-colors">
+                          View →
+                        </a>
+                      </td>
+                    </tr>
                   );
                 })
               )}

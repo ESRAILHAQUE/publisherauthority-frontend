@@ -65,7 +65,7 @@ export default function CreateOrderPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-[#3F207F] mb-2">
+        <h1 className="text-3xl font-bold text-primary-purple mb-2">
           Create New Order
         </h1>
         <p className="text-gray-600">Create a new order for a publisher.</p>
