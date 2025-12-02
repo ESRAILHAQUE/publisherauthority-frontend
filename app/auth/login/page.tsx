@@ -39,7 +39,15 @@ export default function LoginPage() {
       }
       router.push("/dashboard");
     } catch (err: any) {
-      const errorMessage = err.message || "Invalid email or password";
+      let errorMessage = err.message || "Invalid email or password";
+      
+      // Show more specific error messages
+      if (err.message?.includes('pending approval')) {
+        errorMessage = "Your application is still pending approval. Please wait for admin approval before logging in.";
+      } else if (err.message?.includes('deactivated')) {
+        errorMessage = "Your account has been deactivated. Please contact support.";
+      }
+      
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
