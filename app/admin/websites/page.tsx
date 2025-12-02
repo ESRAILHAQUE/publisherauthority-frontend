@@ -10,6 +10,16 @@ import toast from 'react-hot-toast';
 interface Website {
   _id?: string;
   id?: string;
+  url?: string;
+  status?: string;
+  domainAuthority?: number;
+  da?: number;
+  monthlyTraffic?: number;
+  traffic?: number;
+  userId?: {
+    firstName?: string;
+    lastName?: string;
+  };
   [key: string]: unknown;
 }
 
@@ -36,10 +46,13 @@ export default function AdminWebsitesPage() {
 
   const handleVerify = async (websiteId: string, method: 'tag' | 'article') => {
     try {
-      await websitesApi.verifyWebsite(websiteId, method);
+      if (method === 'tag') {
+        await websitesApi.verifyWebsite(websiteId);
+      } else {
+        await websitesApi.verifyWebsite(websiteId);
+      }
       toast.success('Website verified successfully');
       await loadWebsites();
-      setSelectedWebsite(null);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Verification failed';
       toast.error(errorMessage);
@@ -88,7 +101,8 @@ export default function AdminWebsitesPage() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status?: string) => {
+    if (!status) return 'default';
     const statusLower = status.toLowerCase();
     const variants: Record<string, 'success' | 'warning' | 'info' | 'danger' | 'default'> = {
       'active': 'success',
@@ -99,7 +113,8 @@ export default function AdminWebsitesPage() {
     return variants[statusLower] || 'default';
   };
 
-  const formatStatus = (status: string) => {
+  const formatStatus = (status?: string) => {
+    if (!status) return 'Unknown';
     return status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
@@ -141,12 +156,12 @@ export default function AdminWebsitesPage() {
               ) : (
                 websites.map((website) => (
                   <tr key={website._id || website.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="py-4 px-4 font-medium text-gray-900">{website.url}</td>
+                    <td className="py-4 px-4 font-medium text-gray-900">{website.url || 'N/A'}</td>
                     <td className="py-4 px-4 text-gray-600">
                       {website.userId?.firstName || ''} {website.userId?.lastName || ''}
                     </td>
                     <td className="py-4 px-4 text-gray-600">{website.domainAuthority || website.da || '-'}</td>
-                    <td className="py-4 px-4 text-gray-600">{(website.monthlyTraffic || website.traffic || 0).toLocaleString()}</td>
+                    <td className="py-4 px-4 text-gray-600">{((website.monthlyTraffic || website.traffic || 0) as number).toLocaleString()}</td>
                     <td className="py-4 px-4">
                       <Badge variant={getStatusBadge(website.status)}>{formatStatus(website.status)}</Badge>
                     </td>
@@ -154,7 +169,7 @@ export default function AdminWebsitesPage() {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => setShowActions(showActions === website._id ? null : website._id || website.id)}
+                        onClick={() => setShowActions(showActions === website._id ? null : (website._id || website.id || null))}
                       >
                         Actions
                       </Button>
@@ -163,8 +178,9 @@ export default function AdminWebsitesPage() {
                           <div className="py-1">
                             <button
                               onClick={() => {
-                                setSelectedWebsite(website);
                                 setShowActions(null);
+                                // TODO: Implement view details modal
+                                toast('View details feature coming soon', { icon: 'ℹ️' });
                               }}
                               className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                             >
@@ -174,8 +190,11 @@ export default function AdminWebsitesPage() {
                               <>
                                 <button
                                   onClick={() => {
-                                    handleVerify(website._id || website.id, 'tag');
-                                    setShowActions(null);
+                                    const websiteId = website._id || website.id;
+                                    if (websiteId) {
+                                      handleVerify(websiteId, 'tag');
+                                      setShowActions(null);
+                                    }
                                   }}
                                   className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50"
                                 >
@@ -183,8 +202,11 @@ export default function AdminWebsitesPage() {
                                 </button>
                                 <button
                                   onClick={() => {
-                                    handleVerify(website._id || website.id, 'article');
-                                    setShowActions(null);
+                                    const websiteId = website._id || website.id;
+                                    if (websiteId) {
+                                      handleVerify(websiteId, 'article');
+                                      setShowActions(null);
+                                    }
                                   }}
                                   className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50"
                                 >
@@ -192,8 +214,11 @@ export default function AdminWebsitesPage() {
                                 </button>
                                 <button
                                   onClick={() => {
-                                    handleSendCounterOffer(website._id || website.id);
-                                    setShowActions(null);
+                                    const websiteId = website._id || website.id;
+                                    if (websiteId) {
+                                      handleSendCounterOffer(websiteId);
+                                      setShowActions(null);
+                                    }
                                   }}
                                   className="block w-full text-left px-4 py-2 text-sm text-blue-700 hover:bg-blue-50"
                                 >
@@ -201,8 +226,11 @@ export default function AdminWebsitesPage() {
                                 </button>
                                 <button
                                   onClick={() => {
-                                    handleUpdateStatus(website._id || website.id, 'rejected');
-                                    setShowActions(null);
+                                    const websiteId = website._id || website.id;
+                                    if (websiteId) {
+                                      handleUpdateStatus(websiteId, 'rejected');
+                                      setShowActions(null);
+                                    }
                                   }}
                                   className="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50"
                                 >
@@ -213,8 +241,11 @@ export default function AdminWebsitesPage() {
                             {website.status === 'counter-offer' && (
                               <button
                                 onClick={() => {
-                                  handleUpdateStatus(website._id || website.id, 'active');
-                                  setShowActions(null);
+                                  const websiteId = website._id || website.id;
+                                  if (websiteId) {
+                                    handleUpdateStatus(websiteId, 'active');
+                                    setShowActions(null);
+                                  }
                                 }}
                                 className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50"
                               >

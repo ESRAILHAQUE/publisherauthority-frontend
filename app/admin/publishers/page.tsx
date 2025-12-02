@@ -10,6 +10,17 @@ import toast from 'react-hot-toast';
 interface Publisher {
   _id?: string;
   id?: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string;
+  email?: string;
+  accountLevel?: string;
+  level?: string;
+  completedOrders?: number;
+  orders?: number;
+  totalEarnings?: number;
+  earnings?: number;
+  status?: string;
   [key: string]: unknown;
 }
 
@@ -78,25 +89,27 @@ export default function AdminPublishersPage() {
                 </tr>
               ) : (
                 publishers.map((publisher) => {
-                  const level = publisher.accountLevel || publisher.level || 'silver';
+                  const level = (publisher.accountLevel || publisher.level || 'silver') as string;
                   return (
                     <tr key={publisher._id || publisher.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                       <td className="py-4 px-4 font-medium text-gray-900">
                         {publisher.firstName || ''} {publisher.lastName || ''} {publisher.name || ''}
                       </td>
-                      <td className="py-4 px-4 text-gray-600">{publisher.email}</td>
+                      <td className="py-4 px-4 text-gray-600">{publisher.email || 'N/A'}</td>
                       <td className="py-4 px-4">
                         <Badge variant={level === 'premium' ? 'purple' : level === 'gold' ? 'warning' : 'default'}>
                           {level.charAt(0).toUpperCase() + level.slice(1)}
                         </Badge>
                       </td>
-                      <td className="py-4 px-4 text-gray-600">{publisher.completedOrders || publisher.orders || 0}</td>
-                      <td className="py-4 px-4 font-semibold text-[#3F207F]">${(publisher.totalEarnings || publisher.earnings || 0).toLocaleString()}</td>
+                      <td className="py-4 px-4 text-gray-600">{(publisher.completedOrders || publisher.orders || 0) as number}</td>
+                      <td className="py-4 px-4 font-semibold text-[#3F207F]">${((publisher.totalEarnings || publisher.earnings || 0) as number).toLocaleString()}</td>
                       <td className="py-4 px-4">
                         <Badge variant="success">{publisher.status || 'Active'}</Badge>
                       </td>
                       <td className="py-4 px-4">
-                        <Button variant="ghost" size="sm" onClick={() => setSelectedPublisher(publisher)}>
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          toast('Manage feature coming soon', { icon: 'ℹ️' });
+                        }}>
                           Manage
                         </Button>
                       </td>

@@ -55,7 +55,6 @@ export default function LoginPage() {
           "Your account has been deactivated. Please contact support.";
       }
 
-      setError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);

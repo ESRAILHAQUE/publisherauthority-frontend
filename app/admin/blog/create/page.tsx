@@ -34,7 +34,6 @@ export default function CreateBlogPostPage() {
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create blog post';
       toast.error(errorMessage);
-      toast.error(error.message || 'Failed to create blog post');
     } finally {
       setLoading(false);
     }

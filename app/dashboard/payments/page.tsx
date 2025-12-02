@@ -25,10 +25,15 @@ export default function PaymentsPage() {
         profileApi.getProfile().catch(() => ({ paypalEmail: "" })),
         paymentsApi.getInvoices().catch(() => []),
       ]);
-      setPaypalEmail(profileData.paypalEmail || "");
-      const invoicesArray = Array.isArray(invoicesData) 
-        ? invoicesData 
-        : (invoicesData as { invoices?: Record<string, unknown>[] }).invoices || [];
+      const profile = profileData as {
+        paypalEmail?: string;
+        [key: string]: unknown;
+      };
+      setPaypalEmail(profile.paypalEmail || "");
+      const invoicesArray = Array.isArray(invoicesData)
+        ? invoicesData
+        : (invoicesData as { invoices?: Record<string, unknown>[] }).invoices ||
+          [];
       setInvoices(invoicesArray);
     } catch (error) {
       console.error("Failed to load payment data:", error);
@@ -43,14 +48,16 @@ export default function PaymentsPage() {
       await paymentsApi.updatePaypalEmail(paypalEmail);
       toast.success("PayPal email saved successfully");
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to save PayPal email";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to save PayPal email";
       toast.error(errorMessage);
     } finally {
       setSaving(false);
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status?: string) => {
+    if (!status) return "default";
     const variants: Record<
       string,
       "success" | "warning" | "info" | "danger" | "default"
@@ -181,50 +188,72 @@ export default function PaymentsPage() {
                   </td>
                 </tr>
               ) : (
-                invoices.map((invoice) => (
-                  <tr
-                    key={invoice._id || invoice.id}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="py-4 px-4 font-medium text-gray-900">
-                      {invoice.invoiceNumber || invoice.id}
-                    </td>
-                    <td className="py-4 px-4 text-gray-600">
-                      {invoice.description || "-"}
-                    </td>
-                    <td className="py-4 px-4 text-gray-600">
-                      {invoice.invoiceDate
-                        ? new Date(invoice.invoiceDate).toLocaleDateString()
-                        : "-"}
-                    </td>
-                    <td className="py-4 px-4 font-semibold text-[#3F207F]">
-                      ${invoice.amount || 0}
-                    </td>
-                    <td className="py-4 px-4 text-gray-600">
-                      {invoice.dueDate
-                        ? new Date(invoice.dueDate).toLocaleDateString()
-                        : "-"}
-                    </td>
-                    <td className="py-4 px-4 text-gray-600">
-                      {invoice.paymentDate
-                        ? new Date(invoice.paymentDate).toLocaleDateString()
-                        : "-"}
-                    </td>
-                    <td className="py-4 px-4">
-                      <Badge variant={getStatusBadge(invoice.status)}>
-                        {invoice.status || "Pending"}
-                      </Badge>
-                    </td>
-                    <td className="py-4 px-4">
-                      <button
-                        onClick={() =>
-                          paymentsApi.downloadInvoice(invoice._id || invoice.id)
-                        }
-                        className="text-[#3F207F] hover:text-[#2EE6B7] font-medium text-sm transition-colors">
-                        Download PDF
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                invoices.map((invoice) => {
+                  const invoiceId = invoice._id || invoice.id;
+                  const invoiceNumber =
+                    typeof invoice.invoiceNumber === "string"
+                      ? invoice.invoiceNumber
+                      : invoiceId
+                      ? String(invoiceId)
+                      : "";
+                  const invoiceDescription =
+                    typeof invoice.description === "string"
+                      ? invoice.description
+                      : "-";
+
+                  return (
+                    <tr
+                      key={invoiceId ? String(invoiceId) : undefined}
+                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                      <td className="py-4 px-4 font-medium text-gray-900">
+                        {invoiceNumber}
+                      </td>
+                      <td className="py-4 px-4 text-gray-600">
+                        {invoiceDescription}
+                      </td>
+                      <td className="py-4 px-4 text-gray-600">
+                        {invoice.invoiceDate
+                          ? new Date(
+                              invoice.invoiceDate as string | Date
+                            ).toLocaleDateString()
+                          : "-"}
+                      </td>
+                      <td className="py-4 px-4 font-semibold text-[#3F207F]">
+                        ${(invoice.amount || 0) as number}
+                      </td>
+                      <td className="py-4 px-4 text-gray-600">
+                        {invoice.dueDate
+                          ? new Date(
+                              invoice.dueDate as string | Date
+                            ).toLocaleDateString()
+                          : "-"}
+                      </td>
+                      <td className="py-4 px-4 text-gray-600">
+                        {invoice.paymentDate
+                          ? new Date(
+                              invoice.paymentDate as string | Date
+                            ).toLocaleDateString()
+                          : "-"}
+                      </td>
+                      <td className="py-4 px-4">
+                        <Badge
+                          variant={getStatusBadge(invoice.status as string)}>
+                          {(invoice.status as string) || "Pending"}
+                        </Badge>
+                      </td>
+                      <td className="py-4 px-4">
+                        <button
+                          onClick={() => {
+                            if (invoiceId)
+                              paymentsApi.downloadInvoice(String(invoiceId));
+                          }}
+                          className="text-[#3F207F] hover:text-[#2EE6B7] font-medium text-sm transition-colors">
+                          Download PDF
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

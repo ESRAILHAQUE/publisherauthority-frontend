@@ -32,30 +32,67 @@ export default function DashboardPage() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await dashboardApi.getStats() as { data?: { recentOrders?: Record<string, unknown>[]; levelProgress?: Record<string, unknown>; stats?: Record<string, unknown> }; recentOrders?: Record<string, unknown>[]; levelProgress?: Record<string, unknown>; stats?: Record<string, unknown>; [key: string]: unknown };
+      const response = await dashboardApi.getStats() as { data?: { recentOrders?: Record<string, unknown>[]; levelProgress?: Record<string, unknown>; stats?: Record<string, unknown>; user?: Record<string, unknown> }; recentOrders?: Record<string, unknown>[]; levelProgress?: Record<string, unknown>; stats?: Record<string, unknown>; user?: Record<string, unknown>; [key: string]: unknown };
 
       // Handle API response structure: { success: true, data: {...} }
       const data = response?.data || response;
 
+      const statsData = data?.stats as Record<string, unknown> | undefined;
+      const ordersData = statsData?.orders as Record<string, unknown> | undefined;
+      const websitesData = statsData?.websites as Record<string, unknown> | undefined;
+      const userData = (data as { user?: Record<string, unknown> })?.user as Record<string, unknown> | undefined;
+      const levelProgressData = data?.levelProgress as {
+        currentLevel?: string;
+        nextLevel?: string;
+        ordersNeeded?: number;
+        progressPercentage?: number;
+      } | undefined;
+
       setStats({
-        totalEarnings: data?.stats?.totalEarnings || 0,
-        pendingOrders: data?.stats?.orders?.pending || 0,
-        readyToPost: data?.stats?.orders?.readyToPost || 0,
-        verifying: data?.stats?.orders?.verifying || 0,
-        completed: data?.stats?.orders?.completed || 0,
-        activeWebsites: data?.stats?.websites?.active || 0,
-        accountLevel: data?.user?.accountLevel || "silver",
-        ordersForNextLevel: data?.levelProgress?.ordersNeeded || 0,
+        totalEarnings:
+          typeof statsData?.totalEarnings === "number"
+            ? statsData.totalEarnings
+            : 0,
+        pendingOrders:
+          typeof ordersData?.pending === "number" ? ordersData.pending : 0,
+        readyToPost:
+          typeof ordersData?.readyToPost === "number"
+            ? ordersData.readyToPost
+            : 0,
+        verifying:
+          typeof ordersData?.verifying === "number" ? ordersData.verifying : 0,
+        completed:
+          typeof ordersData?.completed === "number" ? ordersData.completed : 0,
+        activeWebsites:
+          typeof websitesData?.active === "number" ? websitesData.active : 0,
+        accountLevel:
+          typeof userData?.accountLevel === "string"
+            ? userData.accountLevel
+            : "silver",
+        ordersForNextLevel:
+          typeof levelProgressData?.ordersNeeded === "number"
+            ? levelProgressData.ordersNeeded
+            : 0,
       });
 
-      setLevelProgress(
-        data?.levelProgress || {
-          currentLevel: "silver",
-          nextLevel: "gold",
-          ordersNeeded: 50,
-          progressPercentage: 0,
-        }
-      );
+      setLevelProgress({
+        currentLevel:
+          typeof levelProgressData?.currentLevel === "string"
+            ? levelProgressData.currentLevel
+            : "silver",
+        nextLevel:
+          typeof levelProgressData?.nextLevel === "string"
+            ? levelProgressData.nextLevel
+            : "gold",
+        ordersNeeded:
+          typeof levelProgressData?.ordersNeeded === "number"
+            ? levelProgressData.ordersNeeded
+            : 50,
+        progressPercentage:
+          typeof levelProgressData?.progressPercentage === "number"
+            ? levelProgressData.progressPercentage
+            : 0,
+      });
       setRecentOrders(data?.recentOrders || []);
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
@@ -282,46 +319,54 @@ export default function DashboardPage() {
                   </td>
                 </tr>
               ) : (
-                recentOrders.map((order) => (
+                recentOrders.map((order) => {
+                  const orderId = order._id || order.id;
+                  const orderTitle = typeof order.title === "string" ? order.title : "Untitled Order";
+                  const orderStatus = typeof order.status === "string" ? order.status : undefined;
+                  const orderDeadline = order.deadline;
+                  const orderEarnings = typeof order.earnings === "number" ? order.earnings : 0;
+                  
+                  return (
                   <tr
-                    key={order._id || order.id}
+                    key={orderId ? String(orderId) : undefined}
                     className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td className="py-4 px-4">
                       <p className="font-medium text-gray-900">
-                        {order.title || "Untitled Order"}
+                        {orderTitle}
                       </p>
                     </td>
                     <td className="py-4 px-4">
                       <Badge
                         variant={
-                          order.status === "completed"
+                          orderStatus === "completed"
                             ? "success"
-                            : order.status === "ready-to-post"
+                            : orderStatus === "ready-to-post"
                             ? "info"
-                            : order.status === "verifying"
+                            : orderStatus === "verifying"
                             ? "warning"
                             : "default"
                         }>
-                        {order.status?.replace("-", " ") || "Pending"}
+                        {orderStatus ? orderStatus.replace("-", " ") : "Pending"}
                       </Badge>
                     </td>
                     <td className="py-4 px-4 text-gray-600">
-                      {order.deadline
-                        ? new Date(order.deadline).toLocaleDateString()
+                      {orderDeadline && (typeof orderDeadline === "string" || orderDeadline instanceof Date)
+                        ? new Date(orderDeadline).toLocaleDateString()
                         : "-"}
                     </td>
                     <td className="py-4 px-4 font-semibold text-[#3F207F]">
-                      ${order.earnings || 0}
+                      ${orderEarnings}
                     </td>
                     <td className="py-4 px-4">
                       <a
-                        href={`/dashboard/orders/${order._id || order.id}`}
+                        href={`/dashboard/orders/${orderId || ""}`}
                         className="text-[#3F207F] hover:text-[#2EE6B7] font-medium transition-colors">
                         View →
                       </a>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>

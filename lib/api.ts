@@ -40,7 +40,6 @@ interface ApiOptions {
 
 interface ApiError extends Error {
   message: string;
-  name?: string;
 }
 
 interface WebsiteData {

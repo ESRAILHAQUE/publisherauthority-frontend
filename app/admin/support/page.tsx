@@ -11,6 +11,13 @@ import toast from 'react-hot-toast';
 interface Ticket {
   _id?: string;
   id?: string;
+  ticketNumber?: string;
+  subject?: string;
+  name?: string;
+  user?: string;
+  status?: string;
+  priority?: string;
+  createdAt?: string | Date;
   [key: string]: unknown;
 }
 
@@ -79,22 +86,25 @@ export default function AdminSupportPage() {
               ) : (
                 tickets.map((ticket) => (
                   <tr key={ticket._id || ticket.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="py-4 px-4 text-gray-600">#{ticket.ticketNumber || ticket._id?.slice(-8) || ticket.id}</td>
-                    <td className="py-4 px-4 font-medium text-gray-900">{ticket.subject}</td>
+                    <td className="py-4 px-4 text-gray-600">#{ticket.ticketNumber || (ticket._id ? ticket._id.slice(-8) : '') || ticket.id || 'N/A'}</td>
+                    <td className="py-4 px-4 font-medium text-gray-900">{ticket.subject || 'No subject'}</td>
                     <td className="py-4 px-4 text-gray-600">{ticket.name || ticket.user || '-'}</td>
                     <td className="py-4 px-4">
                       <Badge variant={ticket.status === 'open' ? 'warning' : ticket.status === 'resolved' ? 'success' : 'info'}>
-                        {ticket.status?.charAt(0).toUpperCase() + ticket.status?.slice(1) || 'Open'}
+                        {ticket.status ? ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1) : 'Open'}
                       </Badge>
                     </td>
                     <td className="py-4 px-4">
                       <Badge variant={ticket.priority === 'high' ? 'danger' : 'warning'}>{ticket.priority || 'medium'}</Badge>
                     </td>
                     <td className="py-4 px-4 text-gray-600">
-                      {ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString() : '-'}
+                      {ticket.createdAt ? new Date(ticket.createdAt as string | Date).toLocaleDateString() : '-'}
                     </td>
                     <td className="py-4 px-4">
-                      <Button variant="ghost" size="sm" onClick={() => router.push(`/admin/support/${ticket._id || ticket.id}`)}>
+                      <Button variant="ghost" size="sm" onClick={() => {
+                        const ticketId = ticket._id || ticket.id;
+                        if (ticketId) router.push(`/admin/support/${ticketId}`);
+                      }}>
                         View
                       </Button>
                     </td>

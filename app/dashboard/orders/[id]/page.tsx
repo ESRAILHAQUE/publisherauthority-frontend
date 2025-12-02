@@ -1,35 +1,38 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { Card } from '@/components/shared/Card';
-import { Badge } from '@/components/shared/Badge';
-import { Button } from '@/components/shared/Button';
-import { Input } from '@/components/shared/Input';
-import { Textarea } from '@/components/shared/Textarea';
-import { ordersApi } from '@/lib/api';
-import toast from 'react-hot-toast';
+import React, { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Card } from "@/components/shared/Card";
+import { Badge } from "@/components/shared/Badge";
+import { Button } from "@/components/shared/Button";
+import { Input } from "@/components/shared/Input";
+import { Textarea } from "@/components/shared/Textarea";
+import { ordersApi } from "@/lib/api";
+import toast from "react-hot-toast";
 
 export default function OrderDetailPage() {
   const params = useParams();
   const router = useRouter();
   const orderId = params.id as string;
-  
+
   const [order, setOrder] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submissionData, setSubmissionData] = useState({
-    articleUrl: '',
-    notes: '',
+    articleUrl: "",
+    notes: "",
   });
 
   const loadOrder = async () => {
     try {
       setLoading(true);
-      const data = await ordersApi.getOrder(orderId) as Record<string, unknown>;
+      const data = (await ordersApi.getOrder(orderId)) as Record<
+        string,
+        unknown
+      >;
       setOrder(data);
     } catch (error) {
-      console.error('Failed to load order:', error);
+      console.error("Failed to load order:", error);
     } finally {
       setLoading(false);
     }
@@ -42,7 +45,7 @@ export default function OrderDetailPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!submissionData.articleUrl) {
-      toast.error('Please provide the article URL');
+      toast.error("Please provide the article URL");
       return;
     }
 
@@ -52,10 +55,11 @@ export default function OrderDetailPage() {
         submissionUrl: submissionData.articleUrl,
         submissionNotes: submissionData.notes,
       });
-      toast.success('Order submitted successfully!');
+      toast.success("Order submitted successfully!");
       await loadOrder();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to submit order';
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to submit order";
       toast.error(errorMessage);
     } finally {
       setSubmitting(false);
@@ -74,42 +78,59 @@ export default function OrderDetailPage() {
     return (
       <div className="text-center py-12">
         <p className="text-gray-600">Order not found</p>
-        <Button onClick={() => router.push('/dashboard/orders')} className="mt-4">
+        <Button
+          onClick={() => router.push("/dashboard/orders")}
+          className="mt-4">
           Back to Orders
         </Button>
       </div>
     );
   }
 
-  const canSubmit = order.status === 'ready-to-post' || order.status === 'pending';
-  const isCompleted = order.status === 'completed';
-  const isVerifying = order.status === 'verifying';
+  const orderStatus = String(order.status || "");
+  const canSubmit =
+    orderStatus === "ready-to-post" || orderStatus === "pending";
+  const isCompleted = orderStatus === "completed";
+  const isVerifying = orderStatus === "verifying";
 
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <Button variant="outline" onClick={() => router.push('/dashboard/orders')}>
+          <Button
+            variant="outline"
+            onClick={() => router.push("/dashboard/orders")}>
             ← Back to Orders
           </Button>
           <h1 className="text-3xl font-bold text-[#3F207F] mt-4 mb-2">
-            Order #{order.orderNumber || order._id?.slice(-8)}
+            Order #
+            {String(
+              order.orderNumber ||
+                (order._id ? String(order._id).slice(-8) : "") ||
+                order.id ||
+                "N/A"
+            )}
           </h1>
-          <p className="text-gray-600">{order.title || 'Untitled Order'}</p>
+          <p className="text-gray-600">
+            {String(order.title || "Untitled Order")}
+          </p>
         </div>
         <Badge
           variant={
-            order.status === 'completed'
-              ? 'success'
-              : order.status === 'ready-to-post'
-              ? 'info'
-              : order.status === 'verifying'
-              ? 'warning'
-              : 'default'
+            orderStatus === "completed"
+              ? "success"
+              : orderStatus === "ready-to-post"
+              ? "info"
+              : orderStatus === "verifying"
+              ? "warning"
+              : "default"
           }
-          size="md"
-        >
-          {order.status?.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+          size="md">
+          {order.status
+            ? String(order.status)
+                .replace("-", " ")
+                .replace(/\b\w/g, (l: string) => l.toUpperCase())
+            : "Unknown"}
         </Badge>
       </div>
 
@@ -117,62 +138,96 @@ export default function OrderDetailPage() {
         {/* Order Details */}
         <div className="lg:col-span-2 space-y-6">
           <Card>
-            <h2 className="text-xl font-semibold text-[#3F207F] mb-4">Order Details</h2>
+            <h2 className="text-xl font-semibold text-[#3F207F] mb-4">
+              Order Details
+            </h2>
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-gray-600">Title</p>
-                <p className="font-medium">{order.title}</p>
+                <p className="font-medium">{String(order.title || "N/A")}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Website</p>
-                <p className="font-medium">{order.websiteId?.url || order.website || '-'}</p>
+                <p className="font-medium">
+                  {(order.websiteId as { url?: string })?.url ||
+                    String(order.website || "-")}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Deadline</p>
                 <p className="font-medium">
-                  {order.deadline ? new Date(order.deadline).toLocaleDateString() : '-'}
+                  {order.deadline
+                    ? new Date(
+                        order.deadline as string | Date
+                      ).toLocaleDateString()
+                    : "-"}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Earnings</p>
-                <p className="font-semibold text-[#3F207F] text-lg">${order.earnings || order.amount || 0}</p>
+                <p className="font-semibold text-[#3F207F] text-lg">
+                  ${(order.earnings || order.amount || 0) as number}
+                </p>
               </div>
-              {order.description && (
+              {order.description ? (
                 <div>
                   <p className="text-sm text-gray-600">Description</p>
-                  <p className="text-gray-700">{order.description}</p>
+                  <p className="text-gray-700">
+                    {typeof order.description === "string"
+                      ? order.description
+                      : String(order.description || "")}
+                  </p>
                 </div>
-              )}
-              {order.requirements && (
+              ) : null}
+              {order.requirements ? (
                 <div>
                   <p className="text-sm text-gray-600">Requirements</p>
-                  <div className="text-gray-700 whitespace-pre-line">{order.requirements}</div>
+                  <div className="text-gray-700 whitespace-pre-line">
+                    {typeof order.requirements === "string"
+                      ? order.requirements
+                      : String(order.requirements || "")}
+                  </div>
                 </div>
-              )}
+              ) : null}
             </div>
           </Card>
 
           {/* Submission Form */}
           {canSubmit && !isCompleted && (
             <Card>
-              <h2 className="text-xl font-semibold text-[#3F207F] mb-4">Submit Order</h2>
+              <h2 className="text-xl font-semibold text-[#3F207F] mb-4">
+                Submit Order
+              </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <Input
                   label="Article URL"
                   type="url"
                   value={submissionData.articleUrl}
-                  onChange={(e) => setSubmissionData({ ...submissionData, articleUrl: e.target.value })}
+                  onChange={(e) =>
+                    setSubmissionData({
+                      ...submissionData,
+                      articleUrl: e.target.value,
+                    })
+                  }
                   placeholder="https://example.com/article"
                   required
                 />
                 <Textarea
                   label="Notes (Optional)"
                   value={submissionData.notes}
-                  onChange={(e) => setSubmissionData({ ...submissionData, notes: e.target.value })}
+                  onChange={(e) =>
+                    setSubmissionData({
+                      ...submissionData,
+                      notes: e.target.value,
+                    })
+                  }
                   rows={4}
                   placeholder="Any additional notes..."
                 />
-                <Button type="submit" isLoading={submitting} disabled={submitting}>
+                <Button
+                  type="submit"
+                  isLoading={submitting}
+                  disabled={submitting}>
                   Submit Order
                 </Button>
               </form>
@@ -182,36 +237,58 @@ export default function OrderDetailPage() {
           {/* Submission Info */}
           {isVerifying || isCompleted ? (
             <Card>
-              <h2 className="text-xl font-semibold text-[#3F207F] mb-4">Submission Details</h2>
-              {order.submittedUrl && (
+              <h2 className="text-xl font-semibold text-[#3F207F] mb-4">
+                Submission Details
+              </h2>
+              {order.submittedUrl ? (
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-gray-600">Article URL</p>
                     <a
-                      href={order.submittedUrl}
+                      href={
+                        typeof order.submittedUrl === "string"
+                          ? order.submittedUrl
+                          : String(order.submittedUrl || "")
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#3F207F] hover:underline"
-                    >
-                      {order.submittedUrl}
+                      className="text-[#3F207F] hover:underline">
+                      {typeof order.submittedUrl === "string"
+                        ? order.submittedUrl
+                        : String(order.submittedUrl || "")}
                     </a>
                   </div>
-                  {order.submittedAt && (
+                  {order.submittedAt ? (
                     <div>
                       <p className="text-sm text-gray-600">Submitted At</p>
                       <p className="text-gray-700">
-                        {new Date(order.submittedAt).toLocaleString()}
+                        {(() => {
+                          const submittedAt =
+                            typeof order.submittedAt === "string" ||
+                            order.submittedAt instanceof Date
+                              ? order.submittedAt
+                              : typeof order.submittedAt === "number"
+                              ? new Date(order.submittedAt)
+                              : null;
+                          return submittedAt
+                            ? new Date(submittedAt).toLocaleString()
+                            : "-";
+                        })()}
                       </p>
                     </div>
-                  )}
-                  {order.submissionNotes && (
+                  ) : null}
+                  {order.submissionNotes ? (
                     <div>
                       <p className="text-sm text-gray-600">Notes</p>
-                      <p className="text-gray-700">{order.submissionNotes}</p>
+                      <p className="text-gray-700">
+                        {typeof order.submissionNotes === "string"
+                          ? order.submissionNotes
+                          : String(order.submissionNotes || "")}
+                      </p>
                     </div>
-                  )}
+                  ) : null}
                 </div>
-              )}
+              ) : null}
             </Card>
           ) : null}
         </div>
@@ -223,14 +300,19 @@ export default function OrderDetailPage() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">Status:</span>
-                <Badge variant={order.status === 'completed' ? 'success' : 'default'}>
-                  {order.status?.replace('-', ' ')}
+                <Badge
+                  variant={orderStatus === "completed" ? "success" : "default"}>
+                  {orderStatus ? orderStatus.replace("-", " ") : "Unknown"}
                 </Badge>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Created:</span>
                 <span className="text-gray-900">
-                  {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '-'}
+                  {order.createdAt
+                    ? new Date(
+                        order.createdAt as string | Date
+                      ).toLocaleDateString()
+                    : "-"}
                 </span>
               </div>
             </div>
@@ -240,4 +322,3 @@ export default function OrderDetailPage() {
     </div>
   );
 }
-

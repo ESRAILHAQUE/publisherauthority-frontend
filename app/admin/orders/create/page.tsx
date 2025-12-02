@@ -31,7 +31,10 @@ export default function CreateOrderPage() {
 
   const loadWebsites = async () => {
     try {
-      const data = await adminApi.getAllWebsites({ status: "active" }) as { websites?: Record<string, unknown>[]; [key: string]: unknown };
+      const data = (await adminApi.getAllWebsites({ status: "active" })) as {
+        websites?: Record<string, unknown>[];
+        [key: string]: unknown;
+      };
       setWebsites(data.websites || []);
     } catch (error) {
       console.error("Failed to load websites:", error);
@@ -51,7 +54,8 @@ export default function CreateOrderPage() {
       toast.success("Order created successfully!");
       router.push("/admin/orders");
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to create order";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create order";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -86,7 +90,13 @@ export default function CreateOrderPage() {
               onChange={(e) => {
                 const website = websites.find(
                   (w) => (w as { _id?: string })._id === e.target.value
-                ) as { userId?: { _id?: string }; _id?: string; [key: string]: unknown } | undefined;
+                ) as
+                  | {
+                      userId?: { _id?: string };
+                      _id?: string;
+                      [key: string]: unknown;
+                    }
+                  | undefined;
                 setFormData({
                   ...formData,
                   websiteId: e.target.value,
@@ -97,11 +107,20 @@ export default function CreateOrderPage() {
               options={[
                 { value: "", label: "Select a website" },
                 ...websites.map((website) => ({
-                  value: (website as { _id?: string })._id || "",
-                  label: (website as { url?: string; domain?: string }).url || (website as { domain?: string }).domain || "Unknown",
-                  value: website._id,
-                  label: `${website.url} - ${website.userId?.firstName || ""} ${
-                    website.userId?.lastName || ""
+                  value: String((website as { _id?: string })._id || ""),
+                  label: `${
+                    (website as { url?: string }).url ||
+                    (website as { domain?: string }).domain ||
+                    "Unknown"
+                  } - ${
+                    (
+                      website as {
+                        userId?: { firstName?: string; lastName?: string };
+                      }
+                    ).userId?.firstName || ""
+                  } ${
+                    (website as { userId?: { lastName?: string } }).userId
+                      ?.lastName || ""
                   }`,
                 })),
               ]}

@@ -1,26 +1,26 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Card } from '@/components/shared/Card';
-import { Input } from '@/components/shared/Input';
-import { Button } from '@/components/shared/Button';
-import { Badge } from '@/components/shared/Badge';
-import { profileApi } from '@/lib/api';
-import toast from 'react-hot-toast';
+import React, { useState, useEffect } from "react";
+import { Card } from "@/components/shared/Card";
+import { Input } from "@/components/shared/Input";
+import { Button } from "@/components/shared/Button";
+import { Badge } from "@/components/shared/Badge";
+import { profileApi } from "@/lib/api";
+import toast from "react-hot-toast";
 
 export default function ProfilePage() {
   const [profileData, setProfileData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    country: '',
-    profileImage: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    country: "",
+    profileImage: "",
   });
 
   const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
   const [saving, setSaving] = useState(false);
@@ -31,16 +31,23 @@ export default function ProfilePage() {
 
   const loadProfile = async () => {
     try {
-      const data = await profileApi.getProfile() as { firstName?: string; lastName?: string; email?: string; country?: string; profileImage?: string; [key: string]: unknown };
+      const data = (await profileApi.getProfile()) as {
+        firstName?: string;
+        lastName?: string;
+        email?: string;
+        country?: string;
+        profileImage?: string;
+        [key: string]: unknown;
+      };
       setProfileData({
-        firstName: data.firstName || '',
-        lastName: data.lastName || '',
-        email: data.email || '',
-        country: data.country || '',
-        profileImage: data.profileImage || '',
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
+        email: data.email || "",
+        country: data.country || "",
+        profileImage: data.profileImage || "",
       });
     } catch (error) {
-      console.error('Failed to load profile:', error);
+      console.error("Failed to load profile:", error);
     }
   };
 
@@ -49,16 +56,19 @@ export default function ProfilePage() {
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      toast.error('Image size must be less than 2MB');
+      toast.error("Image size must be less than 2MB");
       return;
     }
 
     try {
       const response = await profileApi.uploadProfileImage(file);
-      const data = await response.json() as { profileImage?: string; [key: string]: unknown };
-      setProfileData({ ...profileData, profileImage: data.profileImage });
+      const data = (await response.json()) as {
+        profileImage?: string;
+        [key: string]: unknown;
+      };
+      setProfileData({ ...profileData, profileImage: data.profileImage || "" });
     } catch {
-      toast.error('Failed to upload image');
+      toast.error("Failed to upload image");
     }
   };
 
@@ -70,9 +80,10 @@ export default function ProfilePage() {
         lastName: profileData.lastName,
         country: profileData.country,
       });
-      toast.success('Profile updated successfully');
+      toast.success("Profile updated successfully");
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to update profile';
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update profile";
       toast.error(errorMessage);
     } finally {
       setSaving(false);
@@ -81,7 +92,7 @@ export default function ProfilePage() {
 
   const handleChangePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -90,32 +101,43 @@ export default function ProfilePage() {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });
-      toast.success('Password changed successfully');
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      toast.success("Password changed successfully");
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to change password';
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to change password";
       toast.error(errorMessage);
     }
   };
 
   const stats = {
-    accountLevel: 'Gold',
+    accountLevel: "Gold",
     totalOrders: 45,
-    totalEarnings: 12500.00,
+    totalEarnings: 12500.0,
     activeWebsites: 8,
-    joinDate: '2024-01-15',
+    joinDate: "2024-01-15",
   };
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-[#3F207F] mb-2">Profile Settings</h1>
-        <p className="text-gray-600">Manage your account information and preferences.</p>
+        <h1 className="text-3xl font-bold text-primary-purple mb-2">
+          Profile Settings
+        </h1>
+        <p className="text-gray-600">
+          Manage your account information and preferences.
+        </p>
       </div>
 
       {/* Profile Information */}
       <Card>
-        <h2 className="text-xl font-semibold text-[#3F207F] mb-6">Profile Information</h2>
+        <h2 className="text-xl font-semibold text-[#3F207F] mb-6">
+          Profile Information
+        </h2>
         <div className="space-y-6">
           {/* Profile Image */}
           <div className="flex items-center space-x-6">
@@ -127,7 +149,8 @@ export default function ProfilePage() {
               />
             ) : (
               <div className="w-24 h-24 bg-gradient-to-br from-[#3F207F] to-[#2EE6B7] rounded-full flex items-center justify-center text-white text-3xl font-bold">
-                {profileData.firstName?.[0] || 'U'}{profileData.lastName?.[0] || ''}
+                {profileData.firstName?.[0] || "U"}
+                {profileData.lastName?.[0] || ""}
               </div>
             )}
             <div>
@@ -143,7 +166,9 @@ export default function ProfilePage() {
                   Change Profile Picture
                 </Button>
               </label>
-              <p className="text-sm text-gray-500 mt-2">JPG, PNG or GIF. Max size 2MB.</p>
+              <p className="text-sm text-gray-500 mt-2">
+                JPG, PNG or GIF. Max size 2MB.
+              </p>
             </div>
           </div>
 
@@ -151,12 +176,16 @@ export default function ProfilePage() {
             <Input
               label="First Name"
               value={profileData.firstName}
-              onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
+              onChange={(e) =>
+                setProfileData({ ...profileData, firstName: e.target.value })
+              }
             />
             <Input
               label="Last Name"
               value={profileData.lastName}
-              onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
+              onChange={(e) =>
+                setProfileData({ ...profileData, lastName: e.target.value })
+              }
             />
             <Input
               label="Email Address"
@@ -164,14 +193,13 @@ export default function ProfilePage() {
               disabled
               helperText="Email cannot be changed after signup"
             />
-            <Input
-              label="Country"
-              value={profileData.country}
-              disabled
-            />
+            <Input label="Country" value={profileData.country} disabled />
           </div>
 
-          <Button onClick={handleSaveProfile} isLoading={saving} disabled={saving}>
+          <Button
+            onClick={handleSaveProfile}
+            isLoading={saving}
+            disabled={saving}>
             Save Changes
           </Button>
         </div>
@@ -179,25 +207,39 @@ export default function ProfilePage() {
 
       {/* Password Change */}
       <Card>
-        <h2 className="text-xl font-semibold text-[#3F207F] mb-6">Change Password</h2>
+        <h2 className="text-xl font-semibold text-[#3F207F] mb-6">
+          Change Password
+        </h2>
         <div className="space-y-6">
           <Input
             label="Current Password"
             type="password"
             value={passwordData.currentPassword}
-            onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+            onChange={(e) =>
+              setPasswordData({
+                ...passwordData,
+                currentPassword: e.target.value,
+              })
+            }
           />
           <Input
             label="New Password"
             type="password"
             value={passwordData.newPassword}
-            onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+            onChange={(e) =>
+              setPasswordData({ ...passwordData, newPassword: e.target.value })
+            }
           />
           <Input
             label="Confirm New Password"
             type="password"
             value={passwordData.confirmPassword}
-            onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+            onChange={(e) =>
+              setPasswordData({
+                ...passwordData,
+                confirmPassword: e.target.value,
+              })
+            }
           />
           <Button onClick={handleChangePassword}>Update Password</Button>
         </div>
@@ -205,7 +247,9 @@ export default function ProfilePage() {
 
       {/* Account Overview */}
       <Card>
-        <h2 className="text-xl font-semibold text-[#3F207F] mb-6">Account Overview</h2>
+        <h2 className="text-xl font-semibold text-[#3F207F] mb-6">
+          Account Overview
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <p className="text-sm text-gray-600 mb-2">Account Level</p>
@@ -215,23 +259,30 @@ export default function ProfilePage() {
           </div>
           <div>
             <p className="text-sm text-gray-600 mb-2">Total Orders Completed</p>
-            <p className="text-2xl font-bold text-[#3F207F]">{stats.totalOrders}</p>
+            <p className="text-2xl font-bold text-[#3F207F]">
+              {stats.totalOrders}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-600 mb-2">Total Earnings</p>
-            <p className="text-2xl font-bold text-[#3F207F]">${stats.totalEarnings.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-[#3F207F]">
+              ${stats.totalEarnings.toLocaleString()}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-600 mb-2">Active Websites</p>
-            <p className="text-2xl font-bold text-[#3F207F]">{stats.activeWebsites}</p>
+            <p className="text-2xl font-bold text-[#3F207F]">
+              {stats.activeWebsites}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-600 mb-2">Member Since</p>
-            <p className="text-lg font-semibold text-gray-900">{new Date(stats.joinDate).toLocaleDateString()}</p>
+            <p className="text-lg font-semibold text-gray-900">
+              {new Date(stats.joinDate).toLocaleDateString()}
+            </p>
           </div>
         </div>
       </Card>
     </div>
   );
 }
-

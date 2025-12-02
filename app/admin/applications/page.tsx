@@ -11,6 +11,30 @@ import toast from 'react-hot-toast';
 interface Application {
   _id?: string;
   id?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  country?: string;
+  status?: string;
+  createdAt?: string | Date;
+  submittedAt?: string | Date;
+  hearAboutUs?: string;
+  guestPostExperience?: string;
+  guestPostUrls?: string[];
+  referralInfo?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+  };
+  quizAnswers?: Record<string, string>;
+  files?: Array<{
+    mimetype?: string;
+    path?: string;
+    originalName?: string;
+    filename?: string;
+    size?: number;
+    [key: string]: unknown;
+  }>;
   [key: string]: unknown;
 }
 
@@ -57,8 +81,10 @@ export default function AdminApplicationsPage() {
   const handleViewDetails = async (appId: string) => {
     try {
       setLoadingDetails(true);
-      const response = await adminApi.getApplicationById(appId) as { data?: { application?: Application }; application?: Application; data?: Application; [key: string]: unknown };
-      const appData = response?.data?.application || response?.application || response?.data;
+      const response = await adminApi.getApplicationById(appId) as { data?: { application?: Application } | Application; application?: Application; [key: string]: unknown };
+      const appData = response?.data && typeof response.data === 'object' && 'application' in response.data 
+        ? (response.data as { application?: Application }).application 
+        : response?.data || response?.application;
       setSelectedApp(appData as Application);
     } catch (error: unknown) {
       console.error('Failed to load application details:', error);
@@ -72,8 +98,14 @@ export default function AdminApplicationsPage() {
   const handleApprove = async () => {
     if (!selectedApp) return;
     
+    const appId = selectedApp._id || selectedApp.id;
+    if (!appId) {
+      toast.error('Application ID not found');
+      return;
+    }
+    
     try {
-      await adminApi.approveApplication(selectedApp._id || selectedApp.id);
+      await adminApi.approveApplication(appId);
       toast.success('Application approved successfully');
       setSelectedApp(null);
       await loadApplications();
@@ -91,8 +123,14 @@ export default function AdminApplicationsPage() {
       return;
     }
     
+    const appId = selectedApp._id || selectedApp.id;
+    if (!appId) {
+      toast.error('Application ID not found');
+      return;
+    }
+    
     try {
-      await adminApi.rejectApplication(selectedApp._id || selectedApp.id || '', rejectionReason);
+      await adminApi.rejectApplication(appId, rejectionReason);
       toast.success('Application rejected');
       setSelectedApp(null);
       setShowRejectModal(false);
@@ -104,7 +142,12 @@ export default function AdminApplicationsPage() {
     }
   };
 
-  const handleDownload = async (file: { path: string; originalName?: string; filename?: string }) => {
+  const handleDownload = async (file: { path?: string; originalName?: string; filename?: string }) => {
+    if (!file.path) {
+      toast.error('File path not found');
+      return;
+    }
+    
     try {
       const token = localStorage.getItem('authToken');
       const API_URL = getApiUrl();
@@ -234,14 +277,17 @@ export default function AdminApplicationsPage() {
                     </td>
                     <td className="py-4 px-4">
                       <Badge variant={app.status === 'approved' ? 'success' : app.status === 'rejected' ? 'danger' : 'warning'}>
-                        {app.status?.charAt(0).toUpperCase() + app.status?.slice(1) || 'Pending'}
+                        {app.status ? app.status.charAt(0).toUpperCase() + app.status.slice(1) : 'Pending'}
                       </Badge>
                     </td>
                     <td className="py-4 px-4">
                       <Button 
                         variant="primary" 
                         size="sm"
-                        onClick={() => handleViewDetails(app._id || app.id)}
+                        onClick={() => {
+                          const appId = app._id || app.id;
+                          if (appId) handleViewDetails(appId);
+                        }}
                         disabled={loadingDetails}
                       >
                         {loadingDetails ? 'Loading...' : 'View Details'}
@@ -297,7 +343,7 @@ export default function AdminApplicationsPage() {
                     <label className="text-sm font-medium text-gray-600">Status</label>
                     <div className="mt-1">
                       <Badge variant={selectedApp.status === 'approved' ? 'success' : selectedApp.status === 'rejected' ? 'danger' : 'warning'}>
-                        {selectedApp.status?.charAt(0).toUpperCase() + selectedApp.status?.slice(1) || 'Pending'}
+                        {selectedApp.status ? selectedApp.status.charAt(0).toUpperCase() + selectedApp.status.slice(1) : 'Pending'}
                       </Badge>
                     </div>
                   </div>
@@ -305,7 +351,7 @@ export default function AdminApplicationsPage() {
                     <label className="text-sm font-medium text-gray-600">Submitted At</label>
                     <p className="text-gray-900">
                       {selectedApp.createdAt || selectedApp.submittedAt
-                        ? new Date(selectedApp.createdAt || selectedApp.submittedAt).toLocaleString()
+                        ? new Date(selectedApp.createdAt || selectedApp.submittedAt || '').toLocaleString()
                         : '-'}
                     </p>
                   </div>
@@ -407,7 +453,7 @@ export default function AdminApplicationsPage() {
                             Question {questionNum}:
                           </label>
                           <p className="text-sm text-gray-600 mb-2 italic">{fullQuestion}</p>
-                          <p className="text-base font-medium text-gray-900">Answer: {value}</p>
+                          <p className="text-base font-medium text-gray-900">Answer: {String(value)}</p>
                         </div>
                       );
                     })}
@@ -432,7 +478,7 @@ export default function AdminApplicationsPage() {
                               <div>
                                 <p className="text-sm font-medium text-gray-900">{file.originalName || file.filename}</p>
                                 <p className="text-xs text-gray-500">
-                                  {(file.size / 1024 / 1024).toFixed(2)} MB • {file.mimetype}
+                                  {file.size ? `${((file.size as number) / 1024 / 1024).toFixed(2)} MB` : 'N/A'} • {file.mimetype || 'Unknown'}
                                 </p>
                               </div>
                             </div>
@@ -448,7 +494,13 @@ export default function AdminApplicationsPage() {
                                 </a>
                               )}
                               <button
-                                onClick={() => handleDownload(file)}
+                                onClick={() => {
+                                  if (file.path) {
+                                    handleDownload(file as { path: string; originalName?: string; filename?: string });
+                                  } else {
+                                    toast.error('File path not available');
+                                  }
+                                }}
                                 className="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
                               >
                                 Download

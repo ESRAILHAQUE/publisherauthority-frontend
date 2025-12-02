@@ -10,6 +10,14 @@ import toast from 'react-hot-toast';
 interface Payment {
   _id?: string;
   id?: string;
+  amount?: number;
+  dueDate?: string | Date;
+  status?: string;
+  publisher?: string;
+  userId?: {
+    firstName?: string;
+    lastName?: string;
+  };
   [key: string]: unknown;
 }
 
@@ -80,18 +88,21 @@ export default function AdminPaymentsPage() {
                     <td className="py-4 px-4 font-medium text-gray-900">
                       {payment.userId?.firstName || ''} {payment.userId?.lastName || ''} {payment.publisher || ''}
                     </td>
-                    <td className="py-4 px-4 font-semibold text-[#3F207F]">${payment.amount || 0}</td>
+                    <td className="py-4 px-4 font-semibold text-[#3F207F]">${(payment.amount || 0) as number}</td>
                     <td className="py-4 px-4 text-gray-600">
-                      {payment.dueDate ? new Date(payment.dueDate).toLocaleDateString() : '-'}
+                      {payment.dueDate ? new Date(payment.dueDate as string | Date).toLocaleDateString() : '-'}
                     </td>
                     <td className="py-4 px-4">
                       <Badge variant={payment.status === 'paid' ? 'success' : payment.status === 'processing' ? 'info' : 'warning'}>
-                        {payment.status?.charAt(0).toUpperCase() + payment.status?.slice(1) || 'Pending'}
+                        {payment.status ? payment.status.charAt(0).toUpperCase() + payment.status.slice(1) : 'Pending'}
                       </Badge>
                     </td>
                     <td className="py-4 px-4">
                       {payment.status !== 'paid' && (
-                        <Button variant="ghost" size="sm" onClick={() => handleProcessPayment(payment._id || payment.id)}>
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          const paymentId = payment._id || payment.id;
+                          if (paymentId) handleProcessPayment(paymentId);
+                        }}>
                           Process
                         </Button>
                       )}
