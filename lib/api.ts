@@ -9,7 +9,10 @@ const getApiUrl = () => {
   if (typeof window !== "undefined") {
     const hostname = window.location.hostname;
     // If running on production domain, use production API
-    if (hostname === "publisherauthority.com" || hostname.includes("publisherauthority.com")) {
+    if (
+      hostname === "publisherauthority.com" ||
+      hostname.includes("publisherauthority.com")
+    ) {
       return "https://publisherauthority.com/api/v1";
     }
     // Otherwise use env variable or localhost
