@@ -60,10 +60,13 @@ async function apiRequest<T>(
     return data;
   } catch (error: any) {
     console.error("API request failed:", error);
+    console.error("API URL:", `${API_URL}${endpoint}`);
     // Handle network errors
-    if (error.name === "TypeError" && error.message.includes("fetch")) {
+    if (error.name === "TypeError" && (error.message.includes("fetch") || error.message === "Failed to fetch")) {
       throw new Error(
-        "Unable to connect to server. Please check if the backend is running."
+        `Unable to connect to backend server at ${API_URL}. ` +
+        `Please ensure the backend is running on port 5000. ` +
+        `Error: ${error.message}`
       );
     }
     throw error;
