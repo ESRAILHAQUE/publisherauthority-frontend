@@ -1,17 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/shared/Card';
 import { Input } from '@/components/shared/Input';
 import { Button } from '@/components/shared/Button';
 import { Badge } from '@/components/shared/Badge';
+import { profileApi } from '@/lib/api';
 
 export default function ProfilePage() {
   const [profileData, setProfileData] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    country: 'United States',
+    firstName: '',
+    lastName: '',
+    email: '',
+    country: '',
+    profileImage: '',
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -19,6 +21,83 @@ export default function ProfilePage() {
     newPassword: '',
     confirmPassword: '',
   });
+
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    try {
+      const data: any = await profileApi.getProfile();
+      setProfileData({
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
+        email: data.email || '',
+        country: data.country || '',
+        profileImage: data.profileImage || '',
+      });
+    } catch (error) {
+      console.error('Failed to load profile:', error);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Image size must be less than 2MB');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const response = await profileApi.uploadProfileImage(file);
+      const data: any = await response.json();
+      setProfileData({ ...profileData, profileImage: data.profileImage });
+    } catch (error) {
+      alert('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setSaving(true);
+      await profileApi.updateProfile({
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
+        country: profileData.country,
+      });
+      alert('Profile updated successfully');
+    } catch (error: any) {
+      alert(error.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    try {
+      await profileApi.changePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+      alert('Password changed successfully');
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (error: any) {
+      alert(error.message || 'Failed to change password');
+    }
+  };
 
   const stats = {
     accountLevel: 'Gold',
@@ -41,11 +120,30 @@ export default function ProfilePage() {
         <div className="space-y-6">
           {/* Profile Image */}
           <div className="flex items-center space-x-6">
-            <div className="w-24 h-24 bg-gradient-to-br from-[#3F207F] to-[#2EE6B7] rounded-full flex items-center justify-center text-white text-3xl font-bold">
-              JD
-            </div>
+            {profileData.profileImage ? (
+              <img
+                src={profileData.profileImage}
+                alt="Profile"
+                className="w-24 h-24 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-24 h-24 bg-gradient-to-br from-[#3F207F] to-[#2EE6B7] rounded-full flex items-center justify-center text-white text-3xl font-bold">
+                {profileData.firstName?.[0] || 'U'}{profileData.lastName?.[0] || ''}
+              </div>
+            )}
             <div>
-              <Button variant="outline" size="sm">Change Profile Picture</Button>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/gif"
+                onChange={handleImageUpload}
+                className="hidden"
+                id="profile-image-upload"
+              />
+              <label htmlFor="profile-image-upload" className="cursor-pointer">
+                <Button variant="outline" size="sm" type="button">
+                  Change Profile Picture
+                </Button>
+              </label>
               <p className="text-sm text-gray-500 mt-2">JPG, PNG or GIF. Max size 2MB.</p>
             </div>
           </div>
@@ -74,7 +172,9 @@ export default function ProfilePage() {
             />
           </div>
 
-          <Button>Save Changes</Button>
+          <Button onClick={handleSaveProfile} isLoading={saving} disabled={saving}>
+            Save Changes
+          </Button>
         </div>
       </Card>
 
@@ -100,7 +200,7 @@ export default function ProfilePage() {
             value={passwordData.confirmPassword}
             onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
           />
-          <Button>Update Password</Button>
+          <Button onClick={handleChangePassword}>Update Password</Button>
         </div>
       </Card>
 

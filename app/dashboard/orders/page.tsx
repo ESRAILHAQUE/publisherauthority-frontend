@@ -1,44 +1,73 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card } from '@/components/shared/Card';
 import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
+import { ordersApi } from '@/lib/api';
 
 export default function OrdersPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('all');
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const orders = [
-    { id: 1, title: 'SEO Best Practices Guide', status: 'Pending', deadline: '2025-01-30', earnings: 150, website: 'example-blog.com' },
-    { id: 2, title: 'Content Marketing Tips', status: 'Ready To Post', deadline: '2025-01-28', earnings: 120, website: 'tech-insights.net' },
-    { id: 3, title: 'Digital Marketing Trends', status: 'Verifying', deadline: '2025-02-01', earnings: 200, website: 'example-blog.com' },
-    { id: 4, title: 'Social Media Strategy', status: 'Completed', deadline: '2025-01-20', earnings: 180, website: 'tech-insights.net' },
-    { id: 5, title: 'Email Marketing Guide', status: 'Pending', deadline: '2025-02-05', earnings: 160, website: 'example-blog.com' },
-  ];
+  useEffect(() => {
+    loadOrders();
+  }, []);
+
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      const data: any = await ordersApi.getOrders();
+      setOrders(Array.isArray(data) ? data : (data.orders || []));
+    } catch (error) {
+      console.error('Failed to load orders:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const tabs = [
     { id: 'all', label: 'All Orders', count: orders.length },
-    { id: 'pending', label: 'Pending', count: orders.filter((o) => o.status === 'Pending').length },
-    { id: 'ready', label: 'Ready To Post', count: orders.filter((o) => o.status === 'Ready To Post').length },
-    { id: 'verifying', label: 'Verifying', count: orders.filter((o) => o.status === 'Verifying').length },
-    { id: 'completed', label: 'Completed', count: orders.filter((o) => o.status === 'Completed').length },
+    { id: 'pending', label: 'Pending', count: orders.filter((o) => o.status === 'pending').length },
+    { id: 'ready', label: 'Ready To Post', count: orders.filter((o) => o.status === 'ready-to-post').length },
+    { id: 'verifying', label: 'Verifying', count: orders.filter((o) => o.status === 'verifying').length },
+    { id: 'completed', label: 'Completed', count: orders.filter((o) => o.status === 'completed').length },
   ];
 
   const filteredOrders = activeTab === 'all' 
     ? orders 
-    : orders.filter((o) => o.status.toLowerCase().replace(' ', '') === activeTab);
+    : orders.filter((o) => {
+        const status = o.status.toLowerCase().replace(/-/g, '');
+        return status === activeTab;
+      });
 
   const getStatusBadge = (status: string) => {
+    const statusLower = status.toLowerCase();
     const variants: Record<string, 'default' | 'info' | 'warning' | 'success' | 'danger'> = {
-      'Pending': 'default',
-      'Ready To Post': 'info',
-      'Verifying': 'warning',
-      'Completed': 'success',
-      'Revision Requested': 'warning',
-      'Cancelled': 'danger',
+      'pending': 'default',
+      'ready-to-post': 'info',
+      'verifying': 'warning',
+      'completed': 'success',
+      'revision-requested': 'warning',
+      'cancelled': 'danger',
     };
-    return variants[status] || 'default';
+    return variants[statusLower] || 'default';
   };
+
+  const formatStatus = (status: string) => {
+    return status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-gray-600">Loading orders...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -83,23 +112,41 @@ export default function OrdersPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredOrders.map((order) => (
-                <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="py-4 px-4 text-gray-600">#{order.id}</td>
-                  <td className="py-4 px-4">
-                    <p className="font-medium text-gray-900">{order.title}</p>
-                  </td>
-                  <td className="py-4 px-4 text-gray-600">{order.website}</td>
-                  <td className="py-4 px-4">
-                    <Badge variant={getStatusBadge(order.status)}>{order.status}</Badge>
-                  </td>
-                  <td className="py-4 px-4 text-gray-600">{order.deadline}</td>
-                  <td className="py-4 px-4 font-semibold text-[#3F207F]">${order.earnings}</td>
-                  <td className="py-4 px-4">
-                    <Button variant="ghost" size="sm">View Details</Button>
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-8 px-4 text-center text-gray-500">
+                    No orders found
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredOrders.map((order) => (
+                  <tr key={order._id || order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td className="py-4 px-4 text-gray-600">#{order.orderNumber || order._id?.slice(-8) || order.id}</td>
+                    <td className="py-4 px-4">
+                      <p className="font-medium text-gray-900">{order.title || 'Untitled Order'}</p>
+                    </td>
+                    <td className="py-4 px-4 text-gray-600">
+                      {order.websiteId?.url || order.website || '-'}
+                    </td>
+                    <td className="py-4 px-4">
+                      <Badge variant={getStatusBadge(order.status)}>{formatStatus(order.status)}</Badge>
+                    </td>
+                    <td className="py-4 px-4 text-gray-600">
+                      {order.deadline ? new Date(order.deadline).toLocaleDateString() : '-'}
+                    </td>
+                    <td className="py-4 px-4 font-semibold text-[#3F207F]">${order.earnings || order.amount || 0}</td>
+                    <td className="py-4 px-4">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => router.push(`/dashboard/orders/${order._id || order.id}`)}
+                      >
+                        View Details
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

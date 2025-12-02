@@ -1,12 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/shared/Button';
 import { Input } from '@/components/shared/Input';
 import { Textarea } from '@/components/shared/Textarea';
 import { Card } from '@/components/shared/Card';
+import { websitesApi } from '@/lib/api';
 
 export default function AddWebsitePage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     url: '',
     domainAuthority: '',
@@ -15,14 +18,32 @@ export default function AddWebsitePage() {
     description: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     setIsSubmitting(true);
-    setTimeout(() => {
+
+    try {
+      await websitesApi.addWebsite({
+        url: formData.url,
+        domainAuthority: parseInt(formData.domainAuthority),
+        monthlyTraffic: parseInt(formData.monthlyTraffic),
+        niche: formData.niche,
+        description: formData.description,
+      });
+
+      setSuccess(true);
+      setTimeout(() => {
+        router.push('/dashboard/websites');
+      }, 2000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to submit website. Please try again.');
+    } finally {
       setIsSubmitting(false);
-      alert('Website submitted for review!');
-    }, 1500);
+    }
   };
 
   return (
@@ -63,6 +84,18 @@ export default function AddWebsitePage() {
           <p>Fill out the form below with your domains for our review.</p>
         </div>
 
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
+            Website submitted successfully! Redirecting...
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <Input
             label="Website URL"
@@ -72,6 +105,7 @@ export default function AddWebsitePage() {
             onChange={(e) => setFormData({ ...formData, url: e.target.value })}
             placeholder="https://example.com"
             required
+            disabled={isSubmitting}
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -116,8 +150,17 @@ export default function AddWebsitePage() {
           />
 
           <div className="flex justify-end space-x-4">
-            <Button type="button" variant="outline">Cancel</Button>
-            <Button type="submit" isLoading={isSubmitting}>Submit for Review</Button>
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={() => router.push('/dashboard/websites')}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" isLoading={isSubmitting} disabled={isSubmitting}>
+              Submit for Review
+            </Button>
           </div>
         </form>
       </Card>

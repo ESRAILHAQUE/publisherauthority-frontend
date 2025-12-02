@@ -1,19 +1,49 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/shared/Card';
 import { Input } from '@/components/shared/Input';
 import { Button } from '@/components/shared/Button';
 import { Badge } from '@/components/shared/Badge';
+import { paymentsApi, profileApi } from '@/lib/api';
 
 export default function PaymentsPage() {
-  const [paypalEmail, setPaypalEmail] = useState('publisher@example.com');
+  const [paypalEmail, setPaypalEmail] = useState('');
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const invoices = [
-    { id: 'INV-2025-001', description: 'Orders #1, #2, #3', date: '2025-01-15', amount: 450, dueDate: '2025-01-15', paymentDate: '2025-01-15', status: 'Paid' },
-    { id: 'INV-2025-002', description: 'Orders #4, #5', date: '2025-01-01', amount: 360, dueDate: '2025-01-01', paymentDate: '2025-01-01', status: 'Paid' },
-    { id: 'INV-2025-003', description: 'Orders #6', date: '2024-12-15', amount: 200, dueDate: '2024-12-15', paymentDate: '2024-12-15', status: 'Paid' },
-  ];
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [profileData, invoicesData]: any[] = await Promise.all([
+        profileApi.getProfile().catch(() => ({ paypalEmail: '' })),
+        paymentsApi.getInvoices().catch(() => []),
+      ]);
+      setPaypalEmail(profileData.paypalEmail || '');
+      setInvoices(Array.isArray(invoicesData) ? invoicesData : (invoicesData.invoices || []));
+    } catch (error) {
+      console.error('Failed to load payment data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSavePaypal = async () => {
+    try {
+      setSaving(true);
+      await paymentsApi.updatePaypalEmail(paypalEmail);
+      alert('PayPal email saved successfully');
+    } catch (error: any) {
+      alert(error.message || 'Failed to save PayPal email');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, 'success' | 'warning' | 'info' | 'danger' | 'default'> = {
@@ -45,7 +75,9 @@ export default function PaymentsPage() {
               placeholder="your@paypal.com"
             />
           </div>
-          <Button>Save Payment Settings</Button>
+          <Button onClick={handleSavePaypal} isLoading={saving} disabled={saving}>
+            Save Payment Settings
+          </Button>
         </div>
       </Card>
 
@@ -92,24 +124,47 @@ export default function PaymentsPage() {
               </tr>
             </thead>
             <tbody>
-              {invoices.map((invoice) => (
-                <tr key={invoice.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="py-4 px-4 font-medium text-gray-900">{invoice.id}</td>
-                  <td className="py-4 px-4 text-gray-600">{invoice.description}</td>
-                  <td className="py-4 px-4 text-gray-600">{invoice.date}</td>
-                  <td className="py-4 px-4 font-semibold text-[#3F207F]">${invoice.amount}</td>
-                  <td className="py-4 px-4 text-gray-600">{invoice.dueDate}</td>
-                  <td className="py-4 px-4 text-gray-600">{invoice.paymentDate}</td>
-                  <td className="py-4 px-4">
-                    <Badge variant={getStatusBadge(invoice.status)}>{invoice.status}</Badge>
-                  </td>
-                  <td className="py-4 px-4">
-                    <button className="text-[#3F207F] hover:text-[#2EE6B7] font-medium text-sm transition-colors">
-                      Download PDF
-                    </button>
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="py-8 px-4 text-center text-gray-500">
+                    Loading invoices...
                   </td>
                 </tr>
-              ))}
+              ) : invoices.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-8 px-4 text-center text-gray-500">
+                    No invoices found
+                  </td>
+                </tr>
+              ) : (
+                invoices.map((invoice) => (
+                  <tr key={invoice._id || invoice.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td className="py-4 px-4 font-medium text-gray-900">{invoice.invoiceNumber || invoice.id}</td>
+                    <td className="py-4 px-4 text-gray-600">{invoice.description || '-'}</td>
+                    <td className="py-4 px-4 text-gray-600">
+                      {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString() : '-'}
+                    </td>
+                    <td className="py-4 px-4 font-semibold text-[#3F207F]">${invoice.amount || 0}</td>
+                    <td className="py-4 px-4 text-gray-600">
+                      {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : '-'}
+                    </td>
+                    <td className="py-4 px-4 text-gray-600">
+                      {invoice.paymentDate ? new Date(invoice.paymentDate).toLocaleDateString() : '-'}
+                    </td>
+                    <td className="py-4 px-4">
+                      <Badge variant={getStatusBadge(invoice.status)}>{invoice.status || 'Pending'}</Badge>
+                    </td>
+                    <td className="py-4 px-4">
+                      <button
+                        onClick={() => paymentsApi.downloadInvoice(invoice._id || invoice.id)}
+                        className="text-[#3F207F] hover:text-[#2EE6B7] font-medium text-sm transition-colors"
+                      >
+                        Download PDF
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

@@ -4,24 +4,36 @@ import React, { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import Link from 'next/link';
+import { authApi } from '@/lib/api';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     rememberMe: true,
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     setIsLoading(true);
-    // Handle login here
-    setTimeout(() => {
+    
+    try {
+      const response: any = await authApi.login(formData.email, formData.password);
+      localStorage.setItem('authToken', response.token);
+      if (formData.rememberMe) {
+        localStorage.setItem('rememberMe', 'true');
+      }
+      router.push('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Invalid email or password');
+    } finally {
       setIsLoading(false);
-      // Redirect to dashboard
-      window.location.href = '/dashboard';
-    }, 1500);
+    }
   };
 
   return (

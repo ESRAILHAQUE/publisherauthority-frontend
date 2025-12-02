@@ -1,14 +1,43 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/shared/Card';
 import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
+import { adminApi } from '@/lib/api';
 
 export default function AdminPublishersPage() {
-  const publishers = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', level: 'Gold', orders: 45, earnings: 12500, status: 'Active' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', level: 'Silver', orders: 25, earnings: 6500, status: 'Active' },
-    { id: 3, name: 'Mike Johnson', email: 'mike@example.com', level: 'Premium', orders: 150, earnings: 35000, status: 'Active' },
-  ];
+  const [publishers, setPublishers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedPublisher, setSelectedPublisher] = useState<any | null>(null);
+
+  useEffect(() => {
+    loadPublishers();
+  }, []);
+
+  const loadPublishers = async () => {
+    try {
+      setLoading(true);
+      const data: any = await adminApi.getDashboard();
+      setPublishers(data.publishers || []);
+    } catch (error) {
+      console.error('Failed to load publishers:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateLevel = async (userId: string, level: string) => {
+    if (!confirm(`Update user level to ${level}?`)) return;
+
+    try {
+      await adminApi.updateUserLevel(userId, level);
+      alert('User level updated successfully');
+      await loadPublishers();
+    } catch (error: any) {
+      alert(error.message || 'Failed to update user level');
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -32,25 +61,42 @@ export default function AdminPublishersPage() {
               </tr>
             </thead>
             <tbody>
-              {publishers.map((publisher) => (
-                <tr key={publisher.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="py-4 px-4 font-medium text-gray-900">{publisher.name}</td>
-                  <td className="py-4 px-4 text-gray-600">{publisher.email}</td>
-                  <td className="py-4 px-4">
-                    <Badge variant={publisher.level === 'Premium' ? 'purple' : publisher.level === 'Gold' ? 'warning' : 'default'}>
-                      {publisher.level}
-                    </Badge>
-                  </td>
-                  <td className="py-4 px-4 text-gray-600">{publisher.orders}</td>
-                  <td className="py-4 px-4 font-semibold text-[#3F207F]">${publisher.earnings.toLocaleString()}</td>
-                  <td className="py-4 px-4">
-                    <Badge variant="success">{publisher.status}</Badge>
-                  </td>
-                  <td className="py-4 px-4">
-                    <Button variant="ghost" size="sm">View Details</Button>
-                  </td>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="py-8 px-4 text-center text-gray-500">Loading publishers...</td>
                 </tr>
-              ))}
+              ) : publishers.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-8 px-4 text-center text-gray-500">No publishers found</td>
+                </tr>
+              ) : (
+                publishers.map((publisher) => {
+                  const level = publisher.accountLevel || publisher.level || 'silver';
+                  return (
+                    <tr key={publisher._id || publisher.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                      <td className="py-4 px-4 font-medium text-gray-900">
+                        {publisher.firstName || ''} {publisher.lastName || ''} {publisher.name || ''}
+                      </td>
+                      <td className="py-4 px-4 text-gray-600">{publisher.email}</td>
+                      <td className="py-4 px-4">
+                        <Badge variant={level === 'premium' ? 'purple' : level === 'gold' ? 'warning' : 'default'}>
+                          {level.charAt(0).toUpperCase() + level.slice(1)}
+                        </Badge>
+                      </td>
+                      <td className="py-4 px-4 text-gray-600">{publisher.completedOrders || publisher.orders || 0}</td>
+                      <td className="py-4 px-4 font-semibold text-[#3F207F]">${(publisher.totalEarnings || publisher.earnings || 0).toLocaleString()}</td>
+                      <td className="py-4 px-4">
+                        <Badge variant="success">{publisher.status || 'Active'}</Badge>
+                      </td>
+                      <td className="py-4 px-4">
+                        <Button variant="ghost" size="sm" onClick={() => setSelectedPublisher(publisher)}>
+                          Manage
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

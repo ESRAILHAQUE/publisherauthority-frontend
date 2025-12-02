@@ -1,14 +1,52 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card } from '@/components/shared/Card';
 import { Button } from '@/components/shared/Button';
+import { Badge } from '@/components/shared/Badge';
+import { blogApi } from '@/lib/api';
 
 export default function AdminBlogPage() {
-  const posts = [
-    { id: 1, title: 'SEO Best Practices', status: 'Published', date: '2025-01-15' },
-    { id: 2, title: 'Content Marketing Tips', status: 'Draft', date: '2025-01-10' },
-  ];
+  const router = useRouter();
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
+  const loadPosts = async () => {
+    try {
+      setLoading(true);
+      const data: any = await blogApi.getPosts();
+      setPosts(Array.isArray(data) ? data : (data.posts || []));
+    } catch (error) {
+      console.error('Failed to load blog posts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (postId: string) => {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+
+    try {
+      await blogApi.deletePost(postId);
+      alert('Post deleted successfully');
+      await loadPosts();
+    } catch (error: any) {
+      alert(error.message || 'Failed to delete post');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-gray-600">Loading blog posts...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -17,7 +55,9 @@ export default function AdminBlogPage() {
           <h1 className="text-3xl font-bold text-[#3F207F] mb-2">Blog Management</h1>
           <p className="text-gray-600">Create and manage blog posts.</p>
         </div>
-        <Button variant="primary">Create New Post</Button>
+        <Button variant="primary" onClick={() => router.push('/admin/blog/create')}>
+          Create New Post
+        </Button>
       </div>
 
       <Card>
@@ -32,23 +72,45 @@ export default function AdminBlogPage() {
               </tr>
             </thead>
             <tbody>
-              {posts.map((post) => (
-                <tr key={post.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="py-4 px-4 font-medium text-gray-900">{post.title}</td>
-                  <td className="py-4 px-4">
-                    <span className={`px-2 py-1 rounded text-sm ${post.status === 'Published' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                      {post.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4 text-gray-600">{post.date}</td>
-                  <td className="py-4 px-4">
-                    <div className="flex space-x-2">
-                      <Button variant="ghost" size="sm">Edit</Button>
-                      <Button variant="ghost" size="sm">Delete</Button>
-                    </div>
+              {posts.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-8 px-4 text-center text-gray-500">
+                    No blog posts found. <Button variant="ghost" size="sm" onClick={() => router.push('/admin/blog/create')}>Create your first post</Button>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                posts.map((post) => (
+                  <tr key={post._id || post.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td className="py-4 px-4 font-medium text-gray-900">{post.title || 'Untitled'}</td>
+                    <td className="py-4 px-4">
+                      <Badge variant={post.status === 'published' ? 'success' : 'default'}>
+                        {post.status?.charAt(0).toUpperCase() + post.status?.slice(1) || 'Draft'}
+                      </Badge>
+                    </td>
+                    <td className="py-4 px-4 text-gray-600">
+                      {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : '-'}
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="flex space-x-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => router.push(`/admin/blog/${post._id || post.id}/edit`)}
+                        >
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDelete(post._id || post.id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

@@ -8,6 +8,7 @@ import { Input } from '@/components/shared/Input';
 import { Textarea } from '@/components/shared/Textarea';
 import { Select } from '@/components/shared/Select';
 import { Card } from '@/components/shared/Card';
+import { applicationsApi } from '@/lib/api';
 
 export default function ApplyPage() {
   const [formData, setFormData] = useState({
@@ -54,11 +55,44 @@ export default function ApplyPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Handle form submission here
-    setTimeout(() => {
+    
+    try {
+      await applicationsApi.submitApplication({
+        ...formData,
+        quizAnswers,
+      });
+      alert('Application submitted successfully! We will review your application and get back to you soon.');
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        country: '',
+        hearAbout: '',
+        guestPostExperience: '',
+        guestPostUrl1: '',
+        guestPostUrl2: '',
+        guestPostUrl3: '',
+        referralInfo: '',
+      });
+      setQuizAnswers({
+        q1: '',
+        q2: '',
+        q3: '',
+        q4: '',
+        q5: '',
+        q6: '',
+        q7: '',
+        q8: '',
+        q9: '',
+      });
+      setAgreed(false);
+    } catch (error: any) {
+      alert(error.message || 'Failed to submit application. Please try again.');
+    } finally {
       setIsSubmitting(false);
-      alert('Application submitted successfully!');
-    }, 2000);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {

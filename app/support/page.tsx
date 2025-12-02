@@ -7,6 +7,7 @@ import { Button } from '@/components/shared/Button';
 import { Input } from '@/components/shared/Input';
 import { Textarea } from '@/components/shared/Textarea';
 import { Card } from '@/components/shared/Card';
+import { supportApi } from '@/lib/api';
 
 export default function SupportPage() {
   const [contactForm, setContactForm] = useState({
@@ -16,6 +17,7 @@ export default function SupportPage() {
     message: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const faqs = [
     {
@@ -55,12 +57,23 @@ export default function SupportPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Handle form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
-      alert(`Message sent successfully! We'll get back to you soon.`);
+    setSubmitSuccess(false);
+
+    try {
+      await supportApi.createTicket({
+        name: contactForm.name,
+        email: contactForm.email,
+        subject: contactForm.subject,
+        message: contactForm.message,
+      });
+      setSubmitSuccess(true);
       setContactForm({ name: '', email: '', subject: '', message: '' });
-    }, 2000);
+      setTimeout(() => setSubmitSuccess(false), 5000);
+    } catch (error: any) {
+      alert(error.message || 'Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -96,6 +109,11 @@ export default function SupportPage() {
                 <p className="text-gray-600 mb-6">
                   Can&apos;t find what you&apos;re looking for? Send us a message and we&apos;ll get back to you as soon as possible.
                 </p>
+                {submitSuccess && (
+                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
+                    Message sent successfully! We&apos;ll get back to you soon.
+                  </div>
+                )}
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <Input

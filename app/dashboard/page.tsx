@@ -1,46 +1,84 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/shared/Card';
 import { Badge } from '@/components/shared/Badge';
+import { dashboardApi } from '@/lib/api';
 
 export default function DashboardPage() {
-  const stats = {
-    totalEarnings: 12500.00,
-    pendingOrders: 3,
-    readyToPost: 2,
-    verifying: 1,
-    completed: 45,
-    activeWebsites: 8,
-    accountLevel: 'Gold',
-    ordersForNextLevel: 5,
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalEarnings: 0,
+    pendingOrders: 0,
+    readyToPost: 0,
+    verifying: 0,
+    completed: 0,
+    activeWebsites: 0,
+    accountLevel: 'Silver',
+    ordersForNextLevel: 0,
+  });
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [levelProgress, setLevelProgress] = useState({
+    currentLevel: 'silver',
+    nextLevel: 'gold',
+    ordersNeeded: 50,
+    progressPercentage: 0,
+  });
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      const data: any = await dashboardApi.getStats();
+      
+      setStats({
+        totalEarnings: data.stats.totalEarnings || 0,
+        pendingOrders: data.stats.orders.pending || 0,
+        readyToPost: data.stats.orders.readyToPost || 0,
+        verifying: data.stats.orders.verifying || 0,
+        completed: data.stats.orders.completed || 0,
+        activeWebsites: data.stats.websites.active || 0,
+        accountLevel: data.user.accountLevel || 'silver',
+        ordersForNextLevel: data.levelProgress.ordersNeeded || 0,
+      });
+
+      setLevelProgress(data.levelProgress);
+      setRecentOrders(data.recentOrders || []);
+    } catch (error) {
+      console.error('Failed to load dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const recentOrders = [
-    { id: 1, title: 'SEO Best Practices Guide', status: 'Ready To Post', deadline: '2025-01-30', earnings: 150 },
-    { id: 2, title: 'Content Marketing Tips', status: 'Verifying', deadline: '2025-01-28', earnings: 120 },
-    { id: 3, title: 'Digital Marketing Trends', status: 'Pending', deadline: '2025-02-01', earnings: 200 },
-  ];
-
   const getLevelBadgeColor = (level: string) => {
-    switch (level) {
-      case 'Silver':
+    const levelLower = level.toLowerCase();
+    switch (levelLower) {
+      case 'silver':
         return 'default';
-      case 'Gold':
+      case 'gold':
         return 'warning';
-      case 'Premium':
+      case 'premium':
         return 'purple';
       default:
         return 'default';
     }
   };
 
-  const getLevelProgress = () => {
-    if (stats.accountLevel === 'Silver') {
-      return (stats.completed / 50) * 100;
-    } else if (stats.accountLevel === 'Gold') {
-      return ((stats.completed - 50) / 100) * 100;
-    }
-    return 100;
+  const formatLevel = (level: string) => {
+    return level.charAt(0).toUpperCase() + level.slice(1);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-gray-600">Loading dashboard...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -56,25 +94,24 @@ export default function DashboardPage() {
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Account Level</h2>
             <Badge variant={getLevelBadgeColor(stats.accountLevel) as 'default' | 'warning' | 'purple'} size="md" className="text-lg px-4 py-2">
-              {stats.accountLevel}
+              {formatLevel(stats.accountLevel)}
             </Badge>
-            {stats.accountLevel !== 'Premium' && (
+            {levelProgress.currentLevel !== 'premium' && (
               <p className="text-sm text-gray-600 mt-2">
-                {stats.ordersForNextLevel} more completed orders to reach{' '}
-                {stats.accountLevel === 'Silver' ? 'Gold' : 'Premium'} level
+                {levelProgress.ordersNeeded} more completed orders to reach {formatLevel(levelProgress.nextLevel)} level
               </p>
             )}
           </div>
-          {stats.accountLevel !== 'Premium' && (
+          {levelProgress.currentLevel !== 'premium' && (
             <div className="flex-1 max-w-md ml-8">
               <div className="flex justify-between text-sm text-gray-600 mb-2">
                 <span>Progress to next level</span>
-                <span>{Math.round(getLevelProgress())}%</span>
+                <span>{levelProgress.progressPercentage}%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
                 <div
                   className="bg-gradient-to-r from-[#3F207F] to-[#2EE6B7] h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${getLevelProgress()}%` }}
+                  style={{ width: `${levelProgress.progressPercentage}%` }}
                 ></div>
               </div>
             </div>
@@ -156,35 +193,48 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {recentOrders.map((order) => (
-                <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="py-4 px-4">
-                    <p className="font-medium text-gray-900">{order.title}</p>
-                  </td>
-                  <td className="py-4 px-4">
-                    <Badge
-                      variant={
-                        order.status === 'Completed'
-                          ? 'success'
-                          : order.status === 'Ready To Post'
-                          ? 'info'
-                          : order.status === 'Verifying'
-                          ? 'warning'
-                          : 'default'
-                      }
-                    >
-                      {order.status}
-                    </Badge>
-                  </td>
-                  <td className="py-4 px-4 text-gray-600">{order.deadline}</td>
-                  <td className="py-4 px-4 font-semibold text-[#3F207F]">${order.earnings}</td>
-                  <td className="py-4 px-4">
-                    <button className="text-[#3F207F] hover:text-[#2EE6B7] font-medium transition-colors">
-                      View →
-                    </button>
+              {recentOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-8 px-4 text-center text-gray-500">
+                    No recent orders
                   </td>
                 </tr>
-              ))}
+              ) : (
+                recentOrders.map((order) => (
+                  <tr key={order._id || order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td className="py-4 px-4">
+                      <p className="font-medium text-gray-900">{order.title || 'Untitled Order'}</p>
+                    </td>
+                    <td className="py-4 px-4">
+                      <Badge
+                        variant={
+                          order.status === 'completed'
+                            ? 'success'
+                            : order.status === 'ready-to-post'
+                            ? 'info'
+                            : order.status === 'verifying'
+                            ? 'warning'
+                            : 'default'
+                        }
+                      >
+                        {order.status?.replace('-', ' ') || 'Pending'}
+                      </Badge>
+                    </td>
+                    <td className="py-4 px-4 text-gray-600">
+                      {order.deadline ? new Date(order.deadline).toLocaleDateString() : '-'}
+                    </td>
+                    <td className="py-4 px-4 font-semibold text-[#3F207F]">${order.earnings || 0}</td>
+                    <td className="py-4 px-4">
+                      <a 
+                        href={`/dashboard/orders/${order._id || order.id}`}
+                        className="text-[#3F207F] hover:text-[#2EE6B7] font-medium transition-colors"
+                      >
+                        View →
+                      </a>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

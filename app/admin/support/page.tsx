@@ -1,13 +1,42 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card } from '@/components/shared/Card';
 import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
+import { supportApi } from '@/lib/api';
 
 export default function AdminSupportPage() {
-  const tickets = [
-    { id: 1, subject: 'Payment Issue', user: 'John Doe', status: 'Open', priority: 'High', created: '2025-01-25' },
-    { id: 2, subject: 'Account Question', user: 'Jane Smith', status: 'In Progress', priority: 'Medium', created: '2025-01-24' },
-  ];
+  const router = useRouter();
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadTickets();
+  }, []);
+
+  const loadTickets = async () => {
+    try {
+      setLoading(true);
+      const data: any = await supportApi.getTickets();
+      setTickets(Array.isArray(data) ? data : (data.tickets || []));
+    } catch (error) {
+      console.error('Failed to load tickets:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateStatus = async (ticketId: string, status: string) => {
+    try {
+      await supportApi.updateTicket(ticketId, { status });
+      alert('Ticket status updated');
+      await loadTickets();
+    } catch (error: any) {
+      alert(error.message || 'Failed to update ticket');
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -31,25 +60,39 @@ export default function AdminSupportPage() {
               </tr>
             </thead>
             <tbody>
-              {tickets.map((ticket) => (
-                <tr key={ticket.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="py-4 px-4 text-gray-600">#{ticket.id}</td>
-                  <td className="py-4 px-4 font-medium text-gray-900">{ticket.subject}</td>
-                  <td className="py-4 px-4 text-gray-600">{ticket.user}</td>
-                  <td className="py-4 px-4">
-                    <Badge variant={ticket.status === 'Open' ? 'warning' : ticket.status === 'Resolved' ? 'success' : 'info'}>
-                      {ticket.status}
-                    </Badge>
-                  </td>
-                  <td className="py-4 px-4">
-                    <Badge variant={ticket.priority === 'High' ? 'danger' : 'warning'}>{ticket.priority}</Badge>
-                  </td>
-                  <td className="py-4 px-4 text-gray-600">{ticket.created}</td>
-                  <td className="py-4 px-4">
-                    <Button variant="ghost" size="sm">View</Button>
-                  </td>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="py-8 px-4 text-center text-gray-500">Loading tickets...</td>
                 </tr>
-              ))}
+              ) : tickets.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-8 px-4 text-center text-gray-500">No tickets found</td>
+                </tr>
+              ) : (
+                tickets.map((ticket) => (
+                  <tr key={ticket._id || ticket.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td className="py-4 px-4 text-gray-600">#{ticket.ticketNumber || ticket._id?.slice(-8) || ticket.id}</td>
+                    <td className="py-4 px-4 font-medium text-gray-900">{ticket.subject}</td>
+                    <td className="py-4 px-4 text-gray-600">{ticket.name || ticket.user || '-'}</td>
+                    <td className="py-4 px-4">
+                      <Badge variant={ticket.status === 'open' ? 'warning' : ticket.status === 'resolved' ? 'success' : 'info'}>
+                        {ticket.status?.charAt(0).toUpperCase() + ticket.status?.slice(1) || 'Open'}
+                      </Badge>
+                    </td>
+                    <td className="py-4 px-4">
+                      <Badge variant={ticket.priority === 'high' ? 'danger' : 'warning'}>{ticket.priority || 'medium'}</Badge>
+                    </td>
+                    <td className="py-4 px-4 text-gray-600">
+                      {ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString() : '-'}
+                    </td>
+                    <td className="py-4 px-4">
+                      <Button variant="ghost" size="sm" onClick={() => router.push(`/admin/support/${ticket._id || ticket.id}`)}>
+                        View
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

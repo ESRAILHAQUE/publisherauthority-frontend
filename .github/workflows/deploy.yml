@@ -6,6 +6,11 @@ on:
       - main
   workflow_dispatch:
 
+# Prevent multiple deployments from running at the same time
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
