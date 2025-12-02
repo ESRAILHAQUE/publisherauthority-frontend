@@ -21,7 +21,7 @@ export default function AdminApplicationsPage() {
   const loadApplications = async () => {
     try {
       setLoading(true);
-      const response: any = await adminApi.getApplications({ status: 'pending' });
+      const response: any = await adminApi.getAllApplications({ status: 'pending' });
       // Handle different response structures
       let applicationsData = [];
       if (Array.isArray(response)) {
