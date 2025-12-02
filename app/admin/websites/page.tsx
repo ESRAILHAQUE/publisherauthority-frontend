@@ -5,6 +5,7 @@ import { Card } from '@/components/shared/Card';
 import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
 import { adminApi, websitesApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function AdminWebsitesPage() {
   const [websites, setWebsites] = useState<any[]>([]);
@@ -31,11 +32,11 @@ export default function AdminWebsitesPage() {
   const handleVerify = async (websiteId: string, method: 'tag' | 'article') => {
     try {
       await websitesApi.verifyWebsite(websiteId, method);
-      alert('Website verified successfully');
+      toast.success('Website verified successfully');
       await loadWebsites();
       setSelectedWebsite(null);
     } catch (error: any) {
-      alert(error.message || 'Verification failed');
+      toast.error(error.message || 'Verification failed');
     }
   };
 
@@ -46,18 +47,18 @@ export default function AdminWebsitesPage() {
       
       try {
         await adminApi.updateWebsiteStatus(websiteId, status, reason);
-        alert('Website status updated');
+        toast.success('Website status updated');
         await loadWebsites();
       } catch (error: any) {
-        alert(error.message || 'Failed to update status');
+        toast.error(error.message || 'Failed to update status');
       }
     } else {
       try {
         await adminApi.updateWebsiteStatus(websiteId, status);
-        alert('Website status updated');
+        toast.success('Website status updated');
         await loadWebsites();
       } catch (error: any) {
-        alert(error.message || 'Failed to update status');
+        toast.error(error.message || 'Failed to update status');
       }
     }
   };
@@ -71,10 +72,10 @@ export default function AdminWebsitesPage() {
 
     try {
       await adminApi.sendCounterOffer(websiteId, { notes, terms });
-      alert('Counter offer sent');
+      toast.success('Counter offer sent');
       await loadWebsites();
     } catch (error: any) {
-      alert(error.message || 'Failed to send counter offer');
+      toast.error(error.message || 'Failed to send counter offer');
     }
   };
 

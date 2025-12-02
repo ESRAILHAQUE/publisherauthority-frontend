@@ -6,6 +6,7 @@ import { Card } from '@/components/shared/Card';
 import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
 import { adminApi, ordersApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function AdminOrdersPage() {
   const router = useRouter();
@@ -36,10 +37,10 @@ export default function AdminOrdersPage() {
 
     try {
       await ordersApi.requestRevision(orderId, reason);
-      alert('Revision requested successfully');
+      toast.success('Revision requested successfully');
       await loadOrders();
     } catch (error: any) {
-      alert(error.message || 'Failed to request revision');
+      toast.error(error.message || 'Failed to request revision');
     }
   };
 
@@ -51,10 +52,10 @@ export default function AdminOrdersPage() {
 
     try {
       await ordersApi.cancelOrder(orderId, reason);
-      alert('Order cancelled successfully');
+      toast.success('Order cancelled successfully');
       await loadOrders();
     } catch (error: any) {
-      alert(error.message || 'Failed to cancel order');
+      toast.error(error.message || 'Failed to cancel order');
     }
   };
 
@@ -63,10 +64,10 @@ export default function AdminOrdersPage() {
 
     try {
       await ordersApi.completeOrder(orderId);
-      alert('Order marked as completed');
+      toast.success('Order marked as completed');
       await loadOrders();
     } catch (error: any) {
-      alert(error.message || 'Failed to complete order');
+      toast.error(error.message || 'Failed to complete order');
     }
   };
 

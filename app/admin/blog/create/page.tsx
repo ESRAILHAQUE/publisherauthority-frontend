@@ -8,6 +8,7 @@ import { Input } from '@/components/shared/Input';
 import { Textarea } from '@/components/shared/Textarea';
 import { Select } from '@/components/shared/Select';
 import { blogApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function CreateBlogPostPage() {
   const router = useRouter();
@@ -28,10 +29,10 @@ export default function CreateBlogPostPage() {
 
     try {
       await blogApi.createPost(formData);
-      alert('Blog post created successfully!');
+      toast.success('Blog post created successfully!');
       router.push('/admin/blog');
     } catch (error: any) {
-      alert(error.message || 'Failed to create blog post');
+      toast.error(error.message || 'Failed to create blog post');
     } finally {
       setLoading(false);
     }

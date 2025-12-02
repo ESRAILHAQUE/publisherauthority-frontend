@@ -7,6 +7,7 @@ import { Button } from "@/components/shared/Button";
 import Link from "next/link";
 import { websitesApi } from "@/lib/api";
 import { WebsiteVerification } from "@/components/websites/WebsiteVerification";
+import toast from "react-hot-toast";
 
 export default function WebsitesPage() {
   const [websites, setWebsites] = useState<any[]>([]);
@@ -35,7 +36,7 @@ export default function WebsitesPage() {
       await loadWebsites();
       setSelectedWebsite(null);
     } catch (error: any) {
-      alert(error.message || "Verification failed");
+      toast.error(error.message || "Verification failed");
     }
   };
 

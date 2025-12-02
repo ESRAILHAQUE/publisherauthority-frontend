@@ -8,6 +8,7 @@ import { Input } from '@/components/shared/Input';
 import { Textarea } from '@/components/shared/Textarea';
 import { Card } from '@/components/shared/Card';
 import { supportApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function SupportPage() {
   const [contactForm, setContactForm] = useState({
@@ -70,7 +71,7 @@ export default function SupportPage() {
       setContactForm({ name: '', email: '', subject: '', message: '' });
       setTimeout(() => setSubmitSuccess(false), 5000);
     } catch (error: any) {
-      alert(error.message || 'Failed to send message. Please try again.');
+      toast.error(error.message || 'Failed to send message. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

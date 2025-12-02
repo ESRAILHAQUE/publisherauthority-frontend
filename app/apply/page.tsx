@@ -9,6 +9,7 @@ import { Textarea } from '@/components/shared/Textarea';
 import { Select } from '@/components/shared/Select';
 import { Card } from '@/components/shared/Card';
 import { applicationsApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function ApplyPage() {
   const [formData, setFormData] = useState({
@@ -61,7 +62,7 @@ export default function ApplyPage() {
         ...formData,
         quizAnswers,
       });
-      alert('Application submitted successfully! We will review your application and get back to you soon.');
+      toast.success('Application submitted successfully! We will review your application and get back to you soon.');
       // Reset form
       setFormData({
         firstName: '',
@@ -89,7 +90,7 @@ export default function ApplyPage() {
       });
       setAgreed(false);
     } catch (error: any) {
-      alert(error.message || 'Failed to submit application. Please try again.');
+      toast.error(error.message || 'Failed to submit application. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

@@ -8,6 +8,7 @@ import { Input } from "@/components/shared/Input";
 import { Textarea } from "@/components/shared/Textarea";
 import { Select } from "@/components/shared/Select";
 import { adminApi, websitesApi, ordersApi } from "@/lib/api";
+import toast from "react-hot-toast";
 
 export default function CreateOrderPage() {
   const router = useRouter();
@@ -47,10 +48,10 @@ export default function CreateOrderPage() {
         earnings: parseFloat(formData.earnings),
         deadline: new Date(formData.deadline).toISOString(),
       });
-      alert("Order created successfully!");
+      toast.success("Order created successfully!");
       router.push("/admin/orders");
     } catch (error: any) {
-      alert(error.message || "Failed to create order");
+      toast.error(error.message || "Failed to create order");
     } finally {
       setLoading(false);
     }

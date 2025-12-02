@@ -6,6 +6,7 @@ import { Card } from '@/components/shared/Card';
 import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
 import { adminApi, applicationsApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function AdminApplicationsPage() {
   const router = useRouter();
@@ -36,20 +37,20 @@ export default function AdminApplicationsPage() {
       
       try {
         await applicationsApi.reviewApplication(appId, decision, notes);
-        alert('Application rejected');
+        toast.success('Application rejected');
         await loadApplications();
       } catch (error: any) {
-        alert(error.message || 'Failed to review application');
+        toast.error(error.message || 'Failed to review application');
       }
     } else {
       if (!confirm('Approve this application?')) return;
       
       try {
         await applicationsApi.reviewApplication(appId, decision);
-        alert('Application approved');
+        toast.success('Application approved');
         await loadApplications();
       } catch (error: any) {
-        alert(error.message || 'Failed to review application');
+        toast.error(error.message || 'Failed to review application');
       }
     }
   };

@@ -6,6 +6,7 @@ import { Card } from '@/components/shared/Card';
 import { Button } from '@/components/shared/Button';
 import { Badge } from '@/components/shared/Badge';
 import { blogApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function AdminBlogPage() {
   const router = useRouter();
@@ -33,10 +34,10 @@ export default function AdminBlogPage() {
 
     try {
       await blogApi.deletePost(postId);
-      alert('Post deleted successfully');
+      toast.success('Post deleted successfully');
       await loadPosts();
     } catch (error: any) {
-      alert(error.message || 'Failed to delete post');
+      toast.error(error.message || 'Failed to delete post');
     }
   };
 

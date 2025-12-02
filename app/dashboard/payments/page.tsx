@@ -6,6 +6,7 @@ import { Input } from "@/components/shared/Input";
 import { Button } from "@/components/shared/Button";
 import { Badge } from "@/components/shared/Badge";
 import { paymentsApi, profileApi } from "@/lib/api";
+import toast from "react-hot-toast";
 
 export default function PaymentsPage() {
   const [paypalEmail, setPaypalEmail] = useState("");
@@ -39,9 +40,9 @@ export default function PaymentsPage() {
     try {
       setSaving(true);
       await paymentsApi.updatePaypalEmail(paypalEmail);
-      alert("PayPal email saved successfully");
+      toast.success("PayPal email saved successfully");
     } catch (error: any) {
-      alert(error.message || "Failed to save PayPal email");
+      toast.error(error.message || "Failed to save PayPal email");
     } finally {
       setSaving(false);
     }

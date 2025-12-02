@@ -6,6 +6,7 @@ import { Card } from '@/components/shared/Card';
 import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
 import { supportApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function AdminSupportPage() {
   const router = useRouter();
@@ -31,10 +32,10 @@ export default function AdminSupportPage() {
   const handleUpdateStatus = async (ticketId: string, status: string) => {
     try {
       await supportApi.updateTicket(ticketId, { status });
-      alert('Ticket status updated');
+      toast.success('Ticket status updated');
       await loadTickets();
     } catch (error: any) {
-      alert(error.message || 'Failed to update ticket');
+      toast.error(error.message || 'Failed to update ticket');
     }
   };
 

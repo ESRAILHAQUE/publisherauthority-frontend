@@ -6,6 +6,7 @@ import { Input } from '@/components/shared/Input';
 import { Button } from '@/components/shared/Button';
 import { Badge } from '@/components/shared/Badge';
 import { profileApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
   const [profileData, setProfileData] = useState({
@@ -49,7 +50,7 @@ export default function ProfilePage() {
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      alert('Image size must be less than 2MB');
+      toast.error('Image size must be less than 2MB');
       return;
     }
 
@@ -59,7 +60,7 @@ export default function ProfilePage() {
       const data: any = await response.json();
       setProfileData({ ...profileData, profileImage: data.profileImage });
     } catch (error) {
-      alert('Failed to upload image');
+      toast.error('Failed to upload image');
     } finally {
       setUploading(false);
     }
@@ -73,9 +74,9 @@ export default function ProfilePage() {
         lastName: profileData.lastName,
         country: profileData.country,
       });
-      alert('Profile updated successfully');
+      toast.success('Profile updated successfully');
     } catch (error: any) {
-      alert(error.message || 'Failed to update profile');
+      toast.error(error.message || 'Failed to update profile');
     } finally {
       setSaving(false);
     }
@@ -83,7 +84,7 @@ export default function ProfilePage() {
 
   const handleChangePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('Passwords do not match');
+      toast.error('Passwords do not match');
       return;
     }
 
@@ -92,10 +93,10 @@ export default function ProfilePage() {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });
-      alert('Password changed successfully');
+      toast.success('Password changed successfully');
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error: any) {
-      alert(error.message || 'Failed to change password');
+      toast.error(error.message || 'Failed to change password');
     }
   };
 

@@ -5,6 +5,7 @@ import { Card } from '@/components/shared/Card';
 import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
 import { adminApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function AdminPaymentsPage() {
   const [payments, setPayments] = useState<any[]>([]);
@@ -31,10 +32,10 @@ export default function AdminPaymentsPage() {
 
     try {
       await adminApi.processPayment(paymentId);
-      alert('Payment processed successfully');
+      toast.success('Payment processed successfully');
       await loadPayments();
     } catch (error: any) {
-      alert(error.message || 'Failed to process payment');
+      toast.error(error.message || 'Failed to process payment');
     }
   };
 

@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { authApi } from "@/lib/api";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,7 +39,9 @@ export default function LoginPage() {
       }
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Invalid email or password");
+      const errorMessage = err.message || "Invalid email or password";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

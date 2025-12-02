@@ -5,6 +5,7 @@ import { Card } from '@/components/shared/Card';
 import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
 import { adminApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function AdminPublishersPage() {
   const [publishers, setPublishers] = useState<any[]>([]);
@@ -32,10 +33,10 @@ export default function AdminPublishersPage() {
 
     try {
       await adminApi.updateUserLevel(userId, level);
-      alert('User level updated successfully');
+      toast.success('User level updated successfully');
       await loadPublishers();
     } catch (error: any) {
-      alert(error.message || 'Failed to update user level');
+      toast.error(error.message || 'Failed to update user level');
     }
   };
 

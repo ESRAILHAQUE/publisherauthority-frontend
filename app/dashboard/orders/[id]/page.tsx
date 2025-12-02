@@ -8,6 +8,7 @@ import { Button } from '@/components/shared/Button';
 import { Input } from '@/components/shared/Input';
 import { Textarea } from '@/components/shared/Textarea';
 import { ordersApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -41,7 +42,7 @@ export default function OrderDetailPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!submissionData.articleUrl) {
-      alert('Please provide the article URL');
+      toast.error('Please provide the article URL');
       return;
     }
 
@@ -51,10 +52,10 @@ export default function OrderDetailPage() {
         submissionUrl: submissionData.articleUrl,
         submissionNotes: submissionData.notes,
       });
-      alert('Order submitted successfully!');
+      toast.success('Order submitted successfully!');
       await loadOrder();
     } catch (error: any) {
-      alert(error.message || 'Failed to submit order');
+      toast.error(error.message || 'Failed to submit order');
     } finally {
       setSubmitting(false);
     }
