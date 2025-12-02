@@ -38,7 +38,7 @@ export default function LoginPage() {
       if (formData.rememberMe) {
         localStorage.setItem("rememberMe", "true");
       }
-      
+
       // Redirect based on user role
       if (user?.role === "admin") {
         router.push("/admin");

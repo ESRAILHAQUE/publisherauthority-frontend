@@ -21,10 +21,23 @@ export default function WebsitesPage() {
   const loadWebsites = async () => {
     try {
       setLoading(true);
-      const data: any = await websitesApi.getWebsites();
-      setWebsites(data.websites || data || []);
+      const response: any = await websitesApi.getWebsites();
+      // Handle different response structures
+      let websitesData = [];
+      if (Array.isArray(response)) {
+        websitesData = response;
+      } else if (response?.data && Array.isArray(response.data)) {
+        websitesData = response.data;
+      } else if (response?.data?.websites && Array.isArray(response.data.websites)) {
+        websitesData = response.data.websites;
+      } else if (response?.websites && Array.isArray(response.websites)) {
+        websitesData = response.websites;
+      }
+      setWebsites(websitesData);
     } catch (error) {
       console.error("Failed to load websites:", error);
+      toast.error("Failed to load websites");
+      setWebsites([]); // Ensure it's always an array
     } finally {
       setLoading(false);
     }
