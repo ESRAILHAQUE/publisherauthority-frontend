@@ -58,10 +58,34 @@ export default function ApplyPage() {
     setIsSubmitting(true);
     
     try {
-      await applicationsApi.submitApplication({
-        ...formData,
-        quizAnswers,
+      // Convert quiz answers from q1-q9 to question1-question9 format
+      const formattedQuizAnswers: any = {};
+      Object.keys(quizAnswers).forEach((key) => {
+        const questionNumber = key.replace('q', 'question');
+        formattedQuizAnswers[questionNumber] = quizAnswers[key as keyof typeof quizAnswers];
       });
+
+      // Convert guest post URLs from separate fields to array
+      const guestPostUrls: string[] = [];
+      if (formData.guestPostUrl1) guestPostUrls.push(formData.guestPostUrl1);
+      if (formData.guestPostUrl2) guestPostUrls.push(formData.guestPostUrl2);
+      if (formData.guestPostUrl3) guestPostUrls.push(formData.guestPostUrl3);
+
+      // Prepare submission data
+      const submissionData: any = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        country: formData.country,
+        hearAboutUs: formData.hearAbout,
+        guestPostExperience: formData.guestPostExperience,
+        guestPostUrls: guestPostUrls,
+        referralInfo: formData.referralInfo ? { name: formData.referralInfo } : undefined,
+        quizAnswers: formattedQuizAnswers,
+      };
+
+      await applicationsApi.submitApplication(submissionData);
       toast.success('Application submitted successfully! We will review your application and get back to you soon.');
       // Reset form
       setFormData({
