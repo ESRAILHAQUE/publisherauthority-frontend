@@ -27,7 +27,12 @@ export default function LoginPage() {
         formData.email,
         formData.password
       );
-      localStorage.setItem("authToken", response.token);
+      // Backend returns { success: true, data: { user, token } }
+      const token = response.data?.token || response.token;
+      if (!token) {
+        throw new Error("No token received from server");
+      }
+      localStorage.setItem("authToken", token);
       if (formData.rememberMe) {
         localStorage.setItem("rememberMe", "true");
       }

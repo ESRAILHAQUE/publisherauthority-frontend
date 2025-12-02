@@ -3,7 +3,7 @@
  * Centralized API client for backend communication
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5003/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5003/api/v1";
 
 interface ApiOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
@@ -53,9 +53,16 @@ async function apiRequest<T>(
       );
     }
 
-    return await response.json();
-  } catch (error) {
+    const data = await response.json();
+    // Backend returns { success: true, data: {...} } format
+    // Return data directly (it already has success, message, data structure)
+    return data;
+  } catch (error: any) {
     console.error("API request failed:", error);
+    // Handle network errors
+    if (error.name === "TypeError" && error.message.includes("fetch")) {
+      throw new Error("Unable to connect to server. Please check if the backend is running.");
+    }
     throw error;
   }
 }
