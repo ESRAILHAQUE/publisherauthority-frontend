@@ -1,11 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '../shared/Button';
 
 export const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem('authToken');
+    setIsLoggedIn(!!token);
+  }, []);
 
   const navItems = [
     { href: '/', label: 'Home' },
@@ -48,38 +57,64 @@ export const Header: React.FC = () => {
           ))}
 
           <div className="ml-2 flex items-center gap-3">
-            <Link href="/auth/login">
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-white/25 bg-transparent text-xs font-medium text-white hover:border-[#ff8a3c] hover:bg-[#ff8a3c]/10 hover:text-white"
-              >
-                Login
-              </Button>
-            </Link>
-            <Link href="/apply">
-              <Button
-                variant="primary"
-                size="sm"
-                className="bg-[#ff8a3c] text-xs font-semibold text-white shadow-md shadow-slate-900/40 hover:brightness-110"
-              >
-                Sign Up
-              </Button>
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="bg-[#ff8a3c] text-xs font-semibold text-white shadow-md shadow-slate-900/40 hover:brightness-110"
+                >
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/auth/login">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-white/25 bg-transparent text-xs font-medium text-white hover:border-[#ff8a3c] hover:bg-[#ff8a3c]/10 hover:text-white"
+                  >
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/apply">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="bg-[#ff8a3c] text-xs font-semibold text-white shadow-md shadow-slate-900/40 hover:brightness-110"
+                  >
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
         {/* Mobile actions */}
         <div className="flex items-center gap-2 md:hidden">
-          <Link href="/auth/login">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-white/25 bg-transparent px-3 text-[11px] font-medium text-white hover:border-[#ff8a3c] hover:bg-[#ff8a3c]/10 hover:text-white"
-            >
-              Login
-            </Button>
-          </Link>
+          {isLoggedIn ? (
+            <Link href="/dashboard">
+              <Button
+                variant="primary"
+                size="sm"
+                className="bg-[#ff8a3c] px-3 text-[11px] font-semibold text-white shadow-md shadow-slate-900/40 hover:brightness-110"
+              >
+                Dashboard
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/auth/login">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-white/25 bg-transparent px-3 text-[11px] font-medium text-white hover:border-[#ff8a3c] hover:bg-[#ff8a3c]/10 hover:text-white"
+              >
+                Login
+              </Button>
+            </Link>
+          )}
           <button
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/25 bg-transparent text-white shadow-sm shadow-slate-900/40 hover:border-[#ff8a3c] hover:text-[#ff8a3c]"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -123,24 +158,38 @@ export const Header: React.FC = () => {
           ))}
         </div>
         <div className="mt-4 flex gap-2">
-          <Link href="/auth/login" onClick={() => setIsMenuOpen(false)} className="flex-1">
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full border-white/25 bg-transparent text-xs font-medium text-white hover:border-[#ff8a3c] hover:bg-[#ff8a3c]/10 hover:text-white"
-            >
-              Login
-            </Button>
-          </Link>
-          <Link href="/apply" onClick={() => setIsMenuOpen(false)} className="flex-1">
-            <Button
-              variant="primary"
-              size="sm"
-              className="w-full bg-[#ff8a3c] text-xs font-semibold text-white shadow-md shadow-slate-900/40 hover:brightness-110"
-            >
-              Sign Up
-            </Button>
-          </Link>
+          {isLoggedIn ? (
+            <Link href="/dashboard" onClick={() => setIsMenuOpen(false)} className="flex-1">
+              <Button
+                variant="primary"
+                size="sm"
+                className="w-full bg-[#ff8a3c] text-xs font-semibold text-white shadow-md shadow-slate-900/40 hover:brightness-110"
+              >
+                Dashboard
+              </Button>
+            </Link>
+          ) : (
+            <>
+              <Link href="/auth/login" onClick={() => setIsMenuOpen(false)} className="flex-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-white/25 bg-transparent text-xs font-medium text-white hover:border-[#ff8a3c] hover:bg-[#ff8a3c]/10 hover:text-white"
+                >
+                  Login
+                </Button>
+              </Link>
+              <Link href="/apply" onClick={() => setIsMenuOpen(false)} className="flex-1">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="w-full bg-[#ff8a3c] text-xs font-semibold text-white shadow-md shadow-slate-900/40 hover:brightness-110"
+                >
+                  Sign Up
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

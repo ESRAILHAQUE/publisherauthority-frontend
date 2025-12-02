@@ -28,7 +28,10 @@ export default function WebsitesPage() {
         websitesData = response;
       } else if (response?.data && Array.isArray(response.data)) {
         websitesData = response.data;
-      } else if (response?.data?.websites && Array.isArray(response.data.websites)) {
+      } else if (
+        response?.data?.websites &&
+        Array.isArray(response.data.websites)
+      ) {
         websitesData = response.data.websites;
       } else if (response?.websites && Array.isArray(response.websites)) {
         websitesData = response.websites;

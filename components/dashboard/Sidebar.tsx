@@ -2,7 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { authApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 interface MenuItem {
   name: string;
@@ -69,6 +71,23 @@ const menuItems: MenuItem[] = [
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('rememberMe');
+      toast.success('Logged out successfully');
+      router.push('/');
+    } catch (error: any) {
+      // Even if API call fails, clear local storage and redirect
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('rememberMe');
+      toast.success('Logged out successfully');
+      router.push('/');
+    }
+  };
 
   return (
     <aside className="w-64 bg-white shadow-lg h-screen fixed left-0 top-0 overflow-y-auto">
@@ -104,7 +123,7 @@ export const Sidebar: React.FC = () => {
         })}
       </nav>
 
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 space-y-2">
         <Link
           href="/"
           className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
@@ -114,6 +133,15 @@ export const Sidebar: React.FC = () => {
           </svg>
           <span className="font-medium">Back to Home</span>
         </Link>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          <span className="font-medium">Logout</span>
+        </button>
       </div>
     </aside>
   );
