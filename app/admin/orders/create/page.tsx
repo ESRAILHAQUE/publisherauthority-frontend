@@ -1,27 +1,27 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card } from '@/components/shared/Card';
-import { Button } from '@/components/shared/Button';
-import { Input } from '@/components/shared/Input';
-import { Textarea } from '@/components/shared/Textarea';
-import { Select } from '@/components/shared/Select';
-import { adminApi, websitesApi, ordersApi } from '@/lib/api';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Card } from "@/components/shared/Card";
+import { Button } from "@/components/shared/Button";
+import { Input } from "@/components/shared/Input";
+import { Textarea } from "@/components/shared/Textarea";
+import { Select } from "@/components/shared/Select";
+import { adminApi, websitesApi, ordersApi } from "@/lib/api";
 
 export default function CreateOrderPage() {
   const router = useRouter();
   const [websites, setWebsites] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    websiteId: '',
-    publisherId: '',
-    description: '',
-    requirements: '',
-    deadline: '',
-    earnings: '',
-    status: 'pending',
+    title: "",
+    websiteId: "",
+    publisherId: "",
+    description: "",
+    requirements: "",
+    deadline: "",
+    earnings: "",
+    status: "pending",
   });
 
   useEffect(() => {
@@ -30,10 +30,10 @@ export default function CreateOrderPage() {
 
   const loadWebsites = async () => {
     try {
-      const data: any = await adminApi.getAllWebsites({ status: 'active' });
+      const data: any = await adminApi.getAllWebsites({ status: "active" });
       setWebsites(data.websites || []);
     } catch (error) {
-      console.error('Failed to load websites:', error);
+      console.error("Failed to load websites:", error);
     }
   };
 
@@ -47,10 +47,10 @@ export default function CreateOrderPage() {
         earnings: parseFloat(formData.earnings),
         deadline: new Date(formData.deadline).toISOString(),
       });
-      alert('Order created successfully!');
-      router.push('/admin/orders');
+      alert("Order created successfully!");
+      router.push("/admin/orders");
     } catch (error: any) {
-      alert(error.message || 'Failed to create order');
+      alert(error.message || "Failed to create order");
     } finally {
       setLoading(false);
     }
@@ -59,7 +59,9 @@ export default function CreateOrderPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-[#3F207F] mb-2">Create New Order</h1>
+        <h1 className="text-3xl font-bold text-[#3F207F] mb-2">
+          Create New Order
+        </h1>
         <p className="text-gray-600">Create a new order for a publisher.</p>
       </div>
 
@@ -68,7 +70,9 @@ export default function CreateOrderPage() {
           <Input
             label="Order Title"
             value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
             placeholder="e.g., SEO Best Practices Guide"
             required
           />
@@ -78,19 +82,23 @@ export default function CreateOrderPage() {
               label="Website"
               value={formData.websiteId}
               onChange={(e) => {
-                const website = websites.find((w: any) => w._id === e.target.value);
+                const website = websites.find(
+                  (w: any) => w._id === e.target.value
+                );
                 setFormData({
                   ...formData,
                   websiteId: e.target.value,
-                  publisherId: website?.userId?._id || '',
+                  publisherId: website?.userId?._id || "",
                 });
               }}
               required
               options={[
-                { value: '', label: 'Select a website' },
+                { value: "", label: "Select a website" },
                 ...websites.map((website: any) => ({
                   value: website._id,
-                  label: `${website.url} - ${website.userId?.firstName || ''} ${website.userId?.lastName || ''}`,
+                  label: `${website.url} - ${website.userId?.firstName || ""} ${
+                    website.userId?.lastName || ""
+                  }`,
                 })),
               ]}
             />
@@ -99,7 +107,9 @@ export default function CreateOrderPage() {
               label="Deadline"
               type="date"
               value={formData.deadline}
-              onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, deadline: e.target.value })
+              }
               required
             />
           </div>
@@ -111,7 +121,9 @@ export default function CreateOrderPage() {
               step="0.01"
               min="0"
               value={formData.earnings}
-              onChange={(e) => setFormData({ ...formData, earnings: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, earnings: e.target.value })
+              }
               placeholder="150.00"
               required
             />
@@ -119,10 +131,12 @@ export default function CreateOrderPage() {
             <Select
               label="Status"
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, status: e.target.value })
+              }
               options={[
-                { value: 'pending', label: 'Pending' },
-                { value: 'ready-to-post', label: 'Ready To Post' },
+                { value: "pending", label: "Pending" },
+                { value: "ready-to-post", label: "Ready To Post" },
               ]}
             />
           </div>
@@ -130,7 +144,9 @@ export default function CreateOrderPage() {
           <Textarea
             label="Description"
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
             rows={4}
             placeholder="Order description..."
           />
@@ -138,7 +154,9 @@ export default function CreateOrderPage() {
           <Textarea
             label="Requirements"
             value={formData.requirements}
-            onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, requirements: e.target.value })
+            }
             rows={6}
             placeholder="Detailed requirements for the order..."
           />
@@ -147,9 +165,8 @@ export default function CreateOrderPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push('/admin/orders')}
-              disabled={loading}
-            >
+              onClick={() => router.push("/admin/orders")}
+              disabled={loading}>
               Cancel
             </Button>
             <Button type="submit" isLoading={loading} disabled={loading}>
@@ -161,4 +178,3 @@ export default function CreateOrderPage() {
     </div>
   );
 }
-

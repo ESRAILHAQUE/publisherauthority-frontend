@@ -1,36 +1,39 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import Link from 'next/link';
-import { authApi } from '@/lib/api';
-import { useRouter } from 'next/navigation';
+import React, { useState } from "react";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
+import Link from "next/link";
+import { authApi } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
     rememberMe: true,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
-    
+
     try {
-      const response: any = await authApi.login(formData.email, formData.password);
-      localStorage.setItem('authToken', response.token);
+      const response: any = await authApi.login(
+        formData.email,
+        formData.password
+      );
+      localStorage.setItem("authToken", response.token);
       if (formData.rememberMe) {
-        localStorage.setItem('rememberMe', 'true');
+        localStorage.setItem("rememberMe", "true");
       }
-      router.push('/dashboard');
+      router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message || 'Invalid email or password');
+      setError(err.message || "Invalid email or password");
     } finally {
       setIsLoading(false);
     }
@@ -52,18 +55,20 @@ export default function LoginPage() {
                 Sign in to your publisher dashboard
               </div>
               <h1 className="text-3xl md:text-4xl font-semibold text-slate-900 leading-snug">
-                Welcome back to{' '}
+                Welcome back to{" "}
                 <span className="bg-gradient-to-r from-emerald-500 to-sky-500 bg-clip-text text-transparent">
                   publisherauthority
                 </span>
               </h1>
               <p className="text-sm md:text-base text-slate-600 max-w-md">
-                Access your sites, open jobs, and payouts in one place. Use the same email you used
-                when you applied as a publisher.
+                Access your sites, open jobs, and payouts in one place. Use the
+                same email you used when you applied as a publisher.
               </p>
               <p className="text-xs md:text-sm text-slate-500">
-                Don’t have an account yet?{' '}
-                <Link href="/apply" className="font-semibold text-emerald-600 hover:text-emerald-700">
+                Don’t have an account yet?{" "}
+                <Link
+                  href="/apply"
+                  className="font-semibold text-emerald-600 hover:text-emerald-700">
                   Apply to become a publisher
                 </Link>
                 .
@@ -72,19 +77,25 @@ export default function LoginPage() {
 
             {/* Right side form */}
             <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-md shadow-slate-100 p-6 md:p-8">
-              <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-1">Sign in</h2>
+              <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-1">
+                Sign in
+              </h2>
               <p className="text-xs md:text-sm text-slate-500 mb-6">
                 Enter your email and password to continue.
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Email</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                    Email
+                  </label>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     required
                     placeholder="you@example.com"
                     className="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all"
@@ -92,12 +103,16 @@ export default function LoginPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Password</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                    Password
+                  </label>
                   <input
                     type="password"
                     name="password"
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
                     required
                     placeholder="Your password"
                     className="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all"
@@ -109,15 +124,21 @@ export default function LoginPage() {
                     <input
                       type="checkbox"
                       checked={formData.rememberMe}
-                      onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          rememberMe: e.target.checked,
+                        })
+                      }
                       className="w-4 h-4 text-emerald-500 border-slate-300 rounded focus:ring-emerald-400"
                     />
-                    <span className="ml-2 text-xs md:text-sm text-slate-700">Remember me</span>
+                    <span className="ml-2 text-xs md:text-sm text-slate-700">
+                      Remember me
+                    </span>
                   </label>
                   <Link
                     href="/auth/forgot-password"
-                    className="text-xs md:text-sm font-semibold text-emerald-600 hover:text-emerald-700"
-                  >
+                    className="text-xs md:text-sm font-semibold text-emerald-600 hover:text-emerald-700">
                     Forgot password?
                   </Link>
                 </div>
@@ -125,14 +146,15 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full px-4 py-2.5 md:py-3 bg-[#ff8a3c] hover:bg-[#ff7a1f] text-white text-sm md:text-base font-semibold rounded-full cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ff8a3c] disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? 'Signing in…' : 'Sign in'}
+                  className="w-full px-4 py-2.5 md:py-3 bg-[#ff8a3c] hover:bg-[#ff7a1f] text-white text-sm md:text-base font-semibold rounded-full cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ff8a3c] disabled:opacity-60 disabled:cursor-not-allowed">
+                  {isLoading ? "Signing in…" : "Sign in"}
                 </button>
 
                 <p className="text-[11px] md:text-xs text-slate-500 text-center">
-                  By signing in, you agree to our{' '}
-                  <Link href="/terms" className="underline hover:text-slate-700">
+                  By signing in, you agree to our{" "}
+                  <Link
+                    href="/terms"
+                    className="underline hover:text-slate-700">
                     Terms
                   </Link>
                   .
@@ -147,4 +169,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
