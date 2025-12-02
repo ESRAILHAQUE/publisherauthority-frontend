@@ -32,21 +32,31 @@ export default function DashboardPage() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const data: any = await dashboardApi.getStats();
+      const response: any = await dashboardApi.getStats();
+
+      // Handle API response structure: { success: true, data: {...} }
+      const data = response?.data || response;
 
       setStats({
-        totalEarnings: data.stats.totalEarnings || 0,
-        pendingOrders: data.stats.orders.pending || 0,
-        readyToPost: data.stats.orders.readyToPost || 0,
-        verifying: data.stats.orders.verifying || 0,
-        completed: data.stats.orders.completed || 0,
-        activeWebsites: data.stats.websites.active || 0,
-        accountLevel: data.user.accountLevel || "silver",
-        ordersForNextLevel: data.levelProgress.ordersNeeded || 0,
+        totalEarnings: data?.stats?.totalEarnings || 0,
+        pendingOrders: data?.stats?.orders?.pending || 0,
+        readyToPost: data?.stats?.orders?.readyToPost || 0,
+        verifying: data?.stats?.orders?.verifying || 0,
+        completed: data?.stats?.orders?.completed || 0,
+        activeWebsites: data?.stats?.websites?.active || 0,
+        accountLevel: data?.user?.accountLevel || "silver",
+        ordersForNextLevel: data?.levelProgress?.ordersNeeded || 0,
       });
 
-      setLevelProgress(data.levelProgress);
-      setRecentOrders(data.recentOrders || []);
+      setLevelProgress(
+        data?.levelProgress || {
+          currentLevel: "silver",
+          nextLevel: "gold",
+          ordersNeeded: 50,
+          progressPercentage: 0,
+        }
+      );
+      setRecentOrders(data?.recentOrders || []);
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
     } finally {

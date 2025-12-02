@@ -4,7 +4,7 @@
  */
 
 // Get API URL - check both server-side and client-side
-const getApiUrl = () => {
+export const getApiUrl = () => {
   // Client-side: check window location for production
   if (typeof window !== "undefined") {
     const hostname = window.location.hostname;
@@ -259,12 +259,34 @@ export const authApi = {
 
 // Applications API
 export const applicationsApi = {
-  submitApplication: (data: any) =>
-    apiRequest("/applications", {
+  submitApplication: (data: FormData | any) => {
+    // If FormData, use fetch directly for file upload
+    if (data instanceof FormData) {
+      const token = localStorage.getItem("authToken");
+      const API_URL = getApiUrl();
+      
+      return fetch(`${API_URL}/applications`, {
+        method: "POST",
+        body: data,
+        headers: token ? {
+          Authorization: `Bearer ${token}`,
+        } : {},
+      }).then(async (res) => {
+        if (!res.ok) {
+          const error = await res.json().catch(() => ({ message: "An error occurred" }));
+          throw new Error(error.message || `HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      });
+    }
+    
+    // Otherwise use regular apiRequest
+    return apiRequest("/applications", {
       method: "POST",
       body: data,
       requiresAuth: false,
-    }),
+    });
+  },
   getApplications: (filters?: any) =>
     apiRequest("/applications", { method: "GET" }),
   reviewApplication: (
@@ -323,6 +345,8 @@ export const adminApi = {
     const query = params.toString() ? `?${params.toString()}` : "";
     return apiRequest(`/admin/applications${query}`, { method: "GET" });
   },
+  getApplicationById: (id: string) =>
+    apiRequest(`/admin/applications/${id}`, { method: "GET" }),
   approveApplication: (id: string) =>
     apiRequest(`/admin/applications/${id}/approve`, { method: "POST" }),
   rejectApplication: (id: string, reason: string) =>

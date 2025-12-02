@@ -40,6 +40,7 @@ export default function ApplyPage() {
 
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const countries = [
     { value: '', label: 'Select your country of residence' },
@@ -71,21 +72,27 @@ export default function ApplyPage() {
       if (formData.guestPostUrl2) guestPostUrls.push(formData.guestPostUrl2);
       if (formData.guestPostUrl3) guestPostUrls.push(formData.guestPostUrl3);
 
-      // Prepare submission data
-      const submissionData: any = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-        country: formData.country,
-        hearAboutUs: formData.hearAbout,
-        guestPostExperience: formData.guestPostExperience,
-        guestPostUrls: guestPostUrls,
-        referralInfo: formData.referralInfo ? { name: formData.referralInfo } : undefined,
-        quizAnswers: formattedQuizAnswers,
-      };
+      // Prepare FormData for file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append('firstName', formData.firstName);
+      formDataToSend.append('lastName', formData.lastName);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('password', formData.password);
+      formDataToSend.append('country', formData.country);
+      formDataToSend.append('hearAboutUs', formData.hearAbout);
+      formDataToSend.append('guestPostExperience', formData.guestPostExperience);
+      formDataToSend.append('guestPostUrls', JSON.stringify(guestPostUrls));
+      if (formData.referralInfo) {
+        formDataToSend.append('referralInfo', JSON.stringify({ name: formData.referralInfo }));
+      }
+      formDataToSend.append('quizAnswers', JSON.stringify(formattedQuizAnswers));
 
-      await applicationsApi.submitApplication(submissionData);
+      // Append files
+      selectedFiles.forEach((file) => {
+        formDataToSend.append('files', file);
+      });
+
+      await applicationsApi.submitApplication(formDataToSend);
       toast.success('Application submitted successfully! We will review your application and get back to you soon.');
       // Reset form
       setFormData({
@@ -112,6 +119,7 @@ export default function ApplyPage() {
         q8: '',
         q9: '',
       });
+      setSelectedFiles([]);
       setAgreed(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to submit application. Please try again.');
@@ -283,6 +291,31 @@ export default function ApplyPage() {
               </div>
 
               <div className="mt-6">
+                <label className="block text-sm font-medium text-slate-800 mb-2">
+                  Upload files (PDF, DOC, DOCX, XLS, XLSX, CSV, JPG, PNG, TXT) - Max 10MB per file
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.txt"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    setSelectedFiles(files);
+                  }}
+                  className="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#3F207F] file:text-white hover:file:bg-[#2EE6B7] cursor-pointer"
+                />
+                {selectedFiles.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {selectedFiles.map((file, index) => (
+                      <p key={index} className="text-sm text-slate-600">
+                        {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 hidden">
                 <label className="block text-sm font-medium text-slate-800 mb-2">
                   Please upload a CSV file of your website(s) for guest posting. (For secure management review only. 
                   This helps us determine the quality of sites you are looking to utilize.)
