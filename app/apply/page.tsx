@@ -78,7 +78,9 @@ export default function ApplyPage() {
       formDataToSend.append('lastName', formData.lastName);
       formDataToSend.append('email', formData.email);
       formDataToSend.append('password', formData.password);
-      formDataToSend.append('country', formData.country);
+      // Save full country name instead of code
+      const selectedCountry = countries.find(c => c.value === formData.country);
+      formDataToSend.append('country', selectedCountry?.label || formData.country);
       formDataToSend.append('hearAboutUs', formData.hearAbout);
       formDataToSend.append('guestPostExperience', formData.guestPostExperience);
       formDataToSend.append('guestPostUrls', JSON.stringify(guestPostUrls));

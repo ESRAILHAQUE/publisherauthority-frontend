@@ -286,14 +286,33 @@ export default function AdminApplicationsPage() {
               {selectedApp.quizAnswers && Object.keys(selectedApp.quizAnswers).length > 0 && (
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Quiz Answers</h3>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {Object.entries(selectedApp.quizAnswers).map(([key, value]: [string, any]) => {
                       if (!value) return null;
                       const questionNum = key.replace('question', '');
+                      
+                      // Map question numbers to full questions
+                      const questionMap: { [key: string]: string } = {
+                        '1': 'How long must articles stay live after you are paid for a job?',
+                        '2': 'How long do you have to resolve a link issue before payment penalty is enforced?',
+                        '3': 'Where should the articles be placed on your website?',
+                        '4': 'What type of link attributes are not allowed for our articles?',
+                        '5': 'Where should our articles be published on your website?',
+                        '6': 'Which two search engines should the guest post link appear?',
+                        '7': 'How long do you have to take most actions once a job is assigned to you?',
+                        '8': 'When are payments sent?',
+                        '9': 'I hereby attest that all information provided on this application matches the information on my legal identification documents. Please state "I do".',
+                      };
+                      
+                      const fullQuestion = questionMap[questionNum] || `Question ${questionNum}`;
+                      
                       return (
-                        <div key={key} className="border-l-4 border-[#3F207F] pl-4">
-                          <label className="text-sm font-medium text-gray-600">Question {questionNum}</label>
-                          <p className="text-gray-900">{value}</p>
+                        <div key={key} className="border-l-4 border-[#3F207F] pl-4 py-2">
+                          <label className="text-sm font-semibold text-gray-700 block mb-1">
+                            Question {questionNum}:
+                          </label>
+                          <p className="text-sm text-gray-600 mb-2 italic">{fullQuestion}</p>
+                          <p className="text-base font-medium text-gray-900">Answer: {value}</p>
                         </div>
                       );
                     })}
@@ -306,29 +325,54 @@ export default function AdminApplicationsPage() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Uploaded Files</h3>
                   <div className="space-y-2">
-                    {selectedApp.files.map((file: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <div className="flex items-center space-x-3">
-                          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">{file.originalName || file.filename}</p>
-                            <p className="text-xs text-gray-500">
-                              {(file.size / 1024 / 1024).toFixed(2)} MB • {file.mimetype}
-                            </p>
+                    {selectedApp.files.map((file: any, index: number) => {
+                      const isViewable = file.mimetype?.includes('pdf') || file.mimetype?.includes('image');
+                      return (
+                        <div key={index} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center space-x-3">
+                              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{file.originalName || file.filename}</p>
+                                <p className="text-xs text-gray-500">
+                                  {(file.size / 1024 / 1024).toFixed(2)} MB • {file.mimetype}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              {isViewable && (
+                                <a
+                                  href={file.path}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-green-600 hover:text-green-800 text-sm font-medium px-3 py-1 border border-green-600 rounded hover:bg-green-50"
+                                >
+                                  View
+                                </a>
+                              )}
+                              <a
+                                href={file.path}
+                                download
+                                className="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1 border border-blue-600 rounded hover:bg-blue-50"
+                              >
+                                Download
+                              </a>
+                            </div>
                           </div>
+                          {isViewable && (
+                            <div className="mt-3 border-t border-gray-200 pt-3">
+                              <iframe
+                                src={file.path}
+                                className="w-full h-96 border border-gray-300 rounded"
+                                title={file.originalName || file.filename}
+                              />
+                            </div>
+                          )}
                         </div>
-                        <a
-                          href={file.path}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                        >
-                          Download
-                        </a>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
