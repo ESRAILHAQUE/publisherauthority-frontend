@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card } from '@/components/shared/Card';
 import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
-import { adminApi, applicationsApi } from '@/lib/api';
+import { adminApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function AdminApplicationsPage() {
@@ -21,10 +21,23 @@ export default function AdminApplicationsPage() {
   const loadApplications = async () => {
     try {
       setLoading(true);
-      const data: any = await applicationsApi.getApplications({ status: 'pending' });
-      setApplications(Array.isArray(data) ? data : (data.applications || []));
-    } catch (error) {
+      const response: any = await adminApi.getApplications({ status: 'pending' });
+      // Handle different response structures
+      let applicationsData = [];
+      if (Array.isArray(response)) {
+        applicationsData = response;
+      } else if (response?.data && Array.isArray(response.data)) {
+        applicationsData = response.data;
+      } else if (response?.data?.applications && Array.isArray(response.data.applications)) {
+        applicationsData = response.data.applications;
+      } else if (response?.applications && Array.isArray(response.applications)) {
+        applicationsData = response.applications;
+      }
+      setApplications(applicationsData);
+    } catch (error: any) {
       console.error('Failed to load applications:', error);
+      toast.error(error.message || 'Failed to load applications');
+      setApplications([]);
     } finally {
       setLoading(false);
     }
@@ -36,7 +49,7 @@ export default function AdminApplicationsPage() {
       if (notes === null) return; // User cancelled
       
       try {
-        await applicationsApi.reviewApplication(appId, decision, notes);
+        await adminApi.rejectApplication(appId, notes || '');
         toast.success('Application rejected');
         await loadApplications();
       } catch (error: any) {
@@ -46,7 +59,7 @@ export default function AdminApplicationsPage() {
       if (!confirm('Approve this application?')) return;
       
       try {
-        await applicationsApi.reviewApplication(appId, decision);
+        await adminApi.approveApplication(appId);
         toast.success('Application approved');
         await loadApplications();
       } catch (error: any) {
