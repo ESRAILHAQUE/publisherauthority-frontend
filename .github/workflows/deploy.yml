@@ -104,6 +104,10 @@ jobs:
           debug: true
           script: |
             cd /var/www/publisherauthority/frontend
+            # Create or update .env.local with production API URL
+            echo "NEXT_PUBLIC_API_URL=https://publisherauthority.com/api/v1" > .env.local
+            echo "✓ Created .env.local with production API URL"
+            cat .env.local
             npm install --production
             pm2 restart publisherauthority-frontend || pm2 start npm --name publisherauthority-frontend -- start
             pm2 save
