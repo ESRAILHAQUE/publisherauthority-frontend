@@ -29,6 +29,7 @@ export default function LoginPage() {
         formData.password
       );
       // Backend returns { success: true, data: { user, token } }
+      const user = response.data?.user || response.user;
       const token = response.data?.token || response.token;
       if (!token) {
         throw new Error("No token received from server");
@@ -37,7 +38,13 @@ export default function LoginPage() {
       if (formData.rememberMe) {
         localStorage.setItem("rememberMe", "true");
       }
-      router.push("/dashboard");
+      
+      // Redirect based on user role
+      if (user?.role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       let errorMessage = err.message || "Invalid email or password";
 
