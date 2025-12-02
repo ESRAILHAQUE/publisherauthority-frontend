@@ -4,7 +4,7 @@
  */
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5003/api/v1";
 
 interface ApiOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
@@ -62,11 +62,14 @@ async function apiRequest<T>(
     console.error("API request failed:", error);
     console.error("API URL:", `${API_URL}${endpoint}`);
     // Handle network errors
-    if (error.name === "TypeError" && (error.message.includes("fetch") || error.message === "Failed to fetch")) {
+    if (
+      error.name === "TypeError" &&
+      (error.message.includes("fetch") || error.message === "Failed to fetch")
+    ) {
       throw new Error(
         `Unable to connect to backend server at ${API_URL}. ` +
-        `Please ensure the backend is running on port 5000. ` +
-        `Error: ${error.message}`
+          `Please ensure the backend is running on port 5000. ` +
+          `Error: ${error.message}`
       );
     }
     throw error;
