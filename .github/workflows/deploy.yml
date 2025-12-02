@@ -24,9 +24,13 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install dependencies and build
+      - name: Install dependencies
         run: |
           npm install
+
+      - name: Build project (without env - will use production URL on VPS)
+        run: |
+          # Build without NEXT_PUBLIC_API_URL - it will be set on VPS before restart
           npm run build
 
       - name: Verify Secrets Configuration
@@ -86,7 +90,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          source: ".next,public,package.json,package-lock.json,next.config.ts"
+          source: ".next,public,package.json,package-lock.json,next.config.ts,.env.local"
           target: "/var/www/publisherauthority/frontend"
           timeout: 120s
           command_timeout: 20m

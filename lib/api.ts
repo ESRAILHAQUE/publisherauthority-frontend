@@ -3,8 +3,23 @@
  * Centralized API client for backend communication
  */
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5003/api/v1";
+// Get API URL - check both server-side and client-side
+const getApiUrl = () => {
+  // Client-side: check window location for production
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname;
+    // If running on production domain, use production API
+    if (hostname === "publisherauthority.com" || hostname.includes("publisherauthority.com")) {
+      return "https://publisherauthority.com/api/v1";
+    }
+    // Otherwise use env variable or localhost
+    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5003/api/v1";
+  }
+  // Server-side: use env variable or default
+  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5003/api/v1";
+};
+
+const API_URL = getApiUrl();
 
 // Log API URL in development for debugging
 if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
