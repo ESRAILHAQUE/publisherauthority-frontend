@@ -31,7 +31,9 @@ export default function CreateBlogPostPage() {
       await blogApi.createPost(formData);
       toast.success('Blog post created successfully!');
       router.push('/admin/blog');
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create blog post';
+      toast.error(errorMessage);
       toast.error(error.message || 'Failed to create blog post');
     } finally {
       setLoading(false);

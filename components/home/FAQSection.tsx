@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 
 interface FAQItem {
   question: string;
@@ -6,45 +8,43 @@ interface FAQItem {
 }
 
 export const FAQSection: React.FC = () => {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
   const faqs: FAQItem[] = [
     {
-      question: 'What is the minimum Domain Authority you will accept?',
-      answer: 'Domain authority must be 20 or higher.',
+      question: 'How do I join the Publisher Authority platform?',
+      answer:
+        'Click on "Apply as Publisher" in the navigation menu and fill out the application form. Make sure to provide all required information including your blog details and guest post examples.',
     },
     {
-      question: 'Will the content we provide contain links?',
-      answer: 'Yes. Most articles include around 3 contextual links that must be set as do-follow.',
+      question: 'What is the minimum monthly traffic you will accept?',
+      answer:
+        "Our traffic requirements depend on the website's Domain Authority (DA): Websites with DA 20+ must have at least 500 organic visitors per month.",
     },
     {
       question: 'Do you accept all sites?',
       answer: 'We currently only accept sites written primarily in English.',
     },
     {
-      question: 'My blog is outdated — can I still apply?',
-      answer:
-        'Please make sure you have at least one recent post. We typically look for blogs that have been updated within the last 90 days.',
-    },
-    {
       question: 'Any other URL restrictions?',
       answer:
-        'We do not accept subdomains, forum/community sites, sponsored tags, or guest post advertising pages as primary placement URLs.',
+        'We do not accept subdomains, forum or community sites, sponsored tags, or sites primarily used for guest post advertising.',
     },
     {
-      question: 'Do you accept “grey” niches?',
-      answer: 'We are open to sites in most niches, including many grey areas, as long as they meet our quality guidelines.',
+      question: 'How often will I receive orders?',
+      answer:
+        'Order frequency depends on your website quality, niche, and availability. High-quality sites with good metrics typically receive regular orders.',
     },
     {
-      question: 'What is the minimum monthly traffic you will accept?',
-      answer: (
-        <>
-          Our minimum traffic depends on authority. Domains with DA 20–39 require a minimum of 150
-          monthly organic visits.
-          <br className="mt-1 block" />
-          Domains with DA 40+ require a minimum of 500 monthly organic visits.
-        </>
-      ),
+      question: 'When will I get paid?',
+      answer:
+        'Payments are sent bi-weekly on the 1st and 15th of each month. If these dates fall on weekends, payments are processed on the next business day.',
     },
   ];
+
+  const toggleAccordion = (index: number) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
 
   return (
     <section className="bg-white py-14 text-slate-900 md:py-20">
@@ -62,18 +62,65 @@ export const FAQSection: React.FC = () => {
         </div>
 
         <div className="mt-8 grid gap-4 md:mt-10">
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className="rounded-2xl border border-slate-200 bg-white p-4 text-left text-sm text-slate-600 shadow-sm shadow-slate-100 md:p-5 md:text-base"
-            >
-              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600 md:text-[13px]">
-                Q{index + 1}.
-              </p>
-              <p className="mt-1 font-semibold text-slate-900">{faq.question}</p>
-              <p className="mt-2 text-xs text-slate-600 md:text-sm">{faq.answer}</p>
-            </div>
-          ))}
+          {faqs.map((faq, index) => {
+            const isOpen = openIndex === index;
+
+            return (
+              <div
+                key={index}
+                className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-100 transition-all duration-200 hover:shadow-md"
+              >
+                <button
+                  onClick={() => toggleAccordion(index)}
+                  className="w-full p-5 text-left transition-colors duration-200 hover:bg-slate-50 md:p-6"
+                  aria-expanded={isOpen}
+                  aria-controls={`faq-answer-${index}`}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-emerald-600 md:text-[13px]">
+                        Q{index + 1}.
+                      </div>
+                      <h3 className="text-base font-semibold text-slate-900 md:text-lg">
+                        {faq.question}
+                      </h3>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <svg
+                        className={`h-5 w-5 text-slate-400 transition-transform duration-300 ${
+                          isOpen ? 'rotate-180' : ''
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </button>
+
+                <div
+                  id={`faq-answer-${index}`}
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                    isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <div className="border-t border-slate-100 px-5 pb-5 pt-4 md:px-6 md:pb-6">
+                    <p className="text-sm leading-relaxed text-slate-600 md:text-base">
+                      {faq.answer}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

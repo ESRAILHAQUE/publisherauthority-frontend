@@ -39,8 +39,9 @@ export default function AddWebsitePage() {
       setTimeout(() => {
         router.push('/dashboard/websites');
       }, 2000);
-    } catch (err: any) {
-      setError(err.message || 'Failed to submit website. Please try again.');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to submit website. Please try again.';
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

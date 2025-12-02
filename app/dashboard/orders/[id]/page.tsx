@@ -15,7 +15,7 @@ export default function OrderDetailPage() {
   const router = useRouter();
   const orderId = params.id as string;
   
-  const [order, setOrder] = useState<any>(null);
+  const [order, setOrder] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submissionData, setSubmissionData] = useState({
@@ -23,14 +23,10 @@ export default function OrderDetailPage() {
     notes: '',
   });
 
-  useEffect(() => {
-    loadOrder();
-  }, [orderId]);
-
   const loadOrder = async () => {
     try {
       setLoading(true);
-      const data: any = await ordersApi.getOrder(orderId);
+      const data = await ordersApi.getOrder(orderId) as Record<string, unknown>;
       setOrder(data);
     } catch (error) {
       console.error('Failed to load order:', error);
@@ -38,6 +34,10 @@ export default function OrderDetailPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadOrder();
+  }, [orderId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,8 +54,9 @@ export default function OrderDetailPage() {
       });
       toast.success('Order submitted successfully!');
       await loadOrder();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to submit order');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit order';
+      toast.error(errorMessage);
     } finally {
       setSubmitting(false);
     }

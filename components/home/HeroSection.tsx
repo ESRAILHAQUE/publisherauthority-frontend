@@ -12,7 +12,7 @@ export const HeroSection: React.FC = () => {
         <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 md:flex-row md:items-center md:justify-between md:gap-10 lg:gap-14">
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 md:flex-row md:items-center md:justify-between md:gap-10 lg:gap-14">
         {/* Left column */}
         <div className="max-w-xl space-y-7 md:space-y-8">
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/60 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-800 shadow-sm shadow-emerald-200 md:text-sm">
@@ -24,24 +24,24 @@ export const HeroSection: React.FC = () => {
 
           <div className="space-y-4 md:space-y-5">
             <h1 className="text-3xl font-semibold leading-tight tracking-tight text-white md:text-4xl lg:text-5xl">
-              Turn your authority blog into a
+            Monetize Your Blog ,
+
               <span className="bg-gradient-to-r from-[#ffb347] via-[#ff8a3c] to-amber-300 bg-clip-text text-transparent">
                 {' '}
-                predictable revenue stream
+                Publish Quality Content & Earn
               </span>
-              — no banner ads required.
+            
             </h1>
             <p className="text-sm leading-relaxed text-slate-100/90 md:text-base">
-              publisherauthority connects vetted brands with established publishers like you.
-              Publish premium editorial content that your audience actually wants to read and
-              get paid every time you hit “publish”.
+              Ready to join the content revolution? Get high-quality content for your website and earn for every publication.
+
             </p>
           </div>
 
           <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center">
             <Link href="/apply" className="sm:w-auto w-full">
-              <button className="inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-emerald-400 via-sky-400 to-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-300/60 transition-transform hover:-translate-y-[1px] hover:brightness-110 md:px-6 md:py-3 md:text-base">
-                Start as a publisher
+              <button className="cursor-pointer inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-emerald-400 via-sky-400 to-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-300/60 transition-transform hover:-translate-y-[1px] hover:brightness-110 md:px-6 md:py-3 md:text-base">
+              Get Started
                 <svg
                   className="ml-2 h-4 w-4 md:h-5 md:w-5"
                   fill="none"
@@ -57,12 +57,7 @@ export const HeroSection: React.FC = () => {
                 </svg>
               </button>
             </Link>
-            <Link href="/dashboard" className="sm:w-auto w-full">
-              <button className="inline-flex w-full items-center justify-center rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 shadow-sm shadow-slate-100 transition-colors hover:border-emerald-400 hover:bg-emerald-50 hover:text-slate-900 md:px-6 md:py-3 md:text-base">
 
-                View marketplace
-              </button>
-            </Link>
           </div>
 
           <div className="flex items-center gap-3 rounded-xl border border-white/20 bg-white/5 p-3 text-xs text-slate-100 md:max-w-md md:p-4 md:text-sm">
@@ -93,7 +88,7 @@ export const HeroSection: React.FC = () => {
         </div>
 
         {/* Right column */}
-        <div className="relative mx-auto w-full max-w-md md:max-w-lg">
+        <div className="relative mx-auto w-full">
           <div className="relative rounded-2xl border border-slate-700/70 bg-slate-950/70 p-3 shadow-2xl shadow-black/60 backdrop-blur">
             <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-900">
               <Image

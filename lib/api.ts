@@ -30,11 +30,51 @@ if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
   console.log("💡 Make sure backend is running on port 5003");
 }
 
+// Type definitions
 interface ApiOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
-  body?: any;
+  body?: unknown;
   headers?: Record<string, string>;
   requiresAuth?: boolean;
+}
+
+interface ApiError extends Error {
+  message: string;
+  name?: string;
+}
+
+interface WebsiteData {
+  url: string;
+  domain?: string;
+  [key: string]: unknown;
+}
+
+interface OrderData {
+  [key: string]: unknown;
+}
+
+interface ProfileData {
+  [key: string]: unknown;
+}
+
+interface ApplicationData {
+  [key: string]: unknown;
+}
+
+interface BlogPostData {
+  [key: string]: unknown;
+}
+
+interface SupportTicketData {
+  [key: string]: unknown;
+}
+
+interface Filters {
+  status?: string;
+  category?: string;
+  priority?: string;
+  publisherId?: string;
+  [key: string]: string | undefined;
 }
 
 async function apiRequest<T>(
@@ -82,18 +122,19 @@ async function apiRequest<T>(
     // Backend returns { success: true, data: {...} } format
     // Return data directly (it already has success, message, data structure)
     return data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("API request failed:", error);
     console.error("API URL:", `${API_URL}${endpoint}`);
     // Handle network errors
+    const apiError = error as ApiError;
     if (
-      error.name === "TypeError" &&
-      (error.message.includes("fetch") || error.message === "Failed to fetch")
+      apiError.name === "TypeError" &&
+      (apiError.message?.includes("fetch") || apiError.message === "Failed to fetch")
     ) {
       throw new Error(
         `Unable to connect to backend server at ${API_URL}. ` +
           `Please ensure the backend is running on port 5003. ` +
-          `Error: ${error.message}`
+          `Error: ${apiError.message || "Unknown error"}`
       );
     }
     throw error;
@@ -104,30 +145,30 @@ async function apiRequest<T>(
 export const dashboardApi = {
   getStats: () =>
     apiRequest<{
-      user: any;
-      stats: any;
-      levelProgress: any;
-      recentOrders: any[];
-      upcomingDeadlines: any[];
+      user: Record<string, unknown>;
+      stats: Record<string, unknown>;
+      levelProgress: Record<string, unknown>;
+      recentOrders: unknown[];
+      upcomingDeadlines: unknown[];
     }>("/dashboard", { method: "GET" }),
 };
 
 // Websites API
 export const websitesApi = {
-  addWebsite: (data: any) =>
+  addWebsite: (data: WebsiteData) =>
     apiRequest("/websites", { method: "POST", body: data }),
-  getWebsites: (filters?: any) => {
-    const query = filters ? `?${new URLSearchParams(filters).toString()}` : "";
+  getWebsites: (filters?: Filters) => {
+    const query = filters ? `?${new URLSearchParams(filters as Record<string, string>).toString()}` : "";
     return apiRequest(`/websites${query}`, { method: "GET" });
   },
   getWebsite: (id: string) => apiRequest(`/websites/${id}`, { method: "GET" }),
-  updateWebsite: (id: string, data: any) =>
+  updateWebsite: (id: string, data: WebsiteData) =>
     apiRequest(`/websites/${id}`, { method: "PUT", body: data }),
   deleteWebsite: (id: string) =>
     apiRequest(`/websites/${id}`, { method: "DELETE" }),
-  bulkAddWebsites: (data: any[]) =>
+  bulkAddWebsites: (data: WebsiteData[]) =>
     apiRequest("/websites/bulk", { method: "POST", body: { websites: data } }),
-  verifyWebsite: (id: string, method: "tag" | "article") =>
+  verifyWebsite: (id: string) =>
     apiRequest(`/websites/${id}/verify/tag`, {
       method: "POST",
       body: { tag: "" },
@@ -148,14 +189,14 @@ export const websitesApi = {
 
 // Orders API
 export const ordersApi = {
-  getOrders: (filters?: any) => {
-    const query = filters ? `?${new URLSearchParams(filters).toString()}` : "";
+  getOrders: (filters?: Filters) => {
+    const query = filters ? `?${new URLSearchParams(filters as Record<string, string>).toString()}` : "";
     return apiRequest(`/orders${query}`, { method: "GET" });
   },
   getOrder: (id: string) => apiRequest(`/orders/${id}`, { method: "GET" }),
-  createOrder: (data: any) =>
+  createOrder: (data: OrderData) =>
     apiRequest("/admin/orders", { method: "POST", body: data }),
-  updateOrder: (id: string, data: any) =>
+  updateOrder: (id: string, data: OrderData) =>
     apiRequest(`/admin/orders/${id}`, { method: "PUT", body: data }),
   submitOrder: (
     id: string,
@@ -208,7 +249,7 @@ export const paymentsApi = {
 // Profile API
 export const profileApi = {
   getProfile: () => apiRequest("/auth/me", { method: "GET" }),
-  updateProfile: (data: any) => {
+  updateProfile: (data: ProfileData) => {
     const token = localStorage.getItem("authToken");
     return fetch(`${API_URL}/users/profile`, {
       method: "PUT",
@@ -242,7 +283,7 @@ export const authApi = {
       body: { email, password },
       requiresAuth: false,
     }),
-  register: (data: any) =>
+  register: (data: ApplicationData) =>
     apiRequest("/auth/register", {
       method: "POST",
       body: data,
@@ -259,7 +300,7 @@ export const authApi = {
 
 // Applications API
 export const applicationsApi = {
-  submitApplication: (data: FormData | any) => {
+  submitApplication: (data: FormData | ApplicationData) => {
     // If FormData, use fetch directly for file upload
     if (data instanceof FormData) {
       const token = localStorage.getItem("authToken");
@@ -287,7 +328,7 @@ export const applicationsApi = {
       requiresAuth: false,
     });
   },
-  getApplications: (filters?: any) =>
+  getApplications: () =>
     apiRequest("/applications", { method: "GET" }),
   reviewApplication: (
     id: string,
@@ -303,7 +344,7 @@ export const applicationsApi = {
 // Admin API
 export const adminApi = {
   getDashboard: () => apiRequest("/admin/dashboard", { method: "GET" }),
-  getAllWebsites: (filters?: any, page = 1, limit = 20) => {
+  getAllWebsites: (filters?: Filters, page = 1, limit = 20) => {
     const params = new URLSearchParams({
       page: String(page),
       limit: String(limit),
@@ -323,7 +364,7 @@ export const adminApi = {
       method: "POST",
       body: data,
     }),
-  getAllOrders: (filters?: any) => {
+  getAllOrders: (filters?: Filters) => {
     const params = new URLSearchParams();
     if (filters?.status) params.append("status", filters.status);
     if (filters?.publisherId) params.append("publisherId", filters.publisherId);
@@ -339,7 +380,7 @@ export const adminApi = {
       method: "PUT",
       body: { accountLevel: level },
     }),
-  getAllApplications: (filters?: any) => {
+  getAllApplications: (filters?: Filters) => {
     const params = new URLSearchParams();
     if (filters?.status) params.append("status", filters.status);
     const query = params.toString() ? `?${params.toString()}` : "";
@@ -354,7 +395,7 @@ export const adminApi = {
       method: "POST",
       body: { rejectionReason: reason },
     }),
-  getAllSupportTickets: (filters?: any) => {
+  getAllSupportTickets: (filters?: Filters) => {
     const params = new URLSearchParams();
     if (filters?.status) params.append("status", filters.status);
     if (filters?.priority) params.append("priority", filters.priority);
@@ -370,7 +411,7 @@ export const adminApi = {
 
 // Blog API
 export const blogApi = {
-  getPosts: (filters?: any) => {
+  getPosts: (filters?: Filters) => {
     const params = new URLSearchParams();
     if (filters?.status) params.append("status", filters.status);
     if (filters?.category) params.append("category", filters.category);
@@ -382,9 +423,9 @@ export const blogApi = {
   },
   getPost: (slug: string) =>
     apiRequest(`/blog/posts/${slug}`, { method: "GET", requiresAuth: false }),
-  createPost: (data: any) =>
+  createPost: (data: BlogPostData) =>
     apiRequest("/admin/blog/posts", { method: "POST", body: data }),
-  updatePost: (id: string, data: any) =>
+  updatePost: (id: string, data: BlogPostData) =>
     apiRequest(`/admin/blog/posts/${id}`, { method: "PUT", body: data }),
   deletePost: (id: string) =>
     apiRequest(`/admin/blog/posts/${id}`, { method: "DELETE" }),
@@ -392,12 +433,12 @@ export const blogApi = {
 
 // Support API
 export const supportApi = {
-  createTicket: (data: any) =>
+  createTicket: (data: SupportTicketData) =>
     apiRequest("/support/tickets", { method: "POST", body: data }),
   getTickets: () => apiRequest("/support/tickets", { method: "GET" }),
   getTicket: (id: string) =>
     apiRequest(`/support/tickets/${id}`, { method: "GET" }),
-  updateTicket: (id: string, data: any) =>
+  updateTicket: (id: string, data: SupportTicketData) =>
     apiRequest(`/support/tickets/${id}`, { method: "PUT", body: data }),
 };
 

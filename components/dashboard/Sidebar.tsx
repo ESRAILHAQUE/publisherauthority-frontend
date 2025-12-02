@@ -80,7 +80,7 @@ export const Sidebar: React.FC = () => {
       localStorage.removeItem('rememberMe');
       toast.success('Logged out successfully');
       router.push('/');
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Even if API call fails, clear local storage and redirect
       localStorage.removeItem('authToken');
       localStorage.removeItem('rememberMe');

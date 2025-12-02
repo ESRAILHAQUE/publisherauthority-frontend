@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 
 export default function PaymentsPage() {
   const [paypalEmail, setPaypalEmail] = useState("");
-  const [invoices, setInvoices] = useState<any[]>([]);
+  const [invoices, setInvoices] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -21,14 +21,15 @@ export default function PaymentsPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [profileData, invoicesData]: any[] = await Promise.all([
+      const [profileData, invoicesData] = await Promise.all([
         profileApi.getProfile().catch(() => ({ paypalEmail: "" })),
         paymentsApi.getInvoices().catch(() => []),
       ]);
       setPaypalEmail(profileData.paypalEmail || "");
-      setInvoices(
-        Array.isArray(invoicesData) ? invoicesData : invoicesData.invoices || []
-      );
+      const invoicesArray = Array.isArray(invoicesData) 
+        ? invoicesData 
+        : (invoicesData as { invoices?: Record<string, unknown>[] }).invoices || [];
+      setInvoices(invoicesArray);
     } catch (error) {
       console.error("Failed to load payment data:", error);
     } finally {
@@ -41,8 +42,9 @@ export default function PaymentsPage() {
       setSaving(true);
       await paymentsApi.updatePaypalEmail(paypalEmail);
       toast.success("PayPal email saved successfully");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to save PayPal email");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to save PayPal email";
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }

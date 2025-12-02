@@ -10,7 +10,7 @@ import { ordersApi } from '@/lib/api';
 export default function OrdersPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('all');
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function OrdersPage() {
   const loadOrders = async () => {
     try {
       setLoading(true);
-      const data: any = await ordersApi.getOrders();
+      const data = await ordersApi.getOrders() as Record<string, unknown>[] | { orders?: Record<string, unknown>[]; [key: string]: unknown };
       setOrders(Array.isArray(data) ? data : (data.orders || []));
     } catch (error) {
       console.error('Failed to load orders:', error);

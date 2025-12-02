@@ -8,9 +8,15 @@ import { Badge } from '@/components/shared/Badge';
 import { blogApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 
+interface BlogPost {
+  _id?: string;
+  id?: string;
+  [key: string]: unknown;
+}
+
 export default function AdminBlogPage() {
   const router = useRouter();
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,7 +26,7 @@ export default function AdminBlogPage() {
   const loadPosts = async () => {
     try {
       setLoading(true);
-      const data: any = await blogApi.getPosts();
+      const data = await blogApi.getPosts() as BlogPost[] | { posts?: BlogPost[]; [key: string]: unknown };
       setPosts(Array.isArray(data) ? data : (data.posts || []));
     } catch (error) {
       console.error('Failed to load blog posts:', error);
@@ -36,8 +42,9 @@ export default function AdminBlogPage() {
       await blogApi.deletePost(postId);
       toast.success('Post deleted successfully');
       await loadPosts();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to delete post');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete post';
+      toast.error(errorMessage);
     }
   };
 

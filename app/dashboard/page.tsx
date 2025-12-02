@@ -17,7 +17,7 @@ export default function DashboardPage() {
     accountLevel: "Silver",
     ordersForNextLevel: 0,
   });
-  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [recentOrders, setRecentOrders] = useState<Record<string, unknown>[]>([]);
   const [levelProgress, setLevelProgress] = useState({
     currentLevel: "silver",
     nextLevel: "gold",
@@ -32,7 +32,7 @@ export default function DashboardPage() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const response: any = await dashboardApi.getStats();
+      const response = await dashboardApi.getStats() as { data?: { recentOrders?: Record<string, unknown>[]; levelProgress?: Record<string, unknown>; stats?: Record<string, unknown> }; recentOrders?: Record<string, unknown>[]; levelProgress?: Record<string, unknown>; stats?: Record<string, unknown>; [key: string]: unknown };
 
       // Handle API response structure: { success: true, data: {...} }
       const data = response?.data || response;

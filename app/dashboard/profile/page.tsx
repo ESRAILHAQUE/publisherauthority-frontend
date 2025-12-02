@@ -23,7 +23,6 @@ export default function ProfilePage() {
     confirmPassword: '',
   });
 
-  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -32,7 +31,7 @@ export default function ProfilePage() {
 
   const loadProfile = async () => {
     try {
-      const data: any = await profileApi.getProfile();
+      const data = await profileApi.getProfile() as { firstName?: string; lastName?: string; email?: string; country?: string; profileImage?: string; [key: string]: unknown };
       setProfileData({
         firstName: data.firstName || '',
         lastName: data.lastName || '',
@@ -55,14 +54,11 @@ export default function ProfilePage() {
     }
 
     try {
-      setUploading(true);
       const response = await profileApi.uploadProfileImage(file);
-      const data: any = await response.json();
+      const data = await response.json() as { profileImage?: string; [key: string]: unknown };
       setProfileData({ ...profileData, profileImage: data.profileImage });
-    } catch (error) {
+    } catch {
       toast.error('Failed to upload image');
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -75,8 +71,9 @@ export default function ProfilePage() {
         country: profileData.country,
       });
       toast.success('Profile updated successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update profile');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update profile';
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -95,8 +92,9 @@ export default function ProfilePage() {
       });
       toast.success('Password changed successfully');
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to change password');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to change password';
+      toast.error(errorMessage);
     }
   };
 

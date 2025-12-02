@@ -7,10 +7,15 @@ import { Button } from '@/components/shared/Button';
 import { adminApi, websitesApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 
+interface Website {
+  _id?: string;
+  id?: string;
+  [key: string]: unknown;
+}
+
 export default function AdminWebsitesPage() {
-  const [websites, setWebsites] = useState<any[]>([]);
+  const [websites, setWebsites] = useState<Website[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedWebsite, setSelectedWebsite] = useState<any | null>(null);
   const [showActions, setShowActions] = useState<string | null>(null);
 
   useEffect(() => {
@@ -20,7 +25,7 @@ export default function AdminWebsitesPage() {
   const loadWebsites = async () => {
     try {
       setLoading(true);
-      const data: any = await adminApi.getAllWebsites({}, 1, 50);
+      const data = await adminApi.getAllWebsites({}, 1, 50) as { websites?: Website[]; [key: string]: unknown };
       setWebsites(data.websites || []);
     } catch (error) {
       console.error('Failed to load websites:', error);
@@ -35,8 +40,9 @@ export default function AdminWebsitesPage() {
       toast.success('Website verified successfully');
       await loadWebsites();
       setSelectedWebsite(null);
-    } catch (error: any) {
-      toast.error(error.message || 'Verification failed');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Verification failed';
+      toast.error(errorMessage);
     }
   };
 
@@ -49,16 +55,18 @@ export default function AdminWebsitesPage() {
         await adminApi.updateWebsiteStatus(websiteId, status, reason);
         toast.success('Website status updated');
         await loadWebsites();
-      } catch (error: any) {
-        toast.error(error.message || 'Failed to update status');
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to update status';
+        toast.error(errorMessage);
       }
     } else {
       try {
         await adminApi.updateWebsiteStatus(websiteId, status);
         toast.success('Website status updated');
         await loadWebsites();
-      } catch (error: any) {
-        toast.error(error.message || 'Failed to update status');
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to update status';
+        toast.error(errorMessage);
       }
     }
   };
@@ -74,8 +82,9 @@ export default function AdminWebsitesPage() {
       await adminApi.sendCounterOffer(websiteId, { notes, terms });
       toast.success('Counter offer sent');
       await loadWebsites();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to send counter offer');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send counter offer';
+      toast.error(errorMessage);
     }
   };
 

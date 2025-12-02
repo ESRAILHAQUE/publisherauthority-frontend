@@ -70,8 +70,9 @@ export default function SupportPage() {
       setSubmitSuccess(true);
       setContactForm({ name: '', email: '', subject: '', message: '' });
       setTimeout(() => setSubmitSuccess(false), 5000);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to send message. Please try again.');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send message. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

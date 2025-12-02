@@ -8,9 +8,15 @@ import { Button } from '@/components/shared/Button';
 import { supportApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 
+interface Ticket {
+  _id?: string;
+  id?: string;
+  [key: string]: unknown;
+}
+
 export default function AdminSupportPage() {
   const router = useRouter();
-  const [tickets, setTickets] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,7 +26,7 @@ export default function AdminSupportPage() {
   const loadTickets = async () => {
     try {
       setLoading(true);
-      const data: any = await supportApi.getTickets();
+      const data = await supportApi.getTickets() as Ticket[] | { tickets?: Ticket[]; [key: string]: unknown };
       setTickets(Array.isArray(data) ? data : (data.tickets || []));
     } catch (error) {
       console.error('Failed to load tickets:', error);
@@ -34,8 +40,9 @@ export default function AdminSupportPage() {
       await supportApi.updateTicket(ticketId, { status });
       toast.success('Ticket status updated');
       await loadTickets();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update ticket');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update ticket';
+      toast.error(errorMessage);
     }
   };
 

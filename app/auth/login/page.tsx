@@ -16,18 +16,16 @@ export default function LoginPage() {
     rememberMe: true,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setIsLoading(true);
 
     try {
-      const response: any = await authApi.login(
+      const response = await authApi.login(
         formData.email,
         formData.password
-      );
+      ) as { data?: { user?: { role?: string }; token?: string }; user?: { role?: string }; token?: string; [key: string]: unknown };
       // Backend returns { success: true, data: { user, token } }
       const user = response.data?.user || response.user;
       const token = response.data?.token || response.token;
@@ -45,14 +43,14 @@ export default function LoginPage() {
       } else {
         router.push("/dashboard");
       }
-    } catch (err: any) {
-      let errorMessage = err.message || "Invalid email or password";
+    } catch (err: unknown) {
+      let errorMessage = err instanceof Error ? err.message : "Invalid email or password";
 
       // Show more specific error messages
-      if (err.message?.includes("pending approval")) {
+      if (err instanceof Error && err.message?.includes("pending approval")) {
         errorMessage =
           "Your application is still pending approval. Please wait for admin approval before logging in.";
-      } else if (err.message?.includes("deactivated")) {
+      } else if (err instanceof Error && err.message?.includes("deactivated")) {
         errorMessage =
           "Your account has been deactivated. Please contact support.";
       }

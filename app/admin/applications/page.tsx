@@ -1,32 +1,35 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/components/shared/Card';
 import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
-import { adminApi } from '@/lib/api';
+import { Select } from '@/components/shared/Select';
+import { adminApi, getApiUrl } from '@/lib/api';
 import toast from 'react-hot-toast';
 
+interface Application {
+  _id?: string;
+  id?: string;
+  [key: string]: unknown;
+}
+
 export default function AdminApplicationsPage() {
-  const router = useRouter();
-  const [applications, setApplications] = useState<any[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedApp, setSelectedApp] = useState<any | null>(null);
+  const [selectedApp, setSelectedApp] = useState<Application | null>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved'>('pending');
 
-  useEffect(() => {
-    loadApplications();
-  }, []);
-
-  const loadApplications = async () => {
+  const loadApplications = useCallback(async () => {
     try {
       setLoading(true);
-      const response: any = await adminApi.getAllApplications({ status: 'pending' });
+      const filters = statusFilter === 'all' ? {} : { status: statusFilter };
+      const response = await adminApi.getAllApplications(filters) as { data?: { applications?: Application[] }; applications?: Application[]; [key: string]: unknown };
       // Handle different response structures
-      let applicationsData = [];
+      let applicationsData: Application[] = [];
       if (Array.isArray(response)) {
         applicationsData = response;
       } else if (response?.data && Array.isArray(response.data)) {
@@ -37,24 +40,30 @@ export default function AdminApplicationsPage() {
         applicationsData = response.applications;
       }
       setApplications(applicationsData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to load applications:', error);
-      toast.error(error.message || 'Failed to load applications');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load applications';
+      toast.error(errorMessage);
       setApplications([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
+
+  useEffect(() => {
+    loadApplications();
+  }, [loadApplications]);
 
   const handleViewDetails = async (appId: string) => {
     try {
       setLoadingDetails(true);
-      const response: any = await adminApi.getApplicationById(appId);
+      const response = await adminApi.getApplicationById(appId) as { data?: { application?: Application }; application?: Application; data?: Application; [key: string]: unknown };
       const appData = response?.data?.application || response?.application || response?.data;
-      setSelectedApp(appData);
-    } catch (error: any) {
+      setSelectedApp(appData as Application);
+    } catch (error: unknown) {
       console.error('Failed to load application details:', error);
-      toast.error(error.message || 'Failed to load application details');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load application details';
+      toast.error(errorMessage);
     } finally {
       setLoadingDetails(false);
     }
@@ -68,8 +77,9 @@ export default function AdminApplicationsPage() {
       toast.success('Application approved successfully');
       setSelectedApp(null);
       await loadApplications();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to approve application');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to approve application';
+      toast.error(errorMessage);
     }
   };
 
@@ -82,25 +92,76 @@ export default function AdminApplicationsPage() {
     }
     
     try {
-      await adminApi.rejectApplication(selectedApp._id || selectedApp.id, rejectionReason);
+      await adminApi.rejectApplication(selectedApp._id || selectedApp.id || '', rejectionReason);
       toast.success('Application rejected');
       setSelectedApp(null);
       setShowRejectModal(false);
       setRejectionReason('');
       await loadApplications();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to reject application');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to reject application';
+      toast.error(errorMessage);
     }
   };
 
+  const handleDownload = async (file: { path: string; originalName?: string; filename?: string }) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const API_URL = getApiUrl();
+      
+      // Determine file URL
+      let fileUrl = file.path;
+      
+      // If not a full URL, construct it
+      if (!file.path.startsWith('http://') && !file.path.startsWith('https://')) {
+        if (file.path.startsWith('/')) {
+          fileUrl = `${API_URL}${file.path}`;
+        } else {
+          fileUrl = `${API_URL}/${file.path}`;
+        }
+      }
+      
+      // Try fetch with blob first (for authenticated downloads)
+      try {
+        const response = await fetch(fileUrl, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = file.originalName || file.filename || 'download';
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          toast.success('File downloaded successfully');
+          return;
+        }
+      } catch (fetchError) {
+        console.log('Fetch failed, trying direct download:', fetchError);
+      }
+      
+      // Fallback: Direct download link
+      const a = document.createElement('a');
+      a.href = fileUrl;
+      a.download = file.originalName || file.filename || 'download';
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      toast.success('Download started');
+    } catch (error: unknown) {
+      console.error('Download error:', error);
+      toast.error('Failed to download file. Please try again.');
+    }
+  };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-gray-600">Loading applications...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-8">
@@ -109,27 +170,60 @@ export default function AdminApplicationsPage() {
         <p className="text-gray-600">Review and approve new publisher applications.</p>
       </div>
 
+      {/* Filter Dropdown */}
+      <div className="mb-4 flex items-center gap-3">
+        <label className="text-sm font-semibold text-gray-700 whitespace-nowrap">
+          Filter by Status:
+        </label>
+        <div className="w-48 relative">
+          <Select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'pending' | 'approved')}
+            options={[
+              { value: 'all', label: 'All Applications' },
+              { value: 'pending', label: 'Pending' },
+              { value: 'approved', label: 'Approved' }
+            ]}
+            className="px-3 py-2 pr-8 text-sm appearance-none"
+          />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
       <Card>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Name</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Email</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Submitted</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {applications.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-8 px-4 text-center text-gray-500">
-                    No pending applications
-                  </td>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-gray-600">Loading applications...</div>
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Name</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Email</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Submitted</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
                 </tr>
-              ) : (
-                applications.map((app) => (
+              </thead>
+              <tbody>
+                {applications.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-8 px-4 text-center text-gray-500">
+                      {statusFilter === 'all' 
+                        ? 'No applications found' 
+                        : statusFilter === 'pending' 
+                        ? 'No pending applications' 
+                        : 'No approved applications'}
+                    </td>
+                  </tr>
+                ) : (
+                  applications.map((app) => (
                   <tr key={app._id || app.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td className="py-4 px-4 font-medium text-gray-900">
                       {app.firstName} {app.lastName}
@@ -154,10 +248,11 @@ export default function AdminApplicationsPage() {
                       </Button>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </Card>
 
@@ -287,7 +382,7 @@ export default function AdminApplicationsPage() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Quiz Answers</h3>
                   <div className="space-y-4">
-                    {Object.entries(selectedApp.quizAnswers).map(([key, value]: [string, any]) => {
+                    {Object.entries(selectedApp.quizAnswers).map(([key, value]: [string, unknown]) => {
                       if (!value) return null;
                       const questionNum = key.replace('question', '');
                       
@@ -325,7 +420,7 @@ export default function AdminApplicationsPage() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Uploaded Files</h3>
                   <div className="space-y-2">
-                    {selectedApp.files.map((file: any, index: number) => {
+                    {(selectedApp.files as Array<{ mimetype?: string; path?: string; originalName?: string; filename?: string; [key: string]: unknown }>).map((file, index: number) => {
                       const isViewable = file.mimetype?.includes('pdf') || file.mimetype?.includes('image');
                       return (
                         <div key={index} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -347,29 +442,19 @@ export default function AdminApplicationsPage() {
                                   href={file.path}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-green-600 hover:text-green-800 text-sm font-medium px-3 py-1 border border-green-600 rounded hover:bg-green-50"
+                                  className="text-green-600 hover:text-green-800 text-sm font-medium px-3 py-1 border border-green-600 rounded hover:bg-green-50 transition-colors"
                                 >
                                   View
                                 </a>
                               )}
-                              <a
-                                href={file.path}
-                                download
-                                className="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1 border border-blue-600 rounded hover:bg-blue-50"
+                              <button
+                                onClick={() => handleDownload(file)}
+                                className="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
                               >
                                 Download
-                              </a>
+                              </button>
                             </div>
                           </div>
-                          {isViewable && (
-                            <div className="mt-3 border-t border-gray-200 pt-3">
-                              <iframe
-                                src={file.path}
-                                className="w-full h-96 border border-gray-300 rounded"
-                                title={file.originalName || file.filename}
-                              />
-                            </div>
-                          )}
                         </div>
                       );
                     })}

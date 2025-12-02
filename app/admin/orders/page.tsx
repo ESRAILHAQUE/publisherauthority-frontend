@@ -8,11 +8,16 @@ import { Button } from '@/components/shared/Button';
 import { adminApi, ordersApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 
+interface Order {
+  _id?: string;
+  id?: string;
+  [key: string]: unknown;
+}
+
 export default function AdminOrdersPage() {
   const router = useRouter();
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [showActions, setShowActions] = useState<string | null>(null);
 
   useEffect(() => {
@@ -22,7 +27,7 @@ export default function AdminOrdersPage() {
   const loadOrders = async () => {
     try {
       setLoading(true);
-      const data: any = await adminApi.getAllOrders();
+      const data = await adminApi.getAllOrders() as Order[] | { orders?: Order[]; [key: string]: unknown };
       setOrders(Array.isArray(data) ? data : (data.orders || []));
     } catch (error) {
       console.error('Failed to load orders:', error);
@@ -39,8 +44,9 @@ export default function AdminOrdersPage() {
       await ordersApi.requestRevision(orderId, reason);
       toast.success('Revision requested successfully');
       await loadOrders();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to request revision');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to request revision';
+      toast.error(errorMessage);
     }
   };
 
@@ -54,8 +60,9 @@ export default function AdminOrdersPage() {
       await ordersApi.cancelOrder(orderId, reason);
       toast.success('Order cancelled successfully');
       await loadOrders();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to cancel order');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to cancel order';
+      toast.error(errorMessage);
     }
   };
 
@@ -66,7 +73,9 @@ export default function AdminOrdersPage() {
       await ordersApi.completeOrder(orderId);
       toast.success('Order marked as completed');
       await loadOrders();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to complete order';
+      toast.error(errorMessage);
       toast.error(error.message || 'Failed to complete order');
     }
   };

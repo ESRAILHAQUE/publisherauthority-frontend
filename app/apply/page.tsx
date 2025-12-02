@@ -60,7 +60,7 @@ export default function ApplyPage() {
     
     try {
       // Convert quiz answers from q1-q9 to question1-question9 format
-      const formattedQuizAnswers: any = {};
+      const formattedQuizAnswers: Record<string, string> = {};
       Object.keys(quizAnswers).forEach((key) => {
         const questionNumber = key.replace('q', 'question');
         formattedQuizAnswers[questionNumber] = quizAnswers[key as keyof typeof quizAnswers];
@@ -123,8 +123,9 @@ export default function ApplyPage() {
       });
       setSelectedFiles([]);
       setAgreed(false);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to submit application. Please try again.');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit application. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

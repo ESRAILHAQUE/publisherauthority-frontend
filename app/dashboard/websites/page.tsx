@@ -9,10 +9,16 @@ import { websitesApi } from "@/lib/api";
 import { WebsiteVerification } from "@/components/websites/WebsiteVerification";
 import toast from "react-hot-toast";
 
+interface Website {
+  _id?: string;
+  id?: string;
+  [key: string]: unknown;
+}
+
 export default function WebsitesPage() {
-  const [websites, setWebsites] = useState<any[]>([]);
+  const [websites, setWebsites] = useState<Website[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedWebsite, setSelectedWebsite] = useState<any | null>(null);
+  const [selectedWebsite, setSelectedWebsite] = useState<Website | null>(null);
 
   useEffect(() => {
     loadWebsites();
@@ -21,7 +27,7 @@ export default function WebsitesPage() {
   const loadWebsites = async () => {
     try {
       setLoading(true);
-      const response: any = await websitesApi.getWebsites();
+      const response = await websitesApi.getWebsites() as { data?: Website[]; websites?: Website[]; [key: string]: unknown };
       // Handle different response structures
       let websitesData = [];
       if (Array.isArray(response)) {
@@ -51,8 +57,9 @@ export default function WebsitesPage() {
       await websitesApi.verifyWebsite(websiteId, method);
       await loadWebsites();
       setSelectedWebsite(null);
-    } catch (error: any) {
-      toast.error(error.message || "Verification failed");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Verification failed";
+      toast.error(errorMessage);
     }
   };
 

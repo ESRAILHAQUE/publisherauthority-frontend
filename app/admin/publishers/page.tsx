@@ -7,10 +7,15 @@ import { Button } from '@/components/shared/Button';
 import { adminApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 
+interface Publisher {
+  _id?: string;
+  id?: string;
+  [key: string]: unknown;
+}
+
 export default function AdminPublishersPage() {
-  const [publishers, setPublishers] = useState<any[]>([]);
+  const [publishers, setPublishers] = useState<Publisher[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPublisher, setSelectedPublisher] = useState<any | null>(null);
 
   useEffect(() => {
     loadPublishers();
@@ -19,7 +24,7 @@ export default function AdminPublishersPage() {
   const loadPublishers = async () => {
     try {
       setLoading(true);
-      const data: any = await adminApi.getDashboard();
+      const data = await adminApi.getDashboard() as { publishers?: Publisher[]; [key: string]: unknown };
       setPublishers(data.publishers || []);
     } catch (error) {
       console.error('Failed to load publishers:', error);
@@ -35,8 +40,9 @@ export default function AdminPublishersPage() {
       await adminApi.updateUserLevel(userId, level);
       toast.success('User level updated successfully');
       await loadPublishers();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update user level');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update user level';
+      toast.error(errorMessage);
     }
   };
 

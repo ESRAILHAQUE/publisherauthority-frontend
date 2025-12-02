@@ -7,8 +7,14 @@ import { Button } from '@/components/shared/Button';
 import { adminApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 
+interface Payment {
+  _id?: string;
+  id?: string;
+  [key: string]: unknown;
+}
+
 export default function AdminPaymentsPage() {
-  const [payments, setPayments] = useState<any[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,7 +24,7 @@ export default function AdminPaymentsPage() {
   const loadPayments = async () => {
     try {
       setLoading(true);
-      const data: any = await adminApi.getDashboard();
+      const data = await adminApi.getDashboard() as { payments?: Payment[]; [key: string]: unknown };
       setPayments(data.payments || []);
     } catch (error) {
       console.error('Failed to load payments:', error);
@@ -34,8 +40,9 @@ export default function AdminPaymentsPage() {
       await adminApi.processPayment(paymentId);
       toast.success('Payment processed successfully');
       await loadPayments();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to process payment');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process payment';
+      toast.error(errorMessage);
     }
   };
 

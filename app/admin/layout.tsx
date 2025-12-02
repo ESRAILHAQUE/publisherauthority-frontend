@@ -1,5 +1,21 @@
+"use client";
+
 import React from 'react';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { SidebarProvider, useSidebar } from '@/components/admin/SidebarContext';
+
+function AdminContent({ children }: { children: React.ReactNode }) {
+  const { isCollapsed } = useSidebar();
+  
+  return (
+    <>
+      <AdminSidebar />
+      <main className={`transition-all duration-300 p-8 ${isCollapsed ? 'ml-20' : 'ml-64'}`}>
+        {children}
+      </main>
+    </>
+  );
+}
 
 export default function AdminLayout({
   children,
@@ -8,10 +24,9 @@ export default function AdminLayout({
 }) {
   return (
     <div className="min-h-screen bg-gray-50">
-      <AdminSidebar />
-      <main className="ml-64 p-8">
-        {children}
-      </main>
+      <SidebarProvider>
+        <AdminContent>{children}</AdminContent>
+      </SidebarProvider>
     </div>
   );
 }
