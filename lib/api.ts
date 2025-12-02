@@ -4,12 +4,12 @@
  */
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:50003/api/v1";
 
 // Log API URL in development for debugging
 if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
   console.log("🔗 API URL:", API_URL);
-  console.log("💡 Make sure backend is running on port 5000");
+  console.log("💡 Make sure backend is running on port 50003");
 }
 
 interface ApiOptions {
@@ -74,7 +74,7 @@ async function apiRequest<T>(
     ) {
       throw new Error(
         `Unable to connect to backend server at ${API_URL}. ` +
-          `Please ensure the backend is running on port 5000. ` +
+          `Please ensure the backend is running on port 50003. ` +
           `Error: ${error.message}`
       );
     }
