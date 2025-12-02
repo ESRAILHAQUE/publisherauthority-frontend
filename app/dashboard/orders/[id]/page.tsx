@@ -47,7 +47,10 @@ export default function OrderDetailPage() {
 
     try {
       setSubmitting(true);
-      await ordersApi.submitOrder(orderId, submissionData);
+      await ordersApi.submitOrder(orderId, {
+        submissionUrl: submissionData.articleUrl,
+        submissionNotes: submissionData.notes,
+      });
       alert('Order submitted successfully!');
       await loadOrder();
     } catch (error: any) {
