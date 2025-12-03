@@ -150,7 +150,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-3">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-primary-purple mb-2">
@@ -194,7 +194,7 @@ export default function DashboardPage() {
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
                 <div
-                  className="bg-gradient-to-r from-[#3F207F] to-[#2EE6B7] h-3 rounded-full transition-all duration-500"
+                  className="bg-linear-to-r from-primary-purple to-accent-teal h-3 rounded-full transition-all duration-500"
                   style={{
                     width: `${levelProgress.progressPercentage}%`,
                   }}></div>
@@ -205,7 +205,7 @@ export default function DashboardPage() {
       </Card>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
         <Card hover>
           <div className="flex items-center justify-between">
             <div>
@@ -393,7 +393,7 @@ export default function DashboardPage() {
                       <td className="py-4 px-4">
                         <a
                           href={`/dashboard/orders/${orderId || ""}`}
-                          className="text-primary-purple hover:text-[#2EE6B7] font-medium transition-colors">
+                          className="text-primary-purple hover:text-accent-teal font-medium transition-colors">
                           View →
                         </a>
                       </td>

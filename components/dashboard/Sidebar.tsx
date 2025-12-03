@@ -1,10 +1,47 @@
 'use client';
 
-import React from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import toast from 'react-hot-toast';
+
+interface SidebarContextType {
+  isCollapsed: boolean;
+  setIsCollapsed: (collapsed: boolean) => void;
+}
+
+const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
+
+export const DashboardSidebarProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    // Load collapsed state from localStorage on initial render
+    if (typeof window !== "undefined") {
+      const savedState = localStorage.getItem("dashboardSidebarCollapsed");
+      return savedState === "true";
+    }
+    return false;
+  });
+
+  // Save collapsed state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("dashboardSidebarCollapsed", String(isCollapsed));
+  }, [isCollapsed]);
+
+  return (
+    <SidebarContext.Provider value={{ isCollapsed, setIsCollapsed }}>
+      {children}
+    </SidebarContext.Provider>
+  );
+};
+
+const useDashboardSidebar = () => {
+  const context = useContext(SidebarContext);
+  if (context === undefined) {
+    throw new Error("useDashboardSidebar must be used within a DashboardSidebarProvider");
+  }
+  return context;
+};
 
 interface MenuItem {
   name: string;
@@ -72,6 +109,13 @@ const menuItems: MenuItem[] = [
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const { isCollapsed, setIsCollapsed } = useDashboardSidebar();
+
+  const toggleSidebar = () => {
+    setIsCollapsed(!isCollapsed);
+    // Dispatch custom event for same-tab updates
+    window.dispatchEvent(new Event('dashboardSidebarToggle'));
+  };
 
   const handleLogout = async () => {
     try {
@@ -90,48 +134,98 @@ export const Sidebar: React.FC = () => {
   };
 
   return (
-    <aside className="w-64 bg-white shadow-lg h-screen fixed left-0 top-0 overflow-y-auto">
-      <div className="p-6 border-b border-gray-200">
-        <Link href="/dashboard" className="flex items-center space-x-2">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary-purple to-accent-teal rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-xl">CM</span>
-          </div>
-          <span className="text-xl font-bold text-primary-purple">Dashboard</span>
-        </Link>
+    <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white shadow-lg h-screen fixed left-0 top-0 overflow-y-auto flex flex-col transition-all duration-300`}>
+      <div className={`p-6 border-b border-gray-200 ${isCollapsed ? 'px-4' : ''}`}>
+        <div className="flex items-center justify-between">
+          <Link href="/dashboard" className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'}`}>
+            <div className="w-10 h-10 bg-linear-to-br from-primary-purple to-accent-teal rounded-lg flex items-center justify-center shrink-0">
+              <span className="text-white font-bold text-xl">CM</span>
+            </div>
+            {!isCollapsed && <span className="text-xl font-bold text-primary-purple whitespace-nowrap">Dashboard</span>}
+          </Link>
+          <button
+            onClick={toggleSidebar}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors shrink-0"
+            aria-label="Toggle sidebar"
+          >
+            <svg
+              className="w-5 h-5 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              {isCollapsed ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 5l7 7-7 7M5 5l7 7-7 7"
+                />
+              ) : (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                />
+              )}
+            </svg>
+          </button>
+        </div>
       </div>
 
-      <nav className="p-4 space-y-2 pb-24">
+      <nav className={`p-4 space-y-2 flex-1 ${isCollapsed ? 'px-2' : ''}`}>
         {menuItems.map((item) => {
-          const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+          // Check if current page matches the menu item
+          // For /dashboard, only match exact /dashboard or /dashboard/
+          // For other pages like /dashboard/websites, don't match /dashboard/websites/add
+          let isActive = false;
+          
+          if (item.href === "/dashboard") {
+            // Dashboard should only be active on exact /dashboard page
+            isActive = pathname === "/dashboard" || pathname === "/dashboard/";
+          } else if (item.href === "/dashboard/websites/add") {
+            // Add Website should match exact or child routes
+            isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+          } else if (item.href === "/dashboard/websites") {
+            // My Websites should only match exact, not /dashboard/websites/add
+            isActive = pathname === "/dashboard/websites" || pathname === "/dashboard/websites/";
+          } else {
+            // For other pages, match exact or child routes
+            isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+          }
+          
           return (
             <Link
               key={item.href}
               href={item.href}
               className={`
-                flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors
+                flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${isCollapsed ? 'px-2' : 'px-4'} py-3 rounded-lg transition-colors
                 ${
                   isActive
                     ? 'bg-primary-purple text-white'
                     : 'text-gray-700 hover:bg-gray-100'
                 }
               `}
+              title={isCollapsed ? item.name : undefined}
             >
               {item.icon}
-              <span className="font-medium">{item.name}</span>
+              {!isCollapsed && <span className="font-medium whitespace-nowrap">{item.name}</span>}
             </Link>
           );
         })}
       </nav>
 
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
+      <div className={`p-4 border-t border-gray-200 bg-white ${isCollapsed ? 'px-2' : ''}`}>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center space-x-3 px-4 py-3 rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors font-medium shadow-md hover:shadow-lg"
+          className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-center space-x-3'} ${isCollapsed ? 'px-2' : 'px-4'} py-3 rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors font-medium shadow-md hover:shadow-lg`}
+          title={isCollapsed ? "Logout" : undefined}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          <span>Logout</span>
+          {!isCollapsed && <span>Logout</span>}
         </button>
       </div>
     </aside>
