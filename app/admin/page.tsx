@@ -20,7 +20,7 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-2">
       <div>
         <h1 className="text-3xl font-bold text-primary-purple mb-2">
           Admin Dashboard
@@ -31,7 +31,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1">
         <Card hover>
           <div className="flex items-center justify-between">
             <div>
@@ -190,20 +190,20 @@ export default function AdminDashboardPage() {
         <h2 className="text-xl font-semibold text-primary-purple mb-4">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-[#3F207F] hover:bg-gray-50 transition-colors text-left">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
+          <button className="p-4 border-2 border-gray-200 rounded-sm hover:border-primary-purple hover:bg-gray-50 transition-colors text-left">
             <h3 className="font-semibold text-gray-900 mb-1">
               Review Applications
             </h3>
             <p className="text-sm text-gray-600">23 pending applications</p>
           </button>
-          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-[#3F207F] hover:bg-gray-50 transition-colors text-left">
+          <button className="p-4 border-2 border-gray-200 rounded-sm hover:border-primary-purple hover:bg-gray-50 transition-colors text-left">
             <h3 className="font-semibold text-gray-900 mb-1">
               Verify Websites
             </h3>
             <p className="text-sm text-gray-600">15 websites pending</p>
           </button>
-          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-[#3F207F] hover:bg-gray-50 transition-colors text-left">
+          <button className="p-4 border-2 border-gray-200 rounded-sm hover:border-primary-purple hover:bg-gray-50 transition-colors text-left">
             <h3 className="font-semibold text-gray-900 mb-1">
               Process Payments
             </h3>
@@ -221,7 +221,7 @@ export default function AdminDashboardPage() {
           {recentActivity.map((activity, index) => (
             <div
               key={index}
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              className="flex items-center justify-between p-3 bg-gray-50 rounded-sm">
               <div>
                 <p className="font-medium text-gray-900">{activity.type}</p>
                 <p className="text-sm text-gray-600">{activity.user}</p>

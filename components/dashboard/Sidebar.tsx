@@ -138,14 +138,14 @@ export const Sidebar: React.FC = () => {
       <div className={`p-6 border-b border-gray-200 ${isCollapsed ? 'px-4' : ''}`}>
         <div className="flex items-center justify-between">
           <Link href="/dashboard" className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'}`}>
-            <div className="w-10 h-10 bg-linear-to-br from-primary-purple to-accent-teal rounded-lg flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 bg-linear-to-br from-primary-purple to-accent-teal rounded-sm flex items-center justify-center shrink-0">
               <span className="text-white font-bold text-xl">CM</span>
             </div>
             {!isCollapsed && <span className="text-xl font-bold text-primary-purple whitespace-nowrap">Dashboard</span>}
           </Link>
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors shrink-0"
+            className="p-2 rounded-sm hover:bg-gray-100 transition-colors shrink-0"
             aria-label="Toggle sidebar"
           >
             <svg
@@ -200,7 +200,7 @@ export const Sidebar: React.FC = () => {
               key={item.href}
               href={item.href}
               className={`
-                flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${isCollapsed ? 'px-2' : 'px-4'} py-3 rounded-lg transition-colors
+                flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${isCollapsed ? 'px-2' : 'px-4'} py-3 rounded-sm transition-colors
                 ${
                   isActive
                     ? 'bg-primary-purple text-white'
@@ -219,7 +219,7 @@ export const Sidebar: React.FC = () => {
       <div className={`p-4 border-t border-gray-200 bg-white space-y-2 ${isCollapsed ? 'px-2' : ''}`}>
         <button
           onClick={handleLogout}
-          className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-center space-x-3'} ${isCollapsed ? 'px-2' : 'px-4'} py-3 rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors font-medium shadow-md hover:shadow-lg`}
+          className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-center space-x-3'} ${isCollapsed ? 'px-2' : 'px-4'} py-3 rounded-sm text-white bg-red-600 hover:bg-red-700 transition-colors font-medium shadow-md hover:shadow-lg`}
           title={isCollapsed ? "Logout" : undefined}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -229,7 +229,7 @@ export const Sidebar: React.FC = () => {
         </button>
         <Link
           href="/"
-          className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${isCollapsed ? 'px-2' : 'px-4'} py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors`}
+          className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${isCollapsed ? 'px-2' : 'px-4'} py-3 rounded-sm text-gray-700 hover:bg-gray-100 transition-colors`}
           title={isCollapsed ? "Back to Home" : undefined}
         >
           <svg
