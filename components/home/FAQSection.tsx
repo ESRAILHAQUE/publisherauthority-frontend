@@ -47,12 +47,12 @@ export const FAQSection: React.FC = () => {
   };
 
   return (
-    <section className="bg-white py-14 text-slate-900 md:py-20">
-      <div className="mx-auto w-full max-w-5xl px-4">
-        <div className="text-center">
+    <section className="bg-gray-50 py-16">
+      <div className="mx-auto w-full max-w-4xl px-4">
+        <div className="mb-10 text-center">
           <h2 className="text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
             Questions from publishers,{' '}
-            <span className="bg-gradient-to-r from-emerald-500 to-sky-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-emerald-500 to-sky-500 bg-clip-text text-transparent">
               answered
             </span>
           </h2>
@@ -61,59 +61,50 @@ export const FAQSection: React.FC = () => {
           </p>
         </div>
 
-        <div className="mt-8 grid gap-4 md:mt-10">
+        <div className="space-y-0">
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
 
             return (
               <div
                 key={index}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-100 transition-all duration-200 hover:shadow-md"
+                className="overflow-hidden rounded-md border border-gray-200 bg-white"
               >
                 <button
                   onClick={() => toggleAccordion(index)}
-                  className="w-full p-5 text-left transition-colors duration-200 hover:bg-slate-50 md:p-6"
+                  className="flex w-full items-center justify-between px-6 py-5 text-left"
                   aria-expanded={isOpen}
                   aria-controls={`faq-answer-${index}`}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-emerald-600 md:text-[13px]">
-                        Q{index + 1}.
-                      </div>
-                      <h3 className="text-base font-semibold text-slate-900 md:text-lg">
-                        {faq.question}
-                      </h3>
-                    </div>
-                    <div className="flex-shrink-0">
-                      <svg
-                        className={`h-5 w-5 text-slate-400 transition-transform duration-300 ${
-                          isOpen ? 'rotate-180' : ''
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </div>
-                  </div>
+                  <h3 className="text-base font-medium text-gray-900 md:text-lg">
+                    {faq.question}
+                  </h3>
+                  <svg
+                    className={`ml-4 h-5 w-5 shrink-0 text-gray-500 transition-transform duration-200 ${
+                      isOpen ? 'rotate-180' : ''
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
                 </button>
 
                 <div
                   id={`faq-answer-${index}`}
-                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                    isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                  className={`transition-all duration-200 ease-in-out ${
+                    isOpen ? 'max-h-96' : 'max-h-0'
                   }`}
                 >
-                  <div className="border-t border-slate-100 px-5 pb-5 pt-4 md:px-6 md:pb-6">
-                    <p className="text-sm leading-relaxed text-slate-600 md:text-base">
+                  <div className="border-t border-gray-200 px-6 py-4">
+                    <p className="text-sm text-gray-600 md:text-base">
                       {faq.answer}
                     </p>
                   </div>
