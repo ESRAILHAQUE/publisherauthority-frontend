@@ -80,21 +80,14 @@ export default function ProfilePage() {
           createdAt?: string;
           [key: string]: unknown;
         };
-        firstName?: string;
-        lastName?: string;
-        email?: string;
-        country?: string;
-        profileImage?: string;
-        accountLevel?: string;
-        totalEarnings?: number;
-        completedOrders?: number;
-        activeWebsites?: number;
-        createdAt?: string;
         [key: string]: unknown;
       };
 
       // Extract user data from response (backend returns { success: true, data: { user: {...} } })
-      const userData = profileResponse?.data?.user || profileResponse?.user || (profileResponse as any);
+      const userData =
+        profileResponse?.data?.user ||
+        profileResponse?.user ||
+        (profileResponse as any);
 
       setProfileData({
         firstName: userData.firstName || "",
@@ -152,13 +145,21 @@ export default function ProfilePage() {
           websites?: { active?: number };
           totalEarnings?: number;
         };
-        const userDataFromDashboard = dashboardData?.user as { accountLevel?: string };
+        const userDataFromDashboard = dashboardData?.user as {
+          accountLevel?: string;
+        };
 
         setStats({
-          accountLevel: userDataFromDashboard?.accountLevel || userData.accountLevel || "silver",
-          totalOrders: statsData?.orders?.completed || userData.completedOrders || 0,
-          totalEarnings: statsData?.totalEarnings || userData.totalEarnings || 0,
-          activeWebsites: statsData?.websites?.active || userData.activeWebsites || 0,
+          accountLevel:
+            userDataFromDashboard?.accountLevel ||
+            userData.accountLevel ||
+            "silver",
+          totalOrders:
+            statsData?.orders?.completed || userData.completedOrders || 0,
+          totalEarnings:
+            statsData?.totalEarnings || userData.totalEarnings || 0,
+          activeWebsites:
+            statsData?.websites?.active || userData.activeWebsites || 0,
           joinDate: userData.createdAt || new Date().toISOString(),
         });
       } catch (dashboardError) {
@@ -190,9 +191,11 @@ export default function ProfilePage() {
 
     try {
       const response = await profileApi.uploadProfileImage(file);
-      
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: "Failed to upload image" }));
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: "Failed to upload image" }));
         throw new Error(errorData.message || "Failed to upload image");
       }
 
@@ -211,9 +214,11 @@ export default function ProfilePage() {
       };
 
       // Extract profile image URL from response
-      const imageUrl = data?.data?.profileImage || 
-                      data?.data?.user?.profileImage || 
-                      data?.profileImage || "";
+      const imageUrl =
+        data?.data?.profileImage ||
+        data?.data?.user?.profileImage ||
+        data?.profileImage ||
+        "";
 
       if (imageUrl) {
         setProfileData({ ...profileData, profileImage: imageUrl });
@@ -224,7 +229,8 @@ export default function ProfilePage() {
         throw new Error("Image URL not received");
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to upload image";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to upload image";
       toast.error(errorMessage);
     }
   };
@@ -277,19 +283,28 @@ export default function ProfilePage() {
     };
 
     // Check if current password and new password are the same
-    if (passwordData.currentPassword && passwordData.newPassword && 
-        passwordData.currentPassword === passwordData.newPassword) {
-      errors.newPassword = "New password must be different from current password";
+    if (
+      passwordData.currentPassword &&
+      passwordData.newPassword &&
+      passwordData.currentPassword === passwordData.newPassword
+    ) {
+      errors.newPassword =
+        "New password must be different from current password";
     }
 
     // Check if new password and confirm password match
-    if (passwordData.newPassword && passwordData.confirmPassword && 
-        passwordData.newPassword !== passwordData.confirmPassword) {
+    if (
+      passwordData.newPassword &&
+      passwordData.confirmPassword &&
+      passwordData.newPassword !== passwordData.confirmPassword
+    ) {
       errors.confirmPassword = "Password does not match";
     }
 
     setPasswordErrors(errors);
-    return !errors.currentPassword && !errors.newPassword && !errors.confirmPassword;
+    return (
+      !errors.currentPassword && !errors.newPassword && !errors.confirmPassword
+    );
   };
 
   const handlePasswordChange = (field: string, value: string) => {
@@ -306,7 +321,11 @@ export default function ProfilePage() {
       return;
     }
 
-    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+    if (
+      !passwordData.currentPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmPassword
+    ) {
       toast.error("Please fill in all password fields");
       return;
     }
@@ -334,17 +353,15 @@ export default function ProfilePage() {
     }
   };
 
-  const getAccountLevelBadge = (level: string) => {
-    const levelMap: Record<string, { label: string; variant: "warning" | "success" | "info" }> = {
-      silver: { label: "Silver", variant: "info" },
-      gold: { label: "Gold", variant: "warning" },
-      premium: { label: "Premium", variant: "success" },
-    };
-    const levelInfo = levelMap[level.toLowerCase()] || levelMap.silver;
-    return levelInfo;
+  // Get account level info for badge styling
+  const levelInfo = {
+    silver: { label: "Silver", variant: "default" as const },
+    gold: { label: "Gold", variant: "warning" as const },
+    platinum: { label: "Platinum", variant: "success" as const },
+  }[stats.accountLevel.toLowerCase()] || {
+    label: stats.accountLevel,
+    variant: "default" as const,
   };
-
-  const levelInfo = getAccountLevelBadge(stats.accountLevel);
 
   if (loading) {
     return (
@@ -402,12 +419,11 @@ export default function ProfilePage() {
                 className="hidden"
                 id="profile-image-upload"
               />
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
-              >
+                onClick={() => fileInputRef.current?.click()}>
                 Change Profile Picture
               </Button>
               <p className="text-sm text-gray-500 mt-2">
@@ -465,7 +481,9 @@ export default function ProfilePage() {
             label="Current Password"
             type="password"
             value={passwordData.currentPassword}
-            onChange={(e) => handlePasswordChange("currentPassword", e.target.value)}
+            onChange={(e) =>
+              handlePasswordChange("currentPassword", e.target.value)
+            }
             error={passwordErrors.currentPassword}
           />
           <Input
@@ -475,15 +493,34 @@ export default function ProfilePage() {
             onChange={(e) => {
               handlePasswordChange("newPassword", e.target.value);
               // Re-validate confirm password when new password changes
-              if (passwordData.confirmPassword && e.target.value !== passwordData.confirmPassword) {
-                setPasswordErrors({ ...passwordErrors, confirmPassword: "Password does not match" });
-              } else if (passwordData.confirmPassword && e.target.value === passwordData.confirmPassword) {
+              if (
+                passwordData.confirmPassword &&
+                e.target.value !== passwordData.confirmPassword
+              ) {
+                setPasswordErrors({
+                  ...passwordErrors,
+                  confirmPassword: "Password does not match",
+                });
+              } else if (
+                passwordData.confirmPassword &&
+                e.target.value === passwordData.confirmPassword
+              ) {
                 setPasswordErrors({ ...passwordErrors, confirmPassword: "" });
               }
               // Check if new password is same as current
-              if (passwordData.currentPassword && e.target.value === passwordData.currentPassword) {
-                setPasswordErrors({ ...passwordErrors, newPassword: "New password must be different from current password" });
-              } else if (passwordData.currentPassword && e.target.value !== passwordData.currentPassword) {
+              if (
+                passwordData.currentPassword &&
+                e.target.value === passwordData.currentPassword
+              ) {
+                setPasswordErrors({
+                  ...passwordErrors,
+                  newPassword:
+                    "New password must be different from current password",
+                });
+              } else if (
+                passwordData.currentPassword &&
+                e.target.value !== passwordData.currentPassword
+              ) {
                 setPasswordErrors({ ...passwordErrors, newPassword: "" });
               }
             }}
@@ -496,8 +533,14 @@ export default function ProfilePage() {
             onChange={(e) => {
               handlePasswordChange("confirmPassword", e.target.value);
               // Validate match with new password
-              if (passwordData.newPassword && e.target.value !== passwordData.newPassword) {
-                setPasswordErrors({ ...passwordErrors, confirmPassword: "Password does not match" });
+              if (
+                passwordData.newPassword &&
+                e.target.value !== passwordData.newPassword
+              ) {
+                setPasswordErrors({
+                  ...passwordErrors,
+                  confirmPassword: "Password does not match",
+                });
               } else {
                 setPasswordErrors({ ...passwordErrors, confirmPassword: "" });
               }
@@ -516,7 +559,10 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <p className="text-sm text-gray-600 mb-2">Account Level</p>
-            <Badge variant={levelInfo.variant} size="md" className="text-lg px-4 py-2 capitalize">
+            <Badge
+              variant={levelInfo.variant}
+              size="md"
+              className="text-lg px-4 py-2 capitalize">
               {levelInfo.label}
             </Badge>
           </div>
@@ -529,7 +575,11 @@ export default function ProfilePage() {
           <div>
             <p className="text-sm text-gray-600 mb-2">Total Earnings</p>
             <p className="text-2xl font-bold text-primary-purple">
-              ${stats.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              $
+              {stats.totalEarnings.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </p>
           </div>
           <div>

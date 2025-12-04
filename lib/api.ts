@@ -114,7 +114,10 @@ async function apiRequest<T>(
         .catch(() => ({ message: "An error occurred" }));
       // Extract error message from backend response format
       // Backend returns: { success: false, message: "...", error: {...} }
-      const errorMessage = error.message || error.error?.message || `HTTP error! status: ${response.status}`;
+      const errorMessage =
+        error.message ||
+        error.error?.message ||
+        `HTTP error! status: ${response.status}`;
       throw new Error(errorMessage);
     }
 
@@ -129,7 +132,8 @@ async function apiRequest<T>(
     const apiError = error as ApiError;
     if (
       apiError.name === "TypeError" &&
-      (apiError.message?.includes("fetch") || apiError.message === "Failed to fetch")
+      (apiError.message?.includes("fetch") ||
+        apiError.message === "Failed to fetch")
     ) {
       throw new Error(
         `Unable to connect to backend server at ${API_URL}. ` +
@@ -158,7 +162,9 @@ export const websitesApi = {
   addWebsite: (data: WebsiteData) =>
     apiRequest("/websites", { method: "POST", body: data }),
   getWebsites: (filters?: Filters) => {
-    const query = filters ? `?${new URLSearchParams(filters as Record<string, string>).toString()}` : "";
+    const query = filters
+      ? `?${new URLSearchParams(filters as Record<string, string>).toString()}`
+      : "";
     return apiRequest(`/websites${query}`, { method: "GET" });
   },
   getWebsite: (id: string) => apiRequest(`/websites/${id}`, { method: "GET" }),
@@ -190,7 +196,9 @@ export const websitesApi = {
 // Orders API
 export const ordersApi = {
   getOrders: (filters?: Filters) => {
-    const query = filters ? `?${new URLSearchParams(filters as Record<string, string>).toString()}` : "";
+    const query = filters
+      ? `?${new URLSearchParams(filters as Record<string, string>).toString()}`
+      : "";
     return apiRequest(`/orders${query}`, { method: "GET" });
   },
   getOrder: (id: string) => apiRequest(`/orders/${id}`, { method: "GET" }),
@@ -261,8 +269,12 @@ export const profileApi = {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: "An error occurred" }));
-      throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      const error = await response
+        .json()
+        .catch(() => ({ message: "An error occurred" }));
+      throw new Error(
+        error.message || `HTTP error! status: ${response.status}`
+      );
     }
 
     return response.json();
@@ -273,7 +285,7 @@ export const profileApi = {
     const token = localStorage.getItem("authToken");
     const formData = new FormData();
     formData.append("image", file);
-    
+
     const response = await fetch(`${API_URL}/users/profile/image`, {
       method: "POST",
       body: formData,
@@ -283,8 +295,12 @@ export const profileApi = {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: "An error occurred" }));
-      throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      const error = await response
+        .json()
+        .catch(() => ({ message: "An error occurred" }));
+      throw new Error(
+        error.message || `HTTP error! status: ${response.status}`
+      );
     }
 
     return response;
@@ -327,22 +343,26 @@ export const applicationsApi = {
     if (data instanceof FormData) {
       const token = localStorage.getItem("authToken");
       const API_URL = getApiUrl();
-      
+
       return fetch(`${API_URL}/applications`, {
         method: "POST",
         body: data,
-        headers: token ? {
-          Authorization: `Bearer ${token}`,
-        } : {},
+        headers: token
+          ? {
+              Authorization: `Bearer ${token}`,
+            }
+          : {},
       }).then(async (res) => {
         if (!res.ok) {
-          const error = await res.json().catch(() => ({ message: "An error occurred" }));
+          const error = await res
+            .json()
+            .catch(() => ({ message: "An error occurred" }));
           throw new Error(error.message || `HTTP error! status: ${res.status}`);
         }
         return res.json();
       });
     }
-    
+
     // Otherwise use regular apiRequest
     return apiRequest("/applications", {
       method: "POST",
@@ -350,8 +370,7 @@ export const applicationsApi = {
       requiresAuth: false,
     });
   },
-  getApplications: () =>
-    apiRequest("/applications", { method: "GET" }),
+  getApplications: () => apiRequest("/applications", { method: "GET" }),
   reviewApplication: (
     id: string,
     decision: "approve" | "reject",

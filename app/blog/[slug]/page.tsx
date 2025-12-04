@@ -66,7 +66,10 @@ export default function BlogPostPage() {
         setPost(postData);
         // Load related posts
         if (postData.category?.slug) {
-          loadRelatedPosts(postData.category.slug, postData._id || postData.slug);
+          loadRelatedPosts(
+            postData.category.slug,
+            postData._id || postData.slug
+          );
         }
       }
     } catch (error) {
@@ -326,4 +329,3 @@ export default function BlogPostPage() {
     </div>
   );
 }
-

@@ -157,7 +157,9 @@ export default function AdminBlogPage() {
                     </td>
                     <td className="py-4 px-4 text-gray-600">
                       {post.author
-                        ? `${post.author.firstName || ""} ${post.author.lastName || ""}`.trim() || "-"
+                        ? `${post.author.firstName || ""} ${
+                            post.author.lastName || ""
+                          }`.trim() || "-"
                         : "-"}
                     </td>
                     <td className="py-4 px-4">

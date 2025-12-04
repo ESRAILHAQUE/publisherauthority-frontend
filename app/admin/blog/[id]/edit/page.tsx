@@ -187,7 +187,10 @@ export default function EditBlogPostPage() {
                 setFormData({ ...formData, category: e.target.value })
               }
               options={[
-                { value: "", label: loadingCategories ? "Loading..." : "Select category" },
+                {
+                  value: "",
+                  label: loadingCategories ? "Loading..." : "Select category",
+                },
                 ...categories.map((cat) => ({
                   value: cat.slug,
                   label: cat.name,
@@ -257,4 +260,3 @@ export default function EditBlogPostPage() {
     </div>
   );
 }
-

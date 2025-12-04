@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -10,12 +10,12 @@ export const Input: React.FC<InputProps> = ({
   label,
   error,
   helperText,
-  className = '',
+  className = "",
   type,
   ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const isPassword = type === 'password';
+  const isPassword = type === "password";
 
   return (
     <div className="w-full">
@@ -26,14 +26,15 @@ export const Input: React.FC<InputProps> = ({
       )}
       <div className="relative">
         <input
-          type={isPassword && showPassword ? 'text' : type}
+          type={isPassword && showPassword ? "text" : type}
           className={`
             w-full px-4 py-3 rounded-lg border-2 transition-all duration-200
             focus:outline-none focus:ring-2 focus:ring-offset-0
-            ${isPassword ? 'pr-10' : ''}
-            ${error 
-              ? 'border-red-500 focus:ring-red-500' 
-              : 'border-gray-300 focus:border-[#3F207F] focus:ring-[#3F207F]'
+            ${isPassword ? "pr-10" : ""}
+            ${
+              error
+                ? "border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:border-[#3F207F] focus:ring-[#3F207F]"
             }
             ${className}
           `}
@@ -44,15 +45,13 @@ export const Input: React.FC<InputProps> = ({
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors"
-            aria-label={showPassword ? "Hide password" : "Show password"}
-          >
+            aria-label={showPassword ? "Hide password" : "Show password"}>
             {showPassword ? (
               <svg
                 className="w-5 h-5"
                 fill="none"
                 stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+                viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -65,8 +64,7 @@ export const Input: React.FC<InputProps> = ({
                 className="w-5 h-5"
                 fill="none"
                 stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+                viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -84,13 +82,10 @@ export const Input: React.FC<InputProps> = ({
           </button>
         )}
       </div>
-      {error && (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
-      )}
+      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
       {helperText && !error && (
         <p className="mt-1 text-sm text-gray-500">{helperText}</p>
       )}
     </div>
   );
 };
-

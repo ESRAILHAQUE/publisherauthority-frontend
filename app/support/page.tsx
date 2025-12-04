@@ -77,7 +77,9 @@ export default function SupportPage() {
       });
       setSubmitSuccess(true);
       setContactForm({ name: "", email: "", subject: "", message: "" });
-      toast.success("Support ticket created successfully! We'll get back to you soon.");
+      toast.success(
+        "Support ticket created successfully! We'll get back to you soon."
+      );
       setTimeout(() => setSubmitSuccess(false), 5000);
     } catch (error: unknown) {
       const errorMessage =
