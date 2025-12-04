@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-background: #ffffff;
+  --color-foreground: #1a1a1a;
+  
+  /* Brand Colors - publisherauthority inspired */
+  --color-primary-purple: #3F207F;
+  --color-primary-purple-light: #5A2F9F;
+  --color-primary-purple-dark: #2D1659;
+  --color-accent-teal: #2EE6B7;
+  --color-accent-teal-light: #4DFFCC;
+  --color-accent-teal-dark: #26D1A6;
+  --color-accent-pink: #E64980;
+  
+  /* Gray Scale */
+  --color-gray-50: #F9FAFB;
+  --color-gray-100: #F3F4F6;
+  --color-gray-200: #E5E7EB;
+  --color-gray-300: #D1D5DB;
+  --color-gray-400: #9CA3AF;
+  --color-gray-500: #6B7280;
+  --color-gray-600: #4B5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1F2937;
+  --color-gray-900: #111827;
+  
+  /* Fonts */
+  --font-family-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-family-mono: var(--font-geist-mono), monospace;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-family-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Smooth transitions for all elements */
+  * {
+    transition-property: color, background-color, border-color, opacity, transform, box-shadow;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+  }
+}
+
+@layer utilities {
+  /* Smooth fade-in animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-gray-100);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-gray-400);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gray-500);
+  }
+}

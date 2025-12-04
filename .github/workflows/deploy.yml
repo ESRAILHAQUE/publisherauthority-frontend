@@ -1,0 +1,117 @@
+name: Deploy Frontend to VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Prevent multiple deployments from running at the same time
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Build project (without env - will use production URL on VPS)
+        run: |
+          # Build without NEXT_PUBLIC_API_URL - it will be set on VPS before restart
+          npm run build
+
+      - name: Verify Secrets Configuration
+        run: |
+          if [ -z "${{ secrets.VPS_HOST }}" ]; then
+            echo "❌ VPS_HOST secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPS_USERNAME }}" ]; then
+            echo "❌ VPS_USERNAME secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
+            echo "❌ VPS_SSH_KEY secret is not set"
+            exit 1
+          fi
+          echo "✓ All required secrets are configured"
+          echo "✓ Attempting to connect to: ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:22"
+
+      - name: Test Network Connectivity
+        continue-on-error: true
+        run: |
+          echo "Testing basic network connectivity..."
+          VPS_HOST="${{ secrets.VPS_HOST }}"
+          if command -v nc &> /dev/null; then
+            if nc -z -v -w5 "${VPS_HOST}" 22 2>&1; then
+              echo "✓ Port 22 is reachable"
+            else
+              echo "⚠️  Cannot reach port 22 - this is likely a firewall issue"
+              echo "⚠️  Please contact Hostinger support to allow GitHub Actions IPs"
+            fi
+          else
+            echo "⚠️  netcat (nc) not available, skipping connectivity test"
+          fi
+
+      - name: Test SSH Connection
+        continue-on-error: true
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          timeout: 60s
+          debug: true
+          script: |
+            echo "SSH connection successful!"
+            echo "Server info:"
+            uname -a
+            echo "Current user: $(whoami)"
+            echo "Current directory: $(pwd)"
+
+      - name: Deploy to VPS
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: ".next,public,package.json,package-lock.json,next.config.ts,.env.local"
+          target: "/var/www/publisherauthority/frontend"
+          timeout: 120s
+          command_timeout: 20m
+          debug: true
+
+      - name: Restart Frontend
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          timeout: 120s
+          command_timeout: 20m
+          debug: true
+          script: |
+            cd /var/www/publisherauthority/frontend
+            # Create or update .env.local with production API URL
+            echo "NEXT_PUBLIC_API_URL=https://publisherauthority.com/api/v1" > .env.local
+            echo "✓ Created .env.local with production API URL"
+            cat .env.local
+            npm install --production
+            pm2 restart publisherauthority-frontend || pm2 start npm --name publisherauthority-frontend -- start
+            pm2 save
