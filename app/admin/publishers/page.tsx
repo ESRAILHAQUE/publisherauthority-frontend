@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Card } from "@/components/shared/Card";
 import { Badge } from "@/components/shared/Badge";
 import { Button } from "@/components/shared/Button";
+import { PublisherManageModal } from "@/components/admin/PublisherManageModal";
 import { adminApi } from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -27,6 +28,10 @@ interface Publisher {
 export default function AdminPublishersPage() {
   const [publishers, setPublishers] = useState<Publisher[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showManageModal, setShowManageModal] = useState(false);
+  const [selectedPublisher, setSelectedPublisher] = useState<Publisher | null>(
+    null
+  );
 
   useEffect(() => {
     loadPublishers();
@@ -35,30 +40,51 @@ export default function AdminPublishersPage() {
   const loadPublishers = async () => {
     try {
       setLoading(true);
-      const data = (await adminApi.getDashboard()) as {
+      const response = (await adminApi.getAllPublishers({}, 1, 100)) as {
+        success?: boolean;
+        data?: {
+          publishers?: Publisher[];
+          [key: string]: unknown;
+        };
         publishers?: Publisher[];
         [key: string]: unknown;
       };
-      setPublishers(data.publishers || []);
+
+      // Handle different response structures
+      let publishersData: Publisher[] = [];
+      if (Array.isArray(response)) {
+        publishersData = response;
+      } else if (
+        response?.data?.publishers &&
+        Array.isArray(response.data.publishers)
+      ) {
+        publishersData = response.data.publishers;
+      } else if (response?.publishers && Array.isArray(response.publishers)) {
+        publishersData = response.publishers;
+      }
+
+      setPublishers(publishersData);
     } catch (error) {
       console.error("Failed to load publishers:", error);
+      toast.error("Failed to load publishers");
+      setPublishers([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdateLevel = async (userId: string, level: string) => {
-    if (!confirm(`Update user level to ${level}?`)) return;
+  const handleManage = (publisher: Publisher) => {
+    setSelectedPublisher(publisher);
+    setShowManageModal(true);
+  };
 
-    try {
-      await adminApi.updateUserLevel(userId, level);
-      toast.success("User level updated successfully");
-      await loadPublishers();
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to update user level";
-      toast.error(errorMessage);
-    }
+  const handleModalClose = () => {
+    setShowManageModal(false);
+    setSelectedPublisher(null);
+  };
+
+  const handleUpdate = async () => {
+    await loadPublishers();
   };
 
   return (
@@ -169,9 +195,7 @@ export default function AdminPublishersPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => {
-                            toast("Manage feature coming soon", { icon: "ℹ️" });
-                          }}>
+                          onClick={() => handleManage(publisher)}>
                           Manage
                         </Button>
                       </td>
@@ -183,6 +207,16 @@ export default function AdminPublishersPage() {
           </table>
         </div>
       </Card>
+
+      {/* Publisher Manage Modal */}
+      {selectedPublisher && (
+        <PublisherManageModal
+          isOpen={showManageModal}
+          onClose={handleModalClose}
+          publisher={selectedPublisher}
+          onUpdate={handleUpdate}
+        />
+      )}
     </div>
   );
 }

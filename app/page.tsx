@@ -9,6 +9,7 @@ import { BlogAmplifiedSection } from "@/components/home/BlogAmplifiedSection";
 import { HowItWorksSection } from "@/components/home/HowItWorksSection";
 import { HowMuchCanYouMakeSection } from "@/components/home/HowMuchCanYouMakeSection";
 import { StartEarningTodaySection } from "@/components/home/StartEarningTodaySection";
+import { TestimonialsSection } from "@/components/home/TestimonialsSection";
 import { FAQSection } from "@/components/home/FAQSection";
 
 export default function HomePage() {
@@ -20,6 +21,7 @@ export default function HomePage() {
       <BlogAmplifiedSection />
       <HowItWorksSection />
       <HowMuchCanYouMakeSection />
+      <TestimonialsSection />
       <StartEarningTodaySection />
       <FAQSection />
       <Footer />

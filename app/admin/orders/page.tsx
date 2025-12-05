@@ -38,12 +38,51 @@ export default function AdminOrdersPage() {
   const loadOrders = async () => {
     try {
       setLoading(true);
-      const data = (await adminApi.getAllOrders()) as
+      const response = (await adminApi.getAllOrders()) as
         | Order[]
-        | { orders?: Order[]; [key: string]: unknown };
-      setOrders(Array.isArray(data) ? data : data.orders || []);
+        | {
+            success?: boolean;
+            data?: {
+              orders?: Order[];
+              [key: string]: unknown;
+            };
+            orders?: Order[];
+            [key: string]: unknown;
+          };
+
+      // Handle different response structures
+      let ordersData: Order[] = [];
+      if (Array.isArray(response)) {
+        ordersData = response;
+      } else if (
+        response &&
+        typeof response === "object" &&
+        "data" in response
+      ) {
+        if (Array.isArray(response.data)) {
+          ordersData = response.data;
+        } else if (
+          response.data &&
+          typeof response.data === "object" &&
+          "orders" in response.data &&
+          Array.isArray(response.data.orders)
+        ) {
+          ordersData = response.data.orders;
+        }
+      } else if (
+        response &&
+        typeof response === "object" &&
+        "orders" in response &&
+        Array.isArray(response.orders)
+      ) {
+        ordersData = response.orders;
+      }
+
+      setOrders(ordersData);
     } catch (error) {
       console.error("Failed to load orders:", error);
+      toast.error("Failed to load orders");
+      setOrders([]);
     } finally {
       setLoading(false);
     }

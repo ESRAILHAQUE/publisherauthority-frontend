@@ -191,6 +191,14 @@ export const websitesApi = {
       method: "POST",
       body: { accept },
     }),
+  sendCounterOffer: (
+    id: string,
+    data: { price: number; notes?: string; terms?: string }
+  ) =>
+    apiRequest(`/websites/${id}/counter-offer`, {
+      method: "POST",
+      body: data,
+    }),
 };
 
 // Orders API
@@ -400,11 +408,31 @@ export const adminApi = {
       method: "PUT",
       body: { status, rejectionReason: reason },
     }),
-  sendCounterOffer: (id: string, data: { notes: string; terms: string }) =>
+  sendCounterOffer: (
+    id: string,
+    data: { price: number; notes?: string; terms?: string }
+  ) =>
     apiRequest(`/admin/websites/${id}/counter-offer`, {
       method: "POST",
       body: data,
     }),
+  acceptUserCounterOffer: (id: string) =>
+    apiRequest(`/admin/websites/${id}/counter-offer/accept`, {
+      method: "POST",
+    }),
+  getAllPublishers: (filters?: Filters, page = 1, limit = 100) => {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+    if (filters?.accountLevel)
+      params.append("accountLevel", filters.accountLevel);
+    if (filters?.accountStatus)
+      params.append("accountStatus", filters.accountStatus);
+    return apiRequest(`/admin/publishers?${params.toString()}`, {
+      method: "GET",
+    });
+  },
   getAllOrders: (filters?: Filters) => {
     const params = new URLSearchParams();
     if (filters?.status) params.append("status", filters.status);
@@ -412,14 +440,31 @@ export const adminApi = {
     const query = params.toString() ? `?${params.toString()}` : "";
     return apiRequest(`/admin/orders${query}`, { method: "GET" });
   },
+  getAllPayments: (filters?: Filters, page = 1, limit = 100) => {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+    if (filters?.status) params.append("status", filters.status);
+    return apiRequest(`/admin/payments?${params.toString()}`, {
+      method: "GET",
+    });
+  },
   processPayment: (id: string) =>
     apiRequest(`/admin/payments/${id}/process`, { method: "PUT" }),
   markPaymentAsPaid: (id: string) =>
     apiRequest(`/admin/payments/${id}/mark-paid`, { method: "PUT" }),
+  getPublisherDetails: (id: string) =>
+    apiRequest(`/admin/publishers/${id}`, { method: "GET" }),
   updateUserLevel: (userId: string, level: string) =>
     apiRequest(`/admin/publishers/${userId}/level`, {
       method: "PUT",
       body: { accountLevel: level },
+    }),
+  updatePublisherStatus: (userId: string, status: string) =>
+    apiRequest(`/admin/publishers/${userId}/status`, {
+      method: "PUT",
+      body: { accountStatus: status },
     }),
   getAllApplications: (filters?: Filters) => {
     const params = new URLSearchParams();

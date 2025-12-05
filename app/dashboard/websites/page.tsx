@@ -7,6 +7,8 @@ import { Button } from "@/components/shared/Button";
 import Link from "next/link";
 import { websitesApi } from "@/lib/api";
 import { WebsiteVerification } from "@/components/websites/WebsiteVerification";
+import { CounterOfferModal } from "@/components/websites/CounterOfferModal";
+import { WebsiteDetailsModal } from "@/components/websites/WebsiteDetailsModal";
 import toast from "react-hot-toast";
 
 interface Website {
@@ -18,7 +20,24 @@ interface Website {
   da?: number;
   monthlyTraffic?: number;
   traffic?: number;
+  niche?: string;
+  description?: string;
+  price?: number;
+  verificationMethod?: string;
+  verificationCode?: string;
+  verificationArticleUrl?: string;
   verifiedAt?: string | Date;
+  submittedAt?: string | Date;
+  approvedAt?: string | Date;
+  rejectedReason?: string;
+  counterOffer?: {
+    price?: number;
+    notes?: string;
+    terms?: string;
+    offeredBy?: string;
+    offeredAt?: string | Date;
+    status?: string;
+  };
   [key: string]: unknown;
 }
 
@@ -26,6 +45,13 @@ export default function WebsitesPage() {
   const [websites, setWebsites] = useState<Website[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedWebsite, setSelectedWebsite] = useState<Website | null>(null);
+  const [showCounterOfferModal, setShowCounterOfferModal] = useState(false);
+  const [selectedWebsiteForCounterOffer, setSelectedWebsiteForCounterOffer] = useState<{
+    id: string;
+    price?: number;
+  } | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedWebsiteForDetails, setSelectedWebsiteForDetails] = useState<Website | null>(null);
 
   useEffect(() => {
     loadWebsites();
@@ -123,6 +149,40 @@ export default function WebsitesPage() {
       .join(" ");
   };
 
+  const handleRespondToCounterOffer = async (websiteId: string, accept: boolean) => {
+    try {
+      await websitesApi.respondToCounterOffer(websiteId, accept);
+      toast.success(`Counter offer ${accept ? "accepted" : "rejected"}`);
+      await loadWebsites();
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to respond to counter offer";
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleOpenCounterOfferModal = (websiteId: string, currentPrice?: number) => {
+    setSelectedWebsiteForCounterOffer({ id: websiteId, price: currentPrice });
+    setShowCounterOfferModal(true);
+  };
+
+  const handleSendCounterOffer = async (data: { price: number; notes?: string; terms?: string }) => {
+    if (!selectedWebsiteForCounterOffer) return;
+
+    try {
+      await websitesApi.sendCounterOffer(selectedWebsiteForCounterOffer.id, data);
+      toast.success("Counter offer sent successfully");
+      await loadWebsites();
+      setShowCounterOfferModal(false);
+      setSelectedWebsiteForCounterOffer(null);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to send counter offer";
+      toast.error(errorMessage);
+      throw error; // Re-throw to let modal handle it
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -188,6 +248,9 @@ export default function WebsitesPage() {
                   Monthly Traffic
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                  Price
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
                   Status
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
@@ -202,7 +265,7 @@ export default function WebsitesPage() {
               {websites.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="py-8 px-4 text-center text-gray-500">
                     No websites added yet.{" "}
                     <Link
@@ -236,10 +299,28 @@ export default function WebsitesPage() {
                           0) as number
                       ).toLocaleString()}
                     </td>
+                    <td className="py-4 px-4 text-gray-700">
+                      ${(typeof website.price === 'number' ? website.price : 0).toFixed(2)}
+                      {website.counterOffer && (
+                        <div className="text-xs text-blue-600 mt-1">
+                          Offer: ${(typeof website.counterOffer.price === 'number' ? website.counterOffer.price : 0).toFixed(2)}
+                          {website.counterOffer.offeredBy === "admin" && (
+                            <span className="ml-1">(Admin)</span>
+                          )}
+                        </div>
+                      )}
+                    </td>
                     <td className="py-4 px-4">
                       <Badge variant={getStatusBadge(website.status)}>
                         {formatStatus(website.status)}
                       </Badge>
+                      {website.counterOffer && website.counterOffer.status === "pending" && (
+                        <div className="text-xs text-blue-600 mt-1">
+                          {website.counterOffer.offeredBy === "admin" 
+                            ? "Admin counter offer - respond below"
+                            : "Your counter offer - waiting for admin"}
+                        </div>
+                      )}
                     </td>
                     <td className="py-4 px-4 text-gray-600">
                       {website.verifiedAt
@@ -249,17 +330,69 @@ export default function WebsitesPage() {
                         : "-"}
                     </td>
                     <td className="py-4 px-4">
-                      <div className="flex items-center space-x-2">
+                      <div className="flex flex-col items-start space-y-2">
                         <button
                           onClick={() => {
-                            const websiteId = website._id || website.id;
-                            if (websiteId) {
-                              setSelectedWebsite(website);
-                            }
+                            setSelectedWebsiteForDetails(website);
+                            setShowDetailsModal(true);
                           }}
                           className="text-primary-purple hover:text-[#2EE6B7] text-sm font-medium transition-colors">
-                          {website.status === "pending" ? "Verify" : "View"}
+                          View Details
                         </button>
+                        {website.status === "pending" && (
+                          <button
+                            onClick={() => {
+                              const websiteId = website._id || website.id;
+                              if (websiteId) {
+                                setSelectedWebsite(website);
+                              }
+                            }}
+                            className="text-green-600 hover:text-green-700 text-sm font-medium transition-colors">
+                            Verify
+                          </button>
+                        )}
+                        {website.status === "counter-offer" && 
+                         website.counterOffer?.status === "pending" && 
+                         website.counterOffer?.offeredBy === "admin" && (
+                          <div className="flex flex-col space-y-1">
+                            <button
+                              onClick={() => {
+                                const websiteId = website._id || website.id;
+                                if (websiteId) {
+                                  handleRespondToCounterOffer(String(websiteId), true);
+                                }
+                              }}
+                              className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors">
+                              Accept
+                            </button>
+                            <button
+                              onClick={() => {
+                                const websiteId = website._id || website.id;
+                                if (websiteId) {
+                                  handleRespondToCounterOffer(String(websiteId), false);
+                                }
+                              }}
+                              className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors">
+                              Reject
+                            </button>
+                            <button
+                              onClick={() => {
+                                const websiteId = website._id || website.id;
+                                if (websiteId) {
+                                  handleOpenCounterOfferModal(String(websiteId), website.price);
+                                }
+                              }}
+                              className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors">
+                              Counter Offer
+                            </button>
+                          </div>
+                        )}
+                        {website.status === "counter-offer" && 
+                         website.counterOffer?.offeredBy === "user" && (
+                          <span className="text-xs text-gray-500">
+                            Waiting for admin response
+                          </span>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -269,6 +402,31 @@ export default function WebsitesPage() {
           </table>
         </div>
       </Card>
+
+      {/* Counter Offer Modal */}
+      <CounterOfferModal
+        isOpen={showCounterOfferModal}
+        onClose={() => {
+          setShowCounterOfferModal(false);
+          setSelectedWebsiteForCounterOffer(null);
+        }}
+        onSubmit={handleSendCounterOffer}
+        currentPrice={selectedWebsiteForCounterOffer?.price}
+        title="Send Counter Offer"
+        submitLabel="Send Counter Offer"
+      />
+
+      {/* Website Details Modal */}
+      {selectedWebsiteForDetails && (
+        <WebsiteDetailsModal
+          isOpen={showDetailsModal}
+          onClose={() => {
+            setShowDetailsModal(false);
+            setSelectedWebsiteForDetails(null);
+          }}
+          website={selectedWebsiteForDetails}
+        />
+      )}
     </div>
   );
 }

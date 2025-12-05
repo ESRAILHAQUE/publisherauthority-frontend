@@ -1,23 +1,118 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/shared/Card";
+import { adminApi } from "@/lib/api";
+import toast from "react-hot-toast";
 
 export default function AdminDashboardPage() {
-  const stats = {
-    totalPublishers: 1250,
-    totalWebsites: 3420,
-    pendingVerifications: 23,
-    totalOrders: 8450,
-    activeOrders: 156,
-    totalEarnings: 450000,
-    paymentsQueue: 12,
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalPublishers: 0,
+    totalWebsites: 0,
+    pendingVerifications: 0,
+    totalOrders: 0,
+    activeOrders: 0,
+    totalEarnings: 0,
+    paymentsQueue: 0,
+  });
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      const response = (await adminApi.getDashboard()) as {
+        success?: boolean;
+        data?: {
+          publishers?: { total?: number; active?: number };
+          websites?: { total?: number; pending?: number };
+          orders?: { total?: number; active?: number };
+          payments?: { total?: number; pending?: number; totalEarnings?: number };
+          recentWebsites?: any[];
+          recentOrders?: any[];
+          [key: string]: unknown;
+        };
+        [key: string]: unknown;
+      };
+
+      const data = response?.data || response;
+      
+      setStats({
+        totalPublishers: (data as any)?.publishers?.total || 0,
+        totalWebsites: (data as any)?.websites?.total || 0,
+        pendingVerifications: (data as any)?.websites?.pending || 0,
+        totalOrders: (data as any)?.orders?.total || 0,
+        activeOrders: (data as any)?.orders?.active || 0,
+        totalEarnings: (data as any)?.payments?.totalEarnings || 0,
+        paymentsQueue: (data as any)?.payments?.pending || 0,
+      });
+
+      // Load recent activity
+      const recentWebsites = (data as any)?.recentWebsites || [];
+      const recentOrders = (data as any)?.recentOrders || [];
+      
+      const activities: any[] = [];
+      
+      // Add recent websites
+      recentWebsites.slice(0, 3).forEach((website: any) => {
+        const userName = website.userId?.firstName && website.userId?.lastName
+          ? `${website.userId.firstName} ${website.userId.lastName}`
+          : "Unknown User";
+        const timeAgo = website.submittedAt
+          ? getTimeAgo(new Date(website.submittedAt))
+          : "Recently";
+        activities.push({
+          type: website.status === "active" ? "Website Approved" : "New Website",
+          user: userName,
+          time: timeAgo,
+        });
+      });
+      
+      // Add recent orders
+      recentOrders.slice(0, 2).forEach((order: any) => {
+        const userName = order.publisherId?.firstName && order.publisherId?.lastName
+          ? `${order.publisherId.firstName} ${order.publisherId.lastName}`
+          : "Unknown User";
+        const timeAgo = order.assignedAt
+          ? getTimeAgo(new Date(order.assignedAt))
+          : "Recently";
+        activities.push({
+          type: order.status === "completed" ? "Order Completed" : "New Order",
+          user: userName,
+          time: timeAgo,
+        });
+      });
+      
+      setRecentActivity(activities.slice(0, 4));
+    } catch (error) {
+      console.error("Failed to load dashboard data:", error);
+      toast.error("Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const recentActivity = [
-    { type: "New Application", user: "John Doe", time: "2 hours ago" },
-    { type: "Website Approved", user: "Jane Smith", time: "3 hours ago" },
-    { type: "Order Completed", user: "Mike Johnson", time: "4 hours ago" },
-    { type: "Payment Processed", user: "Sarah Williams", time: "5 hours ago" },
-  ];
+  const getTimeAgo = (date: Date): string => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return "Just now";
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-gray-600">Loading dashboard...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
@@ -191,24 +286,36 @@ export default function AdminDashboardPage() {
           Quick Actions
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
-          <button className="p-4 border-2 border-gray-200 rounded-sm hover:border-primary-purple hover:bg-gray-50 transition-colors text-left">
+          <a 
+            href="/admin/applications?status=pending"
+            className="p-4 border-2 border-gray-200 rounded-sm hover:border-primary-purple hover:bg-gray-50 transition-colors text-left">
             <h3 className="font-semibold text-gray-900 mb-1">
               Review Applications
             </h3>
-            <p className="text-sm text-gray-600">23 pending applications</p>
-          </button>
-          <button className="p-4 border-2 border-gray-200 rounded-sm hover:border-primary-purple hover:bg-gray-50 transition-colors text-left">
+            <p className="text-sm text-gray-600">
+              {stats.totalPublishers > 0 ? `${stats.totalPublishers} total publishers` : "No applications"}
+            </p>
+          </a>
+          <a 
+            href="/admin/websites?status=pending"
+            className="p-4 border-2 border-gray-200 rounded-sm hover:border-primary-purple hover:bg-gray-50 transition-colors text-left">
             <h3 className="font-semibold text-gray-900 mb-1">
               Verify Websites
             </h3>
-            <p className="text-sm text-gray-600">15 websites pending</p>
-          </button>
-          <button className="p-4 border-2 border-gray-200 rounded-sm hover:border-primary-purple hover:bg-gray-50 transition-colors text-left">
+            <p className="text-sm text-gray-600">
+              {stats.pendingVerifications} {stats.pendingVerifications === 1 ? "website" : "websites"} pending
+            </p>
+          </a>
+          <a 
+            href="/admin/payments"
+            className="p-4 border-2 border-gray-200 rounded-sm hover:border-primary-purple hover:bg-gray-50 transition-colors text-left">
             <h3 className="font-semibold text-gray-900 mb-1">
               Process Payments
             </h3>
-            <p className="text-sm text-gray-600">12 payments queued</p>
-          </button>
+            <p className="text-sm text-gray-600">
+              {stats.paymentsQueue} {stats.paymentsQueue === 1 ? "payment" : "payments"} queued
+            </p>
+          </a>
         </div>
       </Card>
 
@@ -218,17 +325,23 @@ export default function AdminDashboardPage() {
           Recent Activity
         </h2>
         <div className="space-y-4">
-          {recentActivity.map((activity, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-sm">
-              <div>
-                <p className="font-medium text-gray-900">{activity.type}</p>
-                <p className="text-sm text-gray-600">{activity.user}</p>
+          {recentActivity.length > 0 ? (
+            recentActivity.map((activity, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-sm">
+                <div>
+                  <p className="font-medium text-gray-900">{activity.type}</p>
+                  <p className="text-sm text-gray-600">{activity.user}</p>
+                </div>
+                <p className="text-sm text-gray-500">{activity.time}</p>
               </div>
-              <p className="text-sm text-gray-500">{activity.time}</p>
+            ))
+          ) : (
+            <div className="p-4 text-center text-gray-500">
+              No recent activity
             </div>
-          ))}
+          )}
         </div>
       </Card>
     </div>

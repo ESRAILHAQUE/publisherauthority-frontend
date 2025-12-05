@@ -3,15 +3,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { adminApi } from "@/lib/api";
+import { initializeSocket, getSocket, disconnectSocket } from "@/lib/socket";
+import toast from "react-hot-toast";
 
 interface Notification {
   id: string;
-  type: "ticket" | "order" | "payment" | "application" | "website";
+  type: "ticket" | "order" | "payment" | "application" | "website" | "counter_offer";
   title: string;
   message: string;
   link: string;
   createdAt: string;
   read: boolean;
+  data?: any;
 }
 
 export const NotificationDropdown: React.FC = () => {
@@ -36,29 +39,6 @@ export const NotificationDropdown: React.FC = () => {
       localStorage.setItem("admin_notifications_read", JSON.stringify(Array.from(readSet)));
     }
   };
-
-  useEffect(() => {
-    loadNotifications();
-    // Refresh notifications every 30 seconds
-    const interval = setInterval(loadNotifications, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen]);
 
   const loadNotifications = async () => {
     try {
@@ -146,13 +126,142 @@ export const NotificationDropdown: React.FC = () => {
         });
       }
 
-      setNotifications(notificationList);
+      // Preserve real-time notifications (those with dynamic IDs like website_*, counter_offer_*, etc.)
+      setNotifications((prev) => {
+        const realtimeNotifications = prev.filter(
+          (n) => n.id.startsWith("website_") || n.id.startsWith("counter_offer_accepted_") || n.id.startsWith("user_counter_offer_")
+        );
+        // Merge: real-time notifications first, then dashboard stats notifications
+        // Update read status for real-time notifications from localStorage
+        const updatedRealtime = realtimeNotifications.map((n) => ({
+          ...n,
+          read: readSet.has(n.id),
+        }));
+        return [...updatedRealtime, ...notificationList];
+      });
     } catch (error) {
       console.error("Failed to load notifications:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleRealtimeNotification = (notificationData: { type: string; data: any; timestamp: string }) => {
+    const { type, data, timestamp } = notificationData;
+    
+    let newNotification: Notification | null = null;
+    
+    switch (type) {
+      case "website_added":
+        newNotification = {
+          id: `website_${data.websiteId}_${timestamp}`,
+          type: "website",
+          title: "New Website Added",
+          message: `${data.userName} added a new website: ${data.url} ($${data.price})`,
+          link: `/admin/websites?status=pending`,
+          createdAt: timestamp,
+          read: false,
+          data,
+        };
+        toast.success(`New website added: ${data.url}`, {
+          icon: "🌐",
+        });
+        break;
+        
+      case "counter_offer_accepted":
+        newNotification = {
+          id: `counter_offer_accepted_${data.websiteId}_${timestamp}`,
+          type: "counter_offer",
+          title: "Counter Offer Accepted",
+          message: `${data.userName} accepted counter offer for ${data.url} at $${data.price}`,
+          link: `/admin/websites`,
+          createdAt: timestamp,
+          read: false,
+          data,
+        };
+        toast.success(`Counter offer accepted for ${data.url}`, {
+          icon: "✅",
+        });
+        break;
+        
+      case "user_counter_offer":
+        newNotification = {
+          id: `user_counter_offer_${data.websiteId}_${timestamp}`,
+          type: "counter_offer",
+          title: "User Counter Offer",
+          message: `${data.userName} sent a counter offer: $${data.price} for ${data.url}`,
+          link: `/admin/websites?status=counter-offer`,
+          createdAt: timestamp,
+          read: false,
+          data,
+        };
+        toast.success(`Counter offer received from ${data.userName}`, {
+          icon: "💬",
+        });
+        break;
+    }
+    
+    if (newNotification) {
+      // Ensure new notification is marked as unread (not in localStorage)
+      const readSet = getReadNotifications();
+      const notificationWithReadStatus = {
+        ...newNotification,
+        read: readSet.has(newNotification.id), // Will be false for new notifications
+      };
+      
+      setNotifications((prev) => {
+        // Check if notification already exists (avoid duplicates)
+        const exists = prev.some(n => n.id === newNotification.id);
+        if (exists) return prev;
+        // Add new notification at the beginning
+        return [notificationWithReadStatus, ...prev];
+      });
+      
+      // Reload notifications to get updated counts, but preserve real-time notifications
+      // Use setTimeout to ensure state update happens first
+      setTimeout(() => {
+        loadNotifications();
+      }, 100);
+    }
+  };
+
+  useEffect(() => {
+    loadNotifications();
+    // Refresh notifications every 30 seconds
+    const interval = setInterval(loadNotifications, 30000);
+    
+    // Initialize Socket.IO for real-time notifications
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      const socket = initializeSocket(token);
+      
+      socket.on("notification", handleRealtimeNotification);
+      
+      return () => {
+        clearInterval(interval);
+        socket.off("notification", handleRealtimeNotification);
+        disconnectSocket();
+      };
+    }
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -199,6 +308,12 @@ export const NotificationDropdown: React.FC = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
           </svg>
         );
+      case "counter_offer":
+        return (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          </svg>
+        );
       default:
         return (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -213,7 +328,9 @@ export const NotificationDropdown: React.FC = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors focus:outline-none"
-        aria-label="Notifications">
+        aria-label="Notifications"
+        aria-live="polite"
+        aria-atomic="true">
         <svg
           className="w-6 h-6"
           fill="none"
@@ -227,7 +344,9 @@ export const NotificationDropdown: React.FC = () => {
           />
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+          <span 
+            className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow-lg"
+            style={{ minWidth: '20px' }}>
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -262,6 +381,7 @@ export const NotificationDropdown: React.FC = () => {
                         notification.type === "order" ? "text-purple-500" :
                         notification.type === "payment" ? "text-green-500" :
                         notification.type === "application" ? "text-yellow-500" :
+                        notification.type === "counter_offer" ? "text-orange-500" :
                         "text-gray-500"
                       }`}>
                         {getNotificationIcon(notification.type)}

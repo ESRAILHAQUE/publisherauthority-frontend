@@ -32,13 +32,34 @@ export default function AdminPaymentsPage() {
   const loadPayments = async () => {
     try {
       setLoading(true);
-      const data = (await adminApi.getDashboard()) as {
+      const response = (await adminApi.getAllPayments({}, 1, 100)) as {
+        success?: boolean;
+        data?: {
+          payments?: Payment[];
+          [key: string]: unknown;
+        };
         payments?: Payment[];
         [key: string]: unknown;
       };
-      setPayments(data.payments || []);
+
+      // Handle different response structures
+      let paymentsData: Payment[] = [];
+      if (Array.isArray(response)) {
+        paymentsData = response;
+      } else if (
+        response?.data?.payments &&
+        Array.isArray(response.data.payments)
+      ) {
+        paymentsData = response.data.payments;
+      } else if (response?.payments && Array.isArray(response.payments)) {
+        paymentsData = response.payments;
+      }
+
+      setPayments(paymentsData);
     } catch (error) {
       console.error("Failed to load payments:", error);
+      toast.error("Failed to load payments");
+      setPayments([]);
     } finally {
       setLoading(false);
     }

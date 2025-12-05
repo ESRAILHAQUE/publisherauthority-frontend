@@ -7,6 +7,7 @@ import { Input } from "@/components/shared/Input";
 import { Textarea } from "@/components/shared/Textarea";
 import { Card } from "@/components/shared/Card";
 import { websitesApi } from "@/lib/api";
+import toast from "react-hot-toast";
 
 export default function AddWebsitePage() {
   const router = useRouter();
@@ -16,10 +17,58 @@ export default function AddWebsitePage() {
     monthlyTraffic: "",
     niche: "",
     description: "",
+    price: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [isUploadingBulk, setIsUploadingBulk] = useState(false);
+
+  const handleBulkUpload = async () => {
+    if (!csvFile) return;
+
+    setIsUploadingBulk(true);
+    setError("");
+
+    try {
+      const text = await csvFile.text();
+      const lines = text.split('\n').filter(line => line.trim());
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      
+      const websites = lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.trim());
+        const website: Record<string, unknown> = {};
+        headers.forEach((header, index) => {
+          const value = values[index] || '';
+          if (header === 'domainauthority' || header === 'monthlytraffic') {
+            website[header === 'domainauthority' ? 'domainAuthority' : 'monthlyTraffic'] = parseInt(value) || 0;
+          } else if (header === 'price') {
+            website.price = parseFloat(value) || 0;
+          } else {
+            website[header] = value;
+          }
+        });
+        return website;
+      }).filter(w => w.url);
+
+      await websitesApi.bulkAddWebsites(websites as any);
+      toast.success(`${websites.length} websites uploaded successfully!`);
+      setCsvFile(null);
+      setTimeout(() => {
+        router.push("/dashboard/websites");
+      }, 2000);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to upload websites. Please check CSV format.";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsUploadingBulk(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +82,7 @@ export default function AddWebsitePage() {
         monthlyTraffic: parseInt(formData.monthlyTraffic),
         niche: formData.niche,
         description: formData.description,
+        price: parseFloat(formData.price),
       });
 
       setSuccess(true);
@@ -177,6 +227,20 @@ export default function AddWebsitePage() {
             required
           />
 
+          <Input
+            label="Price per Article ($)"
+            name="price"
+            type="number"
+            value={formData.price}
+            onChange={(e) =>
+              setFormData({ ...formData, price: e.target.value })
+            }
+            placeholder="100.00"
+            min="0"
+            step="0.01"
+            required
+          />
+
           <Textarea
             label="Description"
             name="description"
@@ -211,18 +275,51 @@ export default function AddWebsitePage() {
           Bulk Add Websites
         </h2>
         <p className="text-gray-600 mb-4">
-          Upload a CSV file to add multiple websites at once. Download the
-          template below.
+          Upload a CSV file to add multiple websites at once. CSV format: url, domainAuthority, monthlyTraffic, niche, description, price
         </p>
-        <div className="flex items-center space-x-4">
-          <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium transition-colors">
-            Download CSV Template
-          </button>
-          <input
-            type="file"
-            accept=".csv"
-            className="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#3F207F] file:text-white hover:file:bg-[#5A2F9F] cursor-pointer"
-          />
+        <div className="space-y-4">
+          <div className="flex items-center space-x-4">
+            <button
+              type="button"
+              onClick={() => {
+                const csvContent = "url,domainAuthority,monthlyTraffic,niche,description,price\nhttps://example.com,30,5000,Technology,Great tech blog,100";
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'website_template.csv';
+                a.click();
+                window.URL.revokeObjectURL(url);
+              }}
+              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium transition-colors">
+              Download CSV Template
+            </button>
+            <input
+              type="file"
+              accept=".csv"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setCsvFile(file);
+                }
+              }}
+              className="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#3F207F] file:text-white hover:file:bg-[#5A2F9F] cursor-pointer"
+            />
+          </div>
+          {csvFile && (
+            <div className="flex items-center space-x-4">
+              <p className="text-sm text-gray-600">
+                Selected: {csvFile.name}
+              </p>
+              <Button
+                type="button"
+                onClick={handleBulkUpload}
+                isLoading={isUploadingBulk}
+                disabled={isUploadingBulk}>
+                Upload CSV
+              </Button>
+            </div>
+          )}
         </div>
       </Card>
     </div>
