@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/shared/Card";
+import { Loader } from "@/components/shared/Loader";
 import { adminApi } from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -106,14 +107,6 @@ export default function AdminDashboardPage() {
     return `${Math.floor(diffInSeconds / 86400)} days ago`;
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-gray-600">Loading dashboard...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-2">
       <div>
@@ -125,6 +118,12 @@ export default function AdminDashboardPage() {
         </p>
       </div>
 
+      {loading ? (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader size="lg" text="Loading dashboard..." />
+        </div>
+      ) : (
+        <>
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1">
         <Card hover>
@@ -344,6 +343,8 @@ export default function AdminDashboardPage() {
           )}
         </div>
       </Card>
+        </>
+      )}
     </div>
   );
 }

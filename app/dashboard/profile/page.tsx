@@ -6,6 +6,7 @@ import { Card } from "@/components/shared/Card";
 import { Input } from "@/components/shared/Input";
 import { Button } from "@/components/shared/Button";
 import { Badge } from "@/components/shared/Badge";
+import { Loader } from "@/components/shared/Loader";
 import { profileApi, dashboardApi } from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -363,19 +364,6 @@ export default function ProfilePage() {
     variant: "default" as const,
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold text-primary-purple mb-2">
-            Profile Settings
-          </h1>
-          <p className="text-gray-600">Loading profile data...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
       <div>
@@ -387,6 +375,12 @@ export default function ProfilePage() {
         </p>
       </div>
 
+      {loading ? (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader size="lg" text="Loading profile data..." />
+        </div>
+      ) : (
+        <>
       {/* Profile Information */}
       <Card>
         <h2 className="text-xl font-semibold text-primary-purple mb-6">
@@ -600,6 +594,8 @@ export default function ProfilePage() {
           </div>
         </div>
       </Card>
+        </>
+      )}
     </div>
   );
 }

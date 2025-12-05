@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Card } from "@/components/shared/Card";
 import { Input } from "@/components/shared/Input";
 import { Button } from "@/components/shared/Button";
+import { Loader } from "@/components/shared/Loader";
 import { adminApi } from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -89,14 +90,6 @@ export default function AdminSettingsPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-gray-600">Loading settings...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
       <div>
@@ -108,7 +101,13 @@ export default function AdminSettingsPage() {
         </p>
       </div>
 
-      <Card>
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader size="lg" text="Loading settings..." />
+        </div>
+      ) : (
+        <>
+          <Card>
         <h2 className="text-xl font-semibold text-primary-purple mb-6">
           General Settings
         </h2>
@@ -170,6 +169,8 @@ export default function AdminSettingsPage() {
           </Button>
         </div>
       </Card>
+        </>
+      )}
     </div>
   );
 }

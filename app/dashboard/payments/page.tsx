@@ -5,6 +5,7 @@ import { Card } from "@/components/shared/Card";
 import { Input } from "@/components/shared/Input";
 import { Button } from "@/components/shared/Button";
 import { Badge } from "@/components/shared/Badge";
+import { Loader } from "@/components/shared/Loader";
 import { paymentsApi, profileApi } from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -177,8 +178,10 @@ export default function PaymentsPage() {
                 <tr>
                   <td
                     colSpan={8}
-                    className="py-8 px-4 text-center text-gray-500">
-                    Loading invoices...
+                    className="py-8 px-4 text-center">
+                    <div className="flex items-center justify-center py-12">
+                      <Loader size="md" text="Loading invoices..." />
+                    </div>
                   </td>
                 </tr>
               ) : invoices.length === 0 ? (

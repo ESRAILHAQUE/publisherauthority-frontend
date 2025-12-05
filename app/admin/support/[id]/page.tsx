@@ -6,6 +6,7 @@ import { Card } from "@/components/shared/Card";
 import { Badge } from "@/components/shared/Badge";
 import { Button } from "@/components/shared/Button";
 import { Textarea } from "@/components/shared/Textarea";
+import { Loader } from "@/components/shared/Loader";
 import { adminApi } from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -146,7 +147,7 @@ export default function AdminTicketDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-gray-600">Loading ticket details...</div>
+        <Loader size="lg" text="Loading ticket details..." />
       </div>
     );
   }

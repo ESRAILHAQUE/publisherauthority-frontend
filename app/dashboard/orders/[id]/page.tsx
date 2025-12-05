@@ -7,6 +7,7 @@ import { Badge } from "@/components/shared/Badge";
 import { Button } from "@/components/shared/Button";
 import { Input } from "@/components/shared/Input";
 import { Textarea } from "@/components/shared/Textarea";
+import { Loader } from "@/components/shared/Loader";
 import { ordersApi } from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -66,15 +67,7 @@ export default function OrderDetailPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-gray-600">Loading order...</div>
-      </div>
-    );
-  }
-
-  if (!order) {
+  if (!order && !loading) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-600">Order not found</p>
@@ -87,7 +80,7 @@ export default function OrderDetailPage() {
     );
   }
 
-  const orderStatus = String(order.status || "");
+  const orderStatus = order ? String(order.status || "") : "";
   const canSubmit =
     orderStatus === "ready-to-post" || orderStatus === "pending";
   const isCompleted = orderStatus === "completed";
@@ -102,39 +95,54 @@ export default function OrderDetailPage() {
             onClick={() => router.push("/dashboard/orders")}>
             ← Back to Orders
           </Button>
-          <h1 className="text-3xl font-bold text-primary-purple mt-4 mb-2">
-            Order #
-            {String(
-              order.orderNumber ||
-                (order._id ? String(order._id).slice(-8) : "") ||
-                order.id ||
-                "N/A"
-            )}
-          </h1>
-          <p className="text-gray-600">
-            {String(order.title || "Untitled Order")}
-          </p>
+          {loading ? (
+            <div className="mt-4">
+              <Loader size="md" text="Loading order..." />
+            </div>
+          ) : (
+            <>
+              <h1 className="text-3xl font-bold text-primary-purple mt-4 mb-2">
+                Order #
+                {String(
+                  order?.orderNumber ||
+                    (order?._id ? String(order._id).slice(-8) : "") ||
+                    order?.id ||
+                    "N/A"
+                )}
+              </h1>
+              <p className="text-gray-600">
+                {String(order?.title || "Untitled Order")}
+              </p>
+            </>
+          )}
         </div>
-        <Badge
-          variant={
-            orderStatus === "completed"
-              ? "success"
-              : orderStatus === "ready-to-post"
-              ? "info"
-              : orderStatus === "verifying"
-              ? "warning"
-              : "default"
-          }
-          size="md">
-          {order.status
-            ? String(order.status)
-                .replace("-", " ")
-                .replace(/\b\w/g, (l: string) => l.toUpperCase())
-            : "Unknown"}
-        </Badge>
+        {!loading && order && (
+          <Badge
+            variant={
+              orderStatus === "completed"
+                ? "success"
+                : orderStatus === "ready-to-post"
+                ? "info"
+                : orderStatus === "verifying"
+                ? "warning"
+                : "default"
+            }
+            size="md">
+            {order.status
+              ? String(order.status)
+                  .replace("-", " ")
+                  .replace(/\b\w/g, (l: string) => l.toUpperCase())
+              : "Unknown"}
+          </Badge>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {loading ? (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader size="lg" text="Loading order details..." />
+        </div>
+      ) : order ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Order Details */}
         <div className="lg:col-span-2 space-y-6">
           <Card>
@@ -319,6 +327,7 @@ export default function OrderDetailPage() {
           </Card>
         </div>
       </div>
+      ) : null}
     </div>
   );
 }

@@ -21,7 +21,7 @@ export const BlogAmplifiedSection: React.FC = () => {
 
   return (
     <section className="bg-white py-14 text-slate-900 md:py-20">
-      <div className="mx-auto w-full max-w-6xl px-4">
+      <div className="mx-auto w-full max-w-7xl px-4">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
             Your blog,{' '}

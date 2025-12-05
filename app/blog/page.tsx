@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card } from "@/components/shared/Card";
 import { Badge } from "@/components/shared/Badge";
+import { Loader, BlogPostSkeleton } from "@/components/shared/Loader";
 import Link from "next/link";
 import { blogApi, getApiUrl } from "@/lib/api";
 
@@ -46,9 +47,15 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [error, setError] = useState<string | null>(null);
 
+  // Load categories only once on mount
   useEffect(() => {
     loadCategories();
+  }, []);
+
+  // Load posts when category or page changes
+  useEffect(() => {
     loadPosts();
   }, [selectedCategory, currentPage]);
 
@@ -75,6 +82,7 @@ export default function BlogPage() {
   const loadPosts = async () => {
     try {
       setLoading(true);
+      setError(null);
       const params = new URLSearchParams();
       if (selectedCategory !== "all") {
         params.append("category", selectedCategory);
@@ -86,7 +94,32 @@ export default function BlogPage() {
       const apiUrl = getApiUrl();
       const response = await fetch(`${apiUrl}/blog/posts${query}`, {
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          // Too Many Requests - wait and retry once
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          const retryResponse = await fetch(`${apiUrl}/blog/posts${query}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          if (!retryResponse.ok) {
+            throw new Error("Too many requests. Please wait a moment and refresh the page.");
+          }
+          const retryData = await retryResponse.json();
+          const postsData = retryData?.data?.posts || retryData?.posts || [];
+          setPosts(Array.isArray(postsData) ? postsData : []);
+          setTotalPages(retryData?.data?.pages || retryData?.pages || 1);
+          return;
+        }
+        throw new Error(`Failed to load posts: ${response.statusText}`);
+      }
 
       const data = (await response.json()) as {
         success?: boolean;
@@ -107,8 +140,11 @@ export default function BlogPage() {
       const postsData = data?.data?.posts || data?.posts || [];
       setPosts(Array.isArray(postsData) ? postsData : []);
       setTotalPages(data?.data?.pages || data?.pages || 1);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to load blog posts:", error);
+      setError(error.message || "Failed to load blog posts. Please try again.");
+      setPosts([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
@@ -135,15 +171,35 @@ export default function BlogPage() {
   const featuredPosts = posts.filter((post) => post.status === "published").slice(0, 2);
   const otherPosts = posts.filter((post) => post.status === "published").slice(2);
 
-  if (loading) {
+  if (loading && posts.length === 0) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Header />
         <main className="flex-1 py-12">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-center min-h-[400px]">
-              <div className="text-gray-600">Loading blog posts...</div>
+          <div className="mx-auto w-full max-w-7xl px-4">
+            {/* Header */}
+            <div className="text-center mb-12">
+              <h1 className="text-4xl md:text-5xl font-bold text-primary-purple mb-4">
+                Blog & Resources
+              </h1>
+              <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+                Stay updated with the latest insights on SEO, digital marketing,
+                and blog monetization.
+              </p>
             </div>
+
+            {/* Categories Skeleton */}
+            <div className="flex flex-wrap justify-center gap-3 mb-12">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="h-10 w-24 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-full animate-pulse"
+                />
+              ))}
+            </div>
+
+            {/* Blog Posts Skeleton */}
+            <BlogPostSkeleton count={6} featured={false} />
           </div>
         </main>
         <Footer />
@@ -156,7 +212,7 @@ export default function BlogPage() {
       <Header />
 
       <main className="flex-1 py-12">
-        <div className="container mx-auto px-4">
+        <div className="mx-auto w-full max-w-7xl px-4">
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-primary-purple mb-4">
@@ -199,6 +255,13 @@ export default function BlogPage() {
             ))}
           </div>
 
+          {/* Loading Overlay */}
+          {loading && posts.length > 0 && (
+            <div className="fixed inset-0 z-40 flex items-center justify-center bg-white/60 backdrop-blur-sm">
+              <Loader size="lg" text="Loading posts..." />
+            </div>
+          )}
+
           {/* Featured Posts */}
           {featuredPosts.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
@@ -228,8 +291,26 @@ export default function BlogPage() {
             </div>
           )}
 
+          {/* Error Message */}
+          {error && (
+            <div className="text-center py-12">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+                <p className="text-red-800 font-medium mb-2">Error Loading Posts</p>
+                <p className="text-red-600 text-sm mb-4">{error}</p>
+                <button
+                  onClick={() => {
+                    setError(null);
+                    loadPosts();
+                  }}
+                  className="px-4 py-2 bg-primary-purple text-white rounded-lg hover:bg-primary-purple-light transition-colors">
+                  Try Again
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* No Posts Message */}
-          {posts.length === 0 && !loading && (
+          {posts.length === 0 && !loading && !error && (
             <div className="text-center py-12">
               <p className="text-gray-600 text-lg mb-4">
                 No blog posts found.

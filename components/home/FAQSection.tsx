@@ -48,7 +48,7 @@ export const FAQSection: React.FC = () => {
 
   return (
     <section className="bg-gray-50 py-16">
-      <div className="mx-auto w-full max-w-4xl px-4">
+      <div className="mx-auto w-full max-w-7xl px-4">
         <div className="mb-10 text-center">
           <h2 className="text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
             Questions from publishers,{' '}

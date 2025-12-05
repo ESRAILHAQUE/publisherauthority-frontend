@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Card } from "@/components/shared/Card";
 import { Badge } from "@/components/shared/Badge";
 import { Button } from "@/components/shared/Button";
+import { Loader } from "@/components/shared/Loader";
 import Link from "next/link";
 import { websitesApi } from "@/lib/api";
 import { WebsiteVerification } from "@/components/websites/WebsiteVerification";
@@ -183,14 +184,6 @@ export default function WebsitesPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-gray-600">Loading websites...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -235,48 +228,54 @@ export default function WebsitesPage() {
 
       <Card>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  Website URL
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  DA Score
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  Monthly Traffic
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  Price
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  Status
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  Verified
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {websites.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={7}
-                    className="py-8 px-4 text-center text-gray-500">
-                    No websites added yet.{" "}
-                    <Link
-                      href="/dashboard/websites/add"
-                      className="text-primary-purple hover:underline">
-                      Add your first website
-                    </Link>
-                  </td>
-                </tr>
-              ) : (
-                websites.map((website) => (
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader size="lg" text="Loading websites..." />
+            </div>
+          ) : (
+            <>
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                      Website URL
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                      DA Score
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                      Monthly Traffic
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                      Price
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                      Status
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                      Verified
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {websites.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        className="py-8 px-4 text-center text-gray-500">
+                        No websites added yet.{" "}
+                        <Link
+                          href="/dashboard/websites/add"
+                          className="text-primary-purple hover:underline">
+                          Add your first website
+                        </Link>
+                      </td>
+                    </tr>
+                  ) : (
+                    websites.map((website) => (
                   <tr
                     key={website._id || website.id}
                     className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
@@ -396,10 +395,12 @@ export default function WebsitesPage() {
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </>
+          )}
         </div>
       </Card>
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card } from "@/components/shared/Card";
 import { Badge } from "@/components/shared/Badge";
 import { Button } from "@/components/shared/Button";
+import { Loader } from "@/components/shared/Loader";
 import { ordersApi } from "@/lib/api";
 
 interface Order {
@@ -106,14 +107,6 @@ export default function OrdersPage() {
       .join(" ");
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-gray-600">Loading orders...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
       <div>
@@ -142,8 +135,13 @@ export default function OrdersPage() {
 
       {/* Orders Table */}
       <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader size="lg" text="Loading orders..." />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
@@ -230,7 +228,8 @@ export default function OrdersPage() {
               )}
             </tbody>
           </table>
-        </div>
+          </div>
+        )}
       </Card>
     </div>
   );

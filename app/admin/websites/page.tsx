@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { Card } from "@/components/shared/Card";
 import { Badge } from "@/components/shared/Badge";
 import { Button } from "@/components/shared/Button";
+import { Loader } from "@/components/shared/Loader";
 import { CounterOfferModal } from "@/components/websites/CounterOfferModal";
 import { WebsiteDetailsModal } from "@/components/websites/WebsiteDetailsModal";
 import { adminApi, websitesApi } from "@/lib/api";
@@ -229,14 +230,6 @@ export default function AdminWebsitesPage() {
       .join(" ");
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-gray-600">Loading websites...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
       <div>
@@ -249,8 +242,13 @@ export default function AdminWebsitesPage() {
       </div>
 
       <Card>
-        <div className="overflow-x-auto" style={{ overflowY: "visible" }}>
-          <table className="w-full">
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader size="lg" text="Loading websites..." />
+          </div>
+        ) : (
+          <div className="overflow-x-auto" style={{ overflowY: "visible" }}>
+            <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
@@ -514,7 +512,8 @@ export default function AdminWebsitesPage() {
               )}
             </tbody>
           </table>
-        </div>
+          </div>
+        )}
       </Card>
 
       {/* Counter Offer Modal */}

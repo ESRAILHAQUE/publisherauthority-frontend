@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Card } from "@/components/shared/Card";
 import { Badge } from "@/components/shared/Badge";
 import { Button } from "@/components/shared/Button";
+import { Loader } from "@/components/shared/Loader";
 import { PublisherManageModal } from "@/components/admin/PublisherManageModal";
 import { adminApi } from "@/lib/api";
 import toast from "react-hot-toast";
@@ -99,113 +100,111 @@ export default function AdminPublishersPage() {
       </div>
 
       <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  Name
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  Email
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  Level
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  Orders
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  Earnings
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  Status
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td
-                    colSpan={7}
-                    className="py-8 px-4 text-center text-gray-500">
-                    Loading publishers...
-                  </td>
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader size="lg" text="Loading publishers..." />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                    Name
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                    Email
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                    Level
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                    Orders
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                    Earnings
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                    Status
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                    Actions
+                  </th>
                 </tr>
-              ) : publishers.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={7}
-                    className="py-8 px-4 text-center text-gray-500">
-                    No publishers found
-                  </td>
-                </tr>
-              ) : (
-                publishers.map((publisher) => {
-                  const level = (publisher.accountLevel ||
-                    publisher.level ||
-                    "silver") as string;
-                  return (
-                    <tr
-                      key={publisher._id || publisher.id}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                      <td className="py-4 px-4 font-medium text-gray-900">
-                        {publisher.firstName || ""} {publisher.lastName || ""}{" "}
-                        {publisher.name || ""}
-                      </td>
-                      <td className="py-4 px-4 text-gray-600">
-                        {publisher.email || "N/A"}
-                      </td>
-                      <td className="py-4 px-4">
-                        <Badge
-                          variant={
-                            level === "premium"
-                              ? "purple"
-                              : level === "gold"
-                              ? "warning"
-                              : "default"
-                          }>
-                          {level.charAt(0).toUpperCase() + level.slice(1)}
-                        </Badge>
-                      </td>
-                      <td className="py-4 px-4 text-gray-600">
-                        {
-                          (publisher.completedOrders ||
-                            publisher.orders ||
-                            0) as number
-                        }
-                      </td>
-                      <td className="py-4 px-4 font-semibold text-primary-purple">
-                        $
-                        {(
-                          (publisher.totalEarnings ||
-                            publisher.earnings ||
-                            0) as number
-                        ).toLocaleString()}
-                      </td>
-                      <td className="py-4 px-4">
-                        <Badge variant="success">
-                          {publisher.status || "Active"}
-                        </Badge>
-                      </td>
-                      <td className="py-4 px-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleManage(publisher)}>
-                          Manage
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {publishers.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="py-8 px-4 text-center text-gray-500">
+                      No publishers found
+                    </td>
+                  </tr>
+                ) : (
+                  publishers.map((publisher) => {
+                    const level = (publisher.accountLevel ||
+                      publisher.level ||
+                      "silver") as string;
+                    return (
+                      <tr
+                        key={publisher._id || publisher.id}
+                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td className="py-4 px-4 font-medium text-gray-900">
+                          {publisher.firstName || ""} {publisher.lastName || ""}{" "}
+                          {publisher.name || ""}
+                        </td>
+                        <td className="py-4 px-4 text-gray-600">
+                          {publisher.email || "N/A"}
+                        </td>
+                        <td className="py-4 px-4">
+                          <Badge
+                            variant={
+                              level === "premium"
+                                ? "purple"
+                                : level === "gold"
+                                ? "warning"
+                                : "default"
+                            }>
+                            {level.charAt(0).toUpperCase() + level.slice(1)}
+                          </Badge>
+                        </td>
+                        <td className="py-4 px-4 text-gray-600">
+                          {
+                            (publisher.completedOrders ||
+                              publisher.orders ||
+                              0) as number
+                          }
+                        </td>
+                        <td className="py-4 px-4 font-semibold text-primary-purple">
+                          $
+                          {(
+                            (publisher.totalEarnings ||
+                              publisher.earnings ||
+                              0) as number
+                          ).toLocaleString()}
+                        </td>
+                        <td className="py-4 px-4">
+                          <Badge variant="success">
+                            {publisher.status || "Active"}
+                          </Badge>
+                        </td>
+                        <td className="py-4 px-4">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleManage(publisher)}>
+                            Manage
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Card>
 
       {/* Publisher Manage Modal */}

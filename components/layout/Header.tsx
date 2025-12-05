@@ -24,7 +24,7 @@ export const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-30 border-b border-[#243b6b] bg-[#12244f]/95 backdrop-blur-xl">
-      <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 md:py-5">
+      <nav className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 md:py-5">
         {/* Logo */}
         <Link
           href="/"

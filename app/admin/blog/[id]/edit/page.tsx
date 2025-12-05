@@ -7,6 +7,7 @@ import { Button } from "@/components/shared/Button";
 import { Input } from "@/components/shared/Input";
 import { Textarea } from "@/components/shared/Textarea";
 import { Select } from "@/components/shared/Select";
+import { Loader } from "@/components/shared/Loader";
 import { blogApi, adminApi } from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -137,7 +138,7 @@ export default function EditBlogPostPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-gray-600">Loading blog post...</div>
+        <Loader size="lg" text="Loading blog post..." />
       </div>
     );
   }

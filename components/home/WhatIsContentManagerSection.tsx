@@ -3,7 +3,7 @@ import React from 'react';
 export const WhatIsContentManagerSection: React.FC = () => {
   return (
     <section className="bg-white py-14 text-slate-900 md:py-20">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 md:flex-row md:items-start md:gap-14">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 md:flex-row md:items-start md:gap-14">
         <div className="md:w-5/12">
           <h2 className="text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
             What is{' '}

@@ -5,6 +5,7 @@ import { Card } from "@/components/shared/Card";
 import { Badge } from "@/components/shared/Badge";
 import { Button } from "@/components/shared/Button";
 import { Select } from "@/components/shared/Select";
+import { Loader } from "@/components/shared/Loader";
 import { adminApi, getApiUrl } from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -288,8 +289,8 @@ export default function AdminApplicationsPage() {
       <Card>
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-gray-600">Loading applications...</div>
+            <div className="flex items-center justify-center py-20">
+              <Loader size="lg" text="Loading applications..." />
             </div>
           ) : (
             <table className="w-full">

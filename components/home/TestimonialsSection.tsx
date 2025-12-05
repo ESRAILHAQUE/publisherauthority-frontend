@@ -24,7 +24,7 @@ export const TestimonialsSection: React.FC = () => {
 
   return (
     <section className="bg-gray-50 py-16 md:py-20">
-      <div className="container mx-auto px-4">
+      <div className="mx-auto w-full max-w-7xl px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-primary-purple mb-4">
             What Our Publishers Say
@@ -34,7 +34,7 @@ export const TestimonialsSection: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto">
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
@@ -64,4 +64,5 @@ export const TestimonialsSection: React.FC = () => {
     </section>
   );
 };
+
 

@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const StartEarningTodaySection: React.FC = () => {
   return (
     <section className="bg-white py-14 text-slate-900 md:py-20">
-      <div className="mx-auto w-full max-w-5xl px-4">
+      <div className="mx-auto w-full max-w-7xl px-4">
         <div className="relative overflow-hidden rounded-3xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-sky-50 to-emerald-50 p-8 text-center shadow-xl shadow-emerald-100 md:p-10">
           <div className="pointer-events-none absolute -left-20 top-0 h-40 w-40 rounded-full bg-emerald-200/40 blur-3xl" />
           <div className="pointer-events-none absolute -right-24 bottom-0 h-48 w-48 rounded-full bg-sky-200/40 blur-3xl" />

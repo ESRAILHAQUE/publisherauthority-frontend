@@ -3,7 +3,7 @@ import React from 'react';
 export const HowMuchCanYouMakeSection: React.FC = () => {
   return (
     <section className="bg-white py-14 text-slate-900 md:py-20">
-      <div className="mx-auto w-full max-w-6xl px-4">
+      <div className="mx-auto w-full max-w-7xl px-4">
         <div className="grid gap-10 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] md:items-center">
           <div>
             <h2 className="text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
