@@ -342,6 +342,7 @@ export const authApi = {
       body: { token, password },
       requiresAuth: false,
     }),
+  getMe: () => apiRequest("/auth/me", { method: "GET" }),
 };
 
 // Applications API

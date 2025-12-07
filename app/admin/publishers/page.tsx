@@ -22,6 +22,7 @@ interface Publisher {
   orders?: number;
   totalEarnings?: number;
   earnings?: number;
+  accountStatus?: string;
   status?: string;
   [key: string]: unknown;
 }
@@ -185,8 +186,19 @@ export default function AdminPublishersPage() {
                           ).toLocaleString()}
                         </td>
                         <td className="py-4 px-4">
-                          <Badge variant="success">
-                            {publisher.status || "Active"}
+                          <Badge
+                            variant={
+                              (publisher.accountStatus || publisher.status) === "suspended"
+                                ? "danger"
+                                : (publisher.accountStatus || publisher.status) === "deleted"
+                                ? "danger"
+                                : "success"
+                            }>
+                            {((publisher.accountStatus || publisher.status) || "Active")
+                              .charAt(0)
+                              .toUpperCase() +
+                              ((publisher.accountStatus || publisher.status) || "Active")
+                                .slice(1)}
                           </Badge>
                         </td>
                         <td className="py-4 px-4">

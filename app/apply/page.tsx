@@ -10,6 +10,7 @@ import { Select } from "@/components/shared/Select";
 import { Card } from "@/components/shared/Card";
 import { applicationsApi } from "@/lib/api";
 import toast from "react-hot-toast";
+import { countries } from "@/lib/countries";
 
 export default function ApplyPage() {
   const [formData, setFormData] = useState({
@@ -17,6 +18,7 @@ export default function ApplyPage() {
     lastName: "",
     email: "",
     password: "",
+    contactNumber: "",
     country: "",
     hearAbout: "",
     guestPostExperience: "",
@@ -41,18 +43,6 @@ export default function ApplyPage() {
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-
-  const countries = [
-    { value: "", label: "Select your country of residence" },
-    { value: "US", label: "United States" },
-    { value: "UK", label: "United Kingdom" },
-    { value: "CA", label: "Canada" },
-    { value: "AU", label: "Australia" },
-    { value: "DE", label: "Germany" },
-    { value: "FR", label: "France" },
-    { value: "IN", label: "India" },
-    // Add more countries as needed
-  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +69,9 @@ export default function ApplyPage() {
       formDataToSend.append("lastName", formData.lastName);
       formDataToSend.append("email", formData.email);
       formDataToSend.append("password", formData.password);
+      if (formData.contactNumber) {
+        formDataToSend.append("contactNumber", formData.contactNumber);
+      }
       // Save full country name instead of code
       const selectedCountry = countries.find(
         (c) => c.value === formData.country
@@ -119,6 +112,7 @@ export default function ApplyPage() {
         lastName: "",
         email: "",
         password: "",
+        contactNumber: "",
         country: "",
         hearAbout: "",
         guestPostExperience: "",
@@ -198,6 +192,11 @@ export default function ApplyPage() {
                 Optional but recommended if you manage multiple sites or large
                 inventories.
               </p>
+              <a
+                href="/support"
+                className="text-[11px] md:text-xs text-slate-200/90 underline hover:text-white text-left md:text-right">
+                Contact to fast track application
+              </a>
             </div>
           </div>
 
@@ -243,6 +242,14 @@ export default function ApplyPage() {
                   required
                   minLength={8}
                 />
+                <Input
+                  label="Contact number"
+                  name="contactNumber"
+                  type="tel"
+                  value={formData.contactNumber}
+                  onChange={handleChange}
+                  placeholder="+1234567890"
+                />
                 <div className="md:col-span-2">
                   <Input
                     label="How did you hear about us?"
@@ -281,9 +288,7 @@ export default function ApplyPage() {
 
               <div className="mt-6">
                 <label className="block text-sm font-medium text-slate-800 mb-2">
-                  Please provide 3 guest post URLs you were responsible for
-                  completing within the last 90 days. At least one link within
-                  each guest post must be do-follow.
+                  Please share 3 examples of your completed projects from the last six months. Make sure the links you provide are do-follow. Must use https:// url prefix format.
                 </label>
                 <Input
                   placeholder="https://examplewebsite.com1 - Must use https:// url prefix format"
@@ -292,21 +297,24 @@ export default function ApplyPage() {
                   value={formData.guestPostUrl1}
                   onChange={handleChange}
                   className="mb-4"
+                  required
                 />
                 <Input
-                  placeholder="https://examplewebsite.com2"
+                  placeholder="https://examplewebsite.com2 - Must use https:// url prefix format"
                   name="guestPostUrl2"
                   type="url"
                   value={formData.guestPostUrl2}
                   onChange={handleChange}
                   className="mb-4"
+                  required
                 />
                 <Input
-                  placeholder="https://examplewebsite.com3"
+                  placeholder="https://examplewebsite.com3 - Must use https:// url prefix format"
                   name="guestPostUrl3"
                   type="url"
                   value={formData.guestPostUrl3}
                   onChange={handleChange}
+                  required
                 />
               </div>
 

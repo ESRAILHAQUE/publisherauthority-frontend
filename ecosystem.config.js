@@ -4,7 +4,8 @@ module.exports = {
     script: 'npm',
     args: 'start',
     instances: 1,
-    exec_mode: 'cluster',
+    exec_mode: 'fork',  // Changed from 'cluster' to 'fork' for lower CPU usage
+    max_memory_restart: '400M',  // Auto-restart if memory exceeds 400MB
     env: {
       NODE_ENV: 'production',
       PORT: 3001

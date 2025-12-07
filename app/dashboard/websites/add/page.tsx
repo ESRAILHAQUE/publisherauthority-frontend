@@ -8,6 +8,8 @@ import { Textarea } from "@/components/shared/Textarea";
 import { Card } from "@/components/shared/Card";
 import { websitesApi } from "@/lib/api";
 import toast from "react-hot-toast";
+import { websiteNiches } from "@/lib/niches";
+import { Select } from "@/components/shared/Select";
 
 export default function AddWebsitePage() {
   const router = useRouter();
@@ -216,14 +218,14 @@ export default function AddWebsitePage() {
             />
           </div>
 
-          <Input
+          <Select
             label="Website Niche/Category"
             name="niche"
             value={formData.niche}
             onChange={(e) =>
               setFormData({ ...formData, niche: e.target.value })
             }
-            placeholder="Technology, Health, Finance, etc."
+            options={websiteNiches}
             required
           />
 
