@@ -83,18 +83,41 @@ jobs:
             echo "Current user: $(whoami)"
             echo "Current directory: $(pwd)"
 
-      - name: Deploy to VPS
-        uses: appleboy/scp-action@master
+      - name: Deploy to VPS (Git Pull Method)
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          source: ".next,public,package.json,package-lock.json,next.config.ts,.env.local"
-          target: "/var/www/publisherauthority/frontend"
           timeout: 120s
           command_timeout: 20m
           debug: true
+          script: |
+            cd /var/www/publisherauthority/frontend
+            echo "Pulling latest code from GitHub..."
+            git pull origin main || {
+              echo "⚠️ Git pull failed, trying to reset..."
+              git fetch origin main
+              git reset --hard origin/main
+            }
+            echo "✓ Code updated"
+            
+            echo "Installing dependencies..."
+            npm install --production
+            echo "✓ Dependencies installed"
+            
+            echo "Building Next.js application..."
+            export NEXT_PUBLIC_API_URL=https://publisherauthority.com/api/v1
+            npm run build
+            echo "✓ Build completed"
+            
+            echo "Verifying build output..."
+            if [ ! -d ".next" ]; then
+              echo "❌ Build failed: .next directory not found"
+              exit 1
+            fi
+            echo "✓ Build verified"
 
       - name: Restart Frontend
         uses: appleboy/ssh-action@master
@@ -111,7 +134,13 @@ jobs:
             # Create or update .env.local with production API URL
             echo "NEXT_PUBLIC_API_URL=https://publisherauthority.com/api/v1" > .env.local
             echo "✓ Created .env.local with production API URL"
-            cat .env.local
-            npm install --production
-            pm2 restart publisherauthority-frontend || pm2 start npm --name publisherauthority-frontend -- start
+            
+            # Restart PM2 process
+            echo "Restarting PM2 process..."
+            pm2 restart publisherauthority-frontend --update-env || pm2 start ecosystem.config.js
             pm2 save
+            echo "✓ Frontend restarted successfully"
+            
+            # Show PM2 status
+            pm2 list
+            pm2 show publisherauthority-frontend
