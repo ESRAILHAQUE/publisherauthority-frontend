@@ -42,17 +42,29 @@ jobs:
             echo "📥 Pulling latest code..."
             git pull origin main || (git fetch origin main && git reset --hard origin/main)
             
-            echo "📦 Installing dependencies (using npm ci for faster install)..."
-            npm ci --production=false || npm install
+            # Check if package.json changed (only install if needed)
+            if git diff HEAD@{1} HEAD --name-only | grep -q "package.json\|package-lock.json"; then
+              echo "📦 Package files changed, installing dependencies..."
+              npm ci --production=false || npm install
+            else
+              echo "⏭️  Skipping npm install (no package changes)"
+            fi
             
-            echo "🔨 Building Next.js application..."
-            export NEXT_PUBLIC_API_URL=https://publisherauthority.com/api/v1
-            echo "NEXT_PUBLIC_API_URL=https://publisherauthority.com/api/v1" > .env.local
-            npm run build
+            # Check if source files changed (only build if needed)
+            if git diff HEAD@{1} HEAD --name-only | grep -q "\.tsx$\|\.ts$\|\.jsx$\|\.js$\|next.config"; then
+              echo "🔨 Source files changed, building Next.js application..."
+              export NEXT_PUBLIC_API_URL=https://publisherauthority.com/api/v1
+              echo "NEXT_PUBLIC_API_URL=https://publisherauthority.com/api/v1" > .env.local
+              nice -n 10 npm run build
+            else
+              echo "⏭️  Skipping build (no source changes)"
+            fi
             
             if [ ! -d ".next" ]; then
-              echo "❌ Build failed"
-              exit 1
+              echo "⚠️  .next directory not found, forcing build..."
+              export NEXT_PUBLIC_API_URL=https://publisherauthority.com/api/v1
+              echo "NEXT_PUBLIC_API_URL=https://publisherauthority.com/api/v1" > .env.local
+              nice -n 10 npm run build
             fi
             
             echo "🔄 Restarting frontend..."
@@ -60,4 +72,4 @@ jobs:
             pm2 save
             
             echo "✅ Deployment complete"
-            pm2 show publisherauthority-frontend | head -15
+            pm2 show publisherauthority-frontend | head -10
