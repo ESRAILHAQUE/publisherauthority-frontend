@@ -19,55 +19,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "20"
-
-      - name: Install dependencies
-        run: |
-          npm install
-
-      - name: Build project (without env - will use production URL on VPS)
-        run: |
-          # Build without NEXT_PUBLIC_API_URL - it will be set on VPS before restart
-          npm run build
-
       - name: Verify Secrets Configuration
         run: |
-          if [ -z "${{ secrets.VPS_HOST }}" ]; then
-            echo "❌ VPS_HOST secret is not set"
+          if [ -z "${{ secrets.VPS_HOST }}" ] || [ -z "${{ secrets.VPS_USERNAME }}" ] || [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
+            echo "❌ Required secrets are not set"
             exit 1
           fi
-          if [ -z "${{ secrets.VPS_USERNAME }}" ]; then
-            echo "❌ VPS_USERNAME secret is not set"
-            exit 1
-          fi
-          if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
-            echo "❌ VPS_SSH_KEY secret is not set"
-            exit 1
-          fi
-          echo "✓ All required secrets are configured"
-          echo "✓ Attempting to connect to: ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:22"
+          echo "✓ Secrets configured"
 
-      - name: Test Network Connectivity
-        continue-on-error: true
-        run: |
-          echo "Testing basic network connectivity..."
-          VPS_HOST="${{ secrets.VPS_HOST }}"
-          if command -v nc &> /dev/null; then
-            if nc -z -v -w5 "${VPS_HOST}" 22 2>&1; then
-              echo "✓ Port 22 is reachable"
-            else
-              echo "⚠️  Cannot reach port 22 - this is likely a firewall issue"
-              echo "⚠️  Please contact Hostinger support to allow GitHub Actions IPs"
-            fi
-          else
-            echo "⚠️  netcat (nc) not available, skipping connectivity test"
-          fi
-
-      - name: Test SSH Connection
-        continue-on-error: true
+      - name: Deploy to VPS
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -75,72 +35,29 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           timeout: 60s
-          debug: true
-          script: |
-            echo "SSH connection successful!"
-            echo "Server info:"
-            uname -a
-            echo "Current user: $(whoami)"
-            echo "Current directory: $(pwd)"
-
-      - name: Deploy to VPS (Git Pull Method)
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
-          timeout: 120s
-          command_timeout: 20m
+          command_timeout: 15m
           debug: true
           script: |
             cd /var/www/publisherauthority/frontend
-            echo "Pulling latest code from GitHub..."
-            git pull origin main || {
-              echo "⚠️ Git pull failed, trying to reset..."
-              git fetch origin main
-              git reset --hard origin/main
-            }
-            echo "✓ Code updated"
+            echo "📥 Pulling latest code..."
+            git pull origin main || (git fetch origin main && git reset --hard origin/main)
             
-            echo "Installing dependencies..."
-            npm install --production
-            echo "✓ Dependencies installed"
+            echo "📦 Installing dependencies (using npm ci for faster install)..."
+            npm ci --production=false || npm install
             
-            echo "Building Next.js application..."
+            echo "🔨 Building Next.js application..."
             export NEXT_PUBLIC_API_URL=https://publisherauthority.com/api/v1
+            echo "NEXT_PUBLIC_API_URL=https://publisherauthority.com/api/v1" > .env.local
             npm run build
-            echo "✓ Build completed"
             
-            echo "Verifying build output..."
             if [ ! -d ".next" ]; then
-              echo "❌ Build failed: .next directory not found"
+              echo "❌ Build failed"
               exit 1
             fi
-            echo "✓ Build verified"
-
-      - name: Restart Frontend
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
-          timeout: 120s
-          command_timeout: 20m
-          debug: true
-          script: |
-            cd /var/www/publisherauthority/frontend
-            # Create or update .env.local with production API URL
-            echo "NEXT_PUBLIC_API_URL=https://publisherauthority.com/api/v1" > .env.local
-            echo "✓ Created .env.local with production API URL"
             
-            # Restart PM2 process
-            echo "Restarting PM2 process..."
+            echo "🔄 Restarting frontend..."
             pm2 restart publisherauthority-frontend --update-env || pm2 start ecosystem.config.js
             pm2 save
-            echo "✓ Frontend restarted successfully"
             
-            # Show PM2 status
-            pm2 list
-            pm2 show publisherauthority-frontend
+            echo "✅ Deployment complete"
+            pm2 show publisherauthority-frontend | head -15
