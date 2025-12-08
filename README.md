@@ -526,3 +526,5 @@ For issues or questions, please contact the development team or refer to the bac
 ---
 
 **Built with ❤️ using Next.js 16 and TypeScript**
+
+_Last updated: December 2025_
