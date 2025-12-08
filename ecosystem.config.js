@@ -5,7 +5,7 @@ module.exports = {
     args: 'start',
     instances: 1,
     exec_mode: 'fork',  // Changed from 'cluster' to 'fork' for lower CPU usage
-    max_memory_restart: '400M',  // Auto-restart if memory exceeds 400MB
+    max_memory_restart: '800M',  // Auto-restart if memory exceeds 800MB (increased to prevent OOM kills)
     env: {
       NODE_ENV: 'production',
       PORT: 3003
