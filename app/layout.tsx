@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Content Manager - Monetize Your Blog Without Annoying Ads",
+  title: "Publisher Authority - Publisher Marketplace",
   description: "The easiest way to monetize your blog without annoying ads. Connect with brands through valuable content marketing.",
 };
 
