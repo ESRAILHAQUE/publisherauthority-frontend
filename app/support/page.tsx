@@ -107,24 +107,8 @@ export default function SupportPage() {
               contact us directly.
             </p>
 
-            {/* FAQs Section */}
-            <section className="mb-16">
-              <h2 className="text-3xl font-bold text-primary-purple mb-8 text-center">
-                Frequently Asked Questions
-              </h2>
-              <div className="space-y-4">
-                {faqs.map((faq, index) => (
-                  <FAQItem
-                    key={index}
-                    question={faq.question}
-                    answer={faq.answer}
-                  />
-                ))}
-              </div>
-            </section>
-
             {/* Contact Form Section */}
-            <section>
+            <section className="mb-16">
               <Card>
                 <h2 className="text-2xl font-bold text-primary-purple mb-6">
                   Contact Us
@@ -196,7 +180,7 @@ export default function SupportPage() {
             </section>
 
             {/* Email Support */}
-            <section className="mt-8 text-center">
+            <section className="mb-16 text-center">
               <Card>
                 <h3 className="text-xl font-semibold text-primary-purple mb-4">
                   Email Support
@@ -213,6 +197,22 @@ export default function SupportPage() {
                   We typically respond within 24-48 hours during business days.
                 </p>
               </Card>
+            </section>
+
+            {/* FAQs Section */}
+            <section>
+              <h2 className="text-3xl font-bold text-primary-purple mb-8 text-center">
+                Frequently Asked Questions
+              </h2>
+              <div className="space-y-4">
+                {faqs.map((faq, index) => (
+                  <FAQItem
+                    key={index}
+                    question={faq.question}
+                    answer={faq.answer}
+                  />
+                ))}
+              </div>
             </section>
           </div>
         </div>
