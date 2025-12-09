@@ -19,9 +19,9 @@ export default function HomePage() {
       <HeroSection />
       <WhatIsContentManagerSection />
       <BlogAmplifiedSection />
+      <TestimonialsSection />
       <HowItWorksSection />
       <HowMuchCanYouMakeSection />
-      <TestimonialsSection />
       <StartEarningTodaySection />
       <FAQSection />
       <Footer />
