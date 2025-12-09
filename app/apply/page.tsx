@@ -11,6 +11,7 @@ import { Card } from "@/components/shared/Card";
 import { applicationsApi } from "@/lib/api";
 import toast from "react-hot-toast";
 import { countries } from "@/lib/countries";
+import { websiteNiches } from "@/lib/niches";
 
 export default function ApplyPage() {
   const [formData, setFormData] = useState({
@@ -21,10 +22,14 @@ export default function ApplyPage() {
     contactNumber: "",
     country: "",
     hearAbout: "",
+    websiteNiche: "",
     guestPostExperience: "",
     guestPostUrl1: "",
     guestPostUrl2: "",
     guestPostUrl3: "",
+    completedProjectUrl1: "",
+    completedProjectUrl2: "",
+    completedProjectUrl3: "",
     referralInfo: "",
   });
 
@@ -57,11 +62,64 @@ export default function ApplyPage() {
           quizAnswers[key as keyof typeof quizAnswers];
       });
 
+      // Validate URLs start with https://
+      const validateHttpsUrl = (url: string): boolean => {
+        return url.trim().toLowerCase().startsWith("https://");
+      };
+
       // Convert guest post URLs from separate fields to array
       const guestPostUrls: string[] = [];
-      if (formData.guestPostUrl1) guestPostUrls.push(formData.guestPostUrl1);
-      if (formData.guestPostUrl2) guestPostUrls.push(formData.guestPostUrl2);
-      if (formData.guestPostUrl3) guestPostUrls.push(formData.guestPostUrl3);
+      if (formData.guestPostUrl1) {
+        if (!validateHttpsUrl(formData.guestPostUrl1)) {
+          toast.error("All URLs must start with https://");
+          setIsSubmitting(false);
+          return;
+        }
+        guestPostUrls.push(formData.guestPostUrl1);
+      }
+      if (formData.guestPostUrl2) {
+        if (!validateHttpsUrl(formData.guestPostUrl2)) {
+          toast.error("All URLs must start with https://");
+          setIsSubmitting(false);
+          return;
+        }
+        guestPostUrls.push(formData.guestPostUrl2);
+      }
+      if (formData.guestPostUrl3) {
+        if (!validateHttpsUrl(formData.guestPostUrl3)) {
+          toast.error("All URLs must start with https://");
+          setIsSubmitting(false);
+          return;
+        }
+        guestPostUrls.push(formData.guestPostUrl3);
+      }
+
+      // Convert completed project URLs from separate fields to array
+      const completedProjectsUrls: string[] = [];
+      if (formData.completedProjectUrl1) {
+        if (!validateHttpsUrl(formData.completedProjectUrl1)) {
+          toast.error("All URLs must start with https://");
+          setIsSubmitting(false);
+          return;
+        }
+        completedProjectsUrls.push(formData.completedProjectUrl1);
+      }
+      if (formData.completedProjectUrl2) {
+        if (!validateHttpsUrl(formData.completedProjectUrl2)) {
+          toast.error("All URLs must start with https://");
+          setIsSubmitting(false);
+          return;
+        }
+        completedProjectsUrls.push(formData.completedProjectUrl2);
+      }
+      if (formData.completedProjectUrl3) {
+        if (!validateHttpsUrl(formData.completedProjectUrl3)) {
+          toast.error("All URLs must start with https://");
+          setIsSubmitting(false);
+          return;
+        }
+        completedProjectsUrls.push(formData.completedProjectUrl3);
+      }
 
       // Prepare FormData for file upload
       const formDataToSend = new FormData();
@@ -81,11 +139,18 @@ export default function ApplyPage() {
         selectedCountry?.label || formData.country
       );
       formDataToSend.append("hearAboutUs", formData.hearAbout);
+      if (formData.websiteNiche) {
+        formDataToSend.append("websiteNiche", formData.websiteNiche);
+      }
       formDataToSend.append(
         "guestPostExperience",
         formData.guestPostExperience
       );
       formDataToSend.append("guestPostUrls", JSON.stringify(guestPostUrls));
+      formDataToSend.append(
+        "completedProjectsUrls",
+        JSON.stringify(completedProjectsUrls)
+      );
       if (formData.referralInfo) {
         formDataToSend.append(
           "referralInfo",
@@ -115,10 +180,14 @@ export default function ApplyPage() {
         contactNumber: "",
         country: "",
         hearAbout: "",
+        websiteNiche: "",
         guestPostExperience: "",
         guestPostUrl1: "",
         guestPostUrl2: "",
         guestPostUrl3: "",
+        completedProjectUrl1: "",
+        completedProjectUrl2: "",
+        completedProjectUrl3: "",
         referralInfo: "",
       });
       setQuizAnswers({
@@ -182,11 +251,9 @@ export default function ApplyPage() {
             </div>
             <div className="md:w-2/5 flex flex-col items-start gap-3 md:items-end">
               <a
-                href="https://calendar.app.google/gZYy6vD1PM8A8c8d6"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/support"
                 className="inline-flex items-center justify-center rounded-full bg-[#ff8a3c] px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-slate-900/40 transition-transform hover:-translate-y-[1px] hover:brightness-110 md:px-6 md:py-3">
-                Book a call to fast track application
+                Contact to fast track application
               </a>
               <p className="text-[11px] md:text-xs text-slate-200/90 text-left md:text-right">
                 Optional but recommended if you manage multiple sites or large
@@ -226,7 +293,7 @@ export default function ApplyPage() {
                   required
                 />
                 <Input
-                  label="Email Address (This cannot be changed after signup)"
+                  label="Email Address"
                   name="email"
                   type="email"
                   value={formData.email}
@@ -259,7 +326,7 @@ export default function ApplyPage() {
                   />
                 </div>
                 <Select
-                  label="Country of Residence (According to your legal identification document)"
+                  label='Country of Residence "Show All country"'
                   name="country"
                   value={formData.country}
                   onChange={handleChange}
@@ -267,6 +334,21 @@ export default function ApplyPage() {
                   required
                 />
               </div>
+            </Card>
+
+            {/* Website Niche/Category */}
+            <Card className="border border-slate-200 bg-white/90 shadow-sm shadow-slate-100">
+              <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-2">
+                Website Information
+              </h2>
+              <Select
+                label="All Website Niche/Category show and user select"
+                name="websiteNiche"
+                value={formData.websiteNiche}
+                onChange={handleChange}
+                options={websiteNiches}
+                required
+              />
             </Card>
 
             {/* Guest Post Experience */}
@@ -288,7 +370,7 @@ export default function ApplyPage() {
 
               <div className="mt-6">
                 <label className="block text-sm font-medium text-slate-800 mb-2">
-                  Please share 3 examples of your completed projects from the last six months. Make sure the links you provide are do-follow. Must use https:// url prefix format.
+                  Please share your experience with guest posting. Must use https:// url prefix format.
                 </label>
                 <Input
                   placeholder="https://examplewebsite.com1 - Must use https:// url prefix format"
@@ -300,7 +382,7 @@ export default function ApplyPage() {
                   required
                 />
                 <Input
-                  placeholder="https://examplewebsite.com2 - Must use https:// url prefix format"
+                  placeholder="https://examplewebsite.com2"
                   name="guestPostUrl2"
                   type="url"
                   value={formData.guestPostUrl2}
@@ -309,10 +391,42 @@ export default function ApplyPage() {
                   required
                 />
                 <Input
-                  placeholder="https://examplewebsite.com3 - Must use https:// url prefix format"
+                  placeholder="https://examplewebsite.com3"
                   name="guestPostUrl3"
                   type="url"
                   value={formData.guestPostUrl3}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-slate-800 mb-2">
+                  Please share 3 examples of your completed projects from the last six months. Make sure the links you provide are do-follow.
+                </label>
+                <Input
+                  placeholder="https://examplewebsite.com1"
+                  name="completedProjectUrl1"
+                  type="url"
+                  value={formData.completedProjectUrl1}
+                  onChange={handleChange}
+                  className="mb-4"
+                  required
+                />
+                <Input
+                  placeholder="https://examplewebsite.com2"
+                  name="completedProjectUrl2"
+                  type="url"
+                  value={formData.completedProjectUrl2}
+                  onChange={handleChange}
+                  className="mb-4"
+                  required
+                />
+                <Input
+                  placeholder="https://examplewebsite.com3"
+                  name="completedProjectUrl3"
+                  type="url"
+                  value={formData.completedProjectUrl3}
                   onChange={handleChange}
                   required
                 />

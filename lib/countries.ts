@@ -1,5 +1,5 @@
 export const countries = [
-  { value: "", label: "Select your country of residence" },
+  { value: "", label: "Show All country" },
   { value: "AF", label: "Afghanistan" },
   { value: "AL", label: "Albania" },
   { value: "DZ", label: "Algeria" },
