@@ -11,7 +11,6 @@ import { Card } from "@/components/shared/Card";
 import { applicationsApi } from "@/lib/api";
 import toast from "react-hot-toast";
 import { countries } from "@/lib/countries";
-import { websiteNiches } from "@/lib/niches";
 
 export default function ApplyPage() {
   const [formData, setFormData] = useState({
@@ -22,7 +21,6 @@ export default function ApplyPage() {
     contactNumber: "",
     country: "",
     hearAbout: "",
-    websiteNiche: "",
     guestPostExperience: "",
     guestPostUrl1: "",
     guestPostUrl2: "",
@@ -33,17 +31,6 @@ export default function ApplyPage() {
     referralInfo: "",
   });
 
-  const [quizAnswers, setQuizAnswers] = useState({
-    q1: "",
-    q2: "",
-    q3: "",
-    q4: "",
-    q5: "",
-    q6: "",
-    q7: "",
-    q8: "",
-    q9: "",
-  });
 
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,14 +41,6 @@ export default function ApplyPage() {
     setIsSubmitting(true);
 
     try {
-      // Convert quiz answers from q1-q9 to question1-question9 format
-      const formattedQuizAnswers: Record<string, string> = {};
-      Object.keys(quizAnswers).forEach((key) => {
-        const questionNumber = key.replace("q", "question");
-        formattedQuizAnswers[questionNumber] =
-          quizAnswers[key as keyof typeof quizAnswers];
-      });
-
       // Validate URLs start with https://
       const validateHttpsUrl = (url: string): boolean => {
         return url.trim().toLowerCase().startsWith("https://");
@@ -139,9 +118,6 @@ export default function ApplyPage() {
         selectedCountry?.label || formData.country
       );
       formDataToSend.append("hearAboutUs", formData.hearAbout);
-      if (formData.websiteNiche) {
-        formDataToSend.append("websiteNiche", formData.websiteNiche);
-      }
       formDataToSend.append(
         "guestPostExperience",
         formData.guestPostExperience
@@ -157,10 +133,6 @@ export default function ApplyPage() {
           JSON.stringify({ name: formData.referralInfo })
         );
       }
-      formDataToSend.append(
-        "quizAnswers",
-        JSON.stringify(formattedQuizAnswers)
-      );
 
       // Append files
       selectedFiles.forEach((file) => {
@@ -180,7 +152,6 @@ export default function ApplyPage() {
         contactNumber: "",
         country: "",
         hearAbout: "",
-        websiteNiche: "",
         guestPostExperience: "",
         guestPostUrl1: "",
         guestPostUrl2: "",
@@ -189,17 +160,6 @@ export default function ApplyPage() {
         completedProjectUrl2: "",
         completedProjectUrl3: "",
         referralInfo: "",
-      });
-      setQuizAnswers({
-        q1: "",
-        q2: "",
-        q3: "",
-        q4: "",
-        q5: "",
-        q6: "",
-        q7: "",
-        q8: "",
-        q9: "",
       });
       setSelectedFiles([]);
       setAgreed(false);
@@ -301,7 +261,7 @@ export default function ApplyPage() {
                   required
                 />
                 <Input
-                  label="Password (Create your password)"
+                  label="Create your password"
                   name="password"
                   type="password"
                   value={formData.password}
@@ -310,7 +270,7 @@ export default function ApplyPage() {
                   minLength={8}
                 />
                 <Input
-                  label="Contact number"
+                  label="Contact Number"
                   name="contactNumber"
                   type="tel"
                   value={formData.contactNumber}
@@ -326,7 +286,7 @@ export default function ApplyPage() {
                   />
                 </div>
                 <Select
-                  label='Country of Residence "Show All country"'
+                  label="Country of Residence"
                   name="country"
                   value={formData.country}
                   onChange={handleChange}
@@ -334,21 +294,6 @@ export default function ApplyPage() {
                   required
                 />
               </div>
-            </Card>
-
-            {/* Website Niche/Category */}
-            <Card className="border border-slate-200 bg-white/90 shadow-sm shadow-slate-100">
-              <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-2">
-                Website Information
-              </h2>
-              <Select
-                label="All Website Niche/Category show and user select"
-                name="websiteNiche"
-                value={formData.websiteNiche}
-                onChange={handleChange}
-                options={websiteNiches}
-                required
-              />
             </Card>
 
             {/* Guest Post Experience */}
@@ -482,95 +427,6 @@ export default function ApplyPage() {
               </div>
             </Card>
 
-            {/* Publisher Expectations Quiz */}
-            <Card className="border border-slate-200 bg-white/90 shadow-sm shadow-slate-100">
-              <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-2">
-                Publisher expectations
-              </h2>
-              <p className="text-sm text-slate-600 mb-6">
-                We sincerely appreciate your time on this application. We know
-                this is a lengthy process and we promise it is worth it. Below
-                are the expectations that all users will be held to if accepted
-                to our platform. Please read and then answer the questions below
-                to check for understanding.
-              </p>
-
-              <div className="space-y-6">
-                <QuizQuestion
-                  statement="All articles assigned to you, along with the target URLS, must stay live permanently."
-                  question="How long must articles stay live after you are paid for a job?"
-                  answer={quizAnswers.q1}
-                  onChange={(value) =>
-                    setQuizAnswers({ ...quizAnswers, q1: value })
-                  }
-                />
-                <QuizQuestion
-                  statement="Payment penalties will be enforced for links that fall or target URLs that are removed within 1 year of post date. In the event we detect an error with a provided link or target URL, we will notify you of the issue and grant 72 hours to resolve the issue. If the issue is not resolved, we will deduct the payment total previously paid for the link from your future payout total."
-                  question="How long do you have to resolve a link issue before payment penalty is enforced?"
-                  answer={quizAnswers.q2}
-                  onChange={(value) =>
-                    setQuizAnswers({ ...quizAnswers, q2: value })
-                  }
-                />
-                <QuizQuestion
-                  statement="All articles must be placed in a relevant category or blog section, accessible from the homepage, ensuring they can be easily discovered and appearing as if they were written by you."
-                  question="Where should the articles be placed on your website?"
-                  answer={quizAnswers.q3}
-                  onChange={(value) =>
-                    setQuizAnswers({ ...quizAnswers, q3: value })
-                  }
-                />
-                <QuizQuestion
-                  statement='The articles should not be labeled as sponsored, guest posts, or guest author/contributor, and our links must not have link attributes such as rel="sponsored".'
-                  question="What type of link attributes are not allowed for our articles?"
-                  answer={quizAnswers.q4}
-                  onChange={(value) =>
-                    setQuizAnswers({ ...quizAnswers, q4: value })
-                  }
-                />
-                <QuizQuestion
-                  statement="The articles must be published on your main domain, not on a subdomain if you have one."
-                  question="Where should our articles be published on your website?"
-                  answer={quizAnswers.q5}
-                  onChange={(value) =>
-                    setQuizAnswers({ ...quizAnswers, q5: value })
-                  }
-                />
-                <QuizQuestion
-                  statement="Our articles should be indexed within 90 days, meaning they will appear in Google and Bing search results."
-                  question="Which two search engines should the guest post link appear?"
-                  answer={quizAnswers.q6}
-                  onChange={(value) =>
-                    setQuizAnswers({ ...quizAnswers, q6: value })
-                  }
-                />
-                <QuizQuestion
-                  statement="Our system uses a tight deadline system. You will have 48-72 hours to take most actions once a job is assigned to you."
-                  question="How long do you have to take most actions once a job is assigned to you?"
-                  answer={quizAnswers.q7}
-                  onChange={(value) =>
-                    setQuizAnswers({ ...quizAnswers, q7: value })
-                  }
-                />
-                <QuizQuestion
-                  statement="We use a payment compliance processor to process all payments. Payments are sent bi-weekly on Mondays for the previous pay period."
-                  question="When are payments sent?"
-                  answer={quizAnswers.q8}
-                  onChange={(value) =>
-                    setQuizAnswers({ ...quizAnswers, q8: value })
-                  }
-                />
-                <QuizQuestion
-                  statement="We use a payment compliance company. You must use your real name, email, etc. throughout the application process. Any changing of information after applying is flagged in compliance, and your account will be banned."
-                  question='I hereby attest that all information provided on this application matches the information on my legal identification documents. Please state "I do".'
-                  answer={quizAnswers.q9}
-                  onChange={(value) =>
-                    setQuizAnswers({ ...quizAnswers, q9: value })
-                  }
-                />
-              </div>
-            </Card>
-
             {/* Agreement */}
             <Card className="border border-slate-200 bg-white/90 shadow-sm shadow-slate-100">
               <div className="flex items-start space-x-3">
@@ -623,36 +479,6 @@ export default function ApplyPage() {
       </main>
 
       <Footer />
-    </div>
-  );
-}
-
-// Quiz Question Component
-function QuizQuestion({
-  statement,
-  question,
-  answer,
-  onChange,
-}: {
-  statement: string;
-  question: string;
-  answer: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div className="border border-slate-200 rounded-xl p-5 bg-slate-50/80">
-      <p className="font-semibold text-slate-900 mb-2 text-sm md:text-base">
-        Statement: {statement}
-      </p>
-      <p className="text-slate-700 mb-4 text-sm md:text-base">
-        Question: {question}
-      </p>
-      <Textarea
-        value={answer}
-        onChange={(e) => onChange(e.target.value)}
-        rows={2}
-        required
-      />
     </div>
   );
 }
