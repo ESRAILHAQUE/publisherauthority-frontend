@@ -25,10 +25,6 @@ export default function ApplyPage() {
     guestPostUrl1: "",
     guestPostUrl2: "",
     guestPostUrl3: "",
-    completedProjectUrl1: "",
-    completedProjectUrl2: "",
-    completedProjectUrl3: "",
-    referralInfo: "",
   });
 
 
@@ -73,33 +69,6 @@ export default function ApplyPage() {
         guestPostUrls.push(formData.guestPostUrl3);
       }
 
-      // Convert completed project URLs from separate fields to array
-      const completedProjectsUrls: string[] = [];
-      if (formData.completedProjectUrl1) {
-        if (!validateHttpsUrl(formData.completedProjectUrl1)) {
-          toast.error("All URLs must start with https://");
-          setIsSubmitting(false);
-          return;
-        }
-        completedProjectsUrls.push(formData.completedProjectUrl1);
-      }
-      if (formData.completedProjectUrl2) {
-        if (!validateHttpsUrl(formData.completedProjectUrl2)) {
-          toast.error("All URLs must start with https://");
-          setIsSubmitting(false);
-          return;
-        }
-        completedProjectsUrls.push(formData.completedProjectUrl2);
-      }
-      if (formData.completedProjectUrl3) {
-        if (!validateHttpsUrl(formData.completedProjectUrl3)) {
-          toast.error("All URLs must start with https://");
-          setIsSubmitting(false);
-          return;
-        }
-        completedProjectsUrls.push(formData.completedProjectUrl3);
-      }
-
       // Prepare FormData for file upload
       const formDataToSend = new FormData();
       formDataToSend.append("firstName", formData.firstName);
@@ -123,16 +92,6 @@ export default function ApplyPage() {
         formData.guestPostExperience
       );
       formDataToSend.append("guestPostUrls", JSON.stringify(guestPostUrls));
-      formDataToSend.append(
-        "completedProjectsUrls",
-        JSON.stringify(completedProjectsUrls)
-      );
-      if (formData.referralInfo) {
-        formDataToSend.append(
-          "referralInfo",
-          JSON.stringify({ name: formData.referralInfo })
-        );
-      }
 
       // Append files
       selectedFiles.forEach((file) => {
@@ -156,10 +115,6 @@ export default function ApplyPage() {
         guestPostUrl1: "",
         guestPostUrl2: "",
         guestPostUrl3: "",
-        completedProjectUrl1: "",
-        completedProjectUrl2: "",
-        completedProjectUrl3: "",
-        referralInfo: "",
       });
       setSelectedFiles([]);
       setAgreed(false);
@@ -342,48 +297,6 @@ export default function ApplyPage() {
                   value={formData.guestPostUrl3}
                   onChange={handleChange}
                   required
-                />
-              </div>
-
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-slate-800 mb-2">
-                  Please share 3 examples of your completed projects from the last six months. Make sure the links you provide are do-follow.
-                </label>
-                <Input
-                  placeholder="https://examplewebsite.com1"
-                  name="completedProjectUrl1"
-                  type="url"
-                  value={formData.completedProjectUrl1}
-                  onChange={handleChange}
-                  className="mb-4"
-                  required
-                />
-                <Input
-                  placeholder="https://examplewebsite.com2"
-                  name="completedProjectUrl2"
-                  type="url"
-                  value={formData.completedProjectUrl2}
-                  onChange={handleChange}
-                  className="mb-4"
-                  required
-                />
-                <Input
-                  placeholder="https://examplewebsite.com3"
-                  name="completedProjectUrl3"
-                  type="url"
-                  value={formData.completedProjectUrl3}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="mt-6">
-                <Textarea
-                  label="Referral information (professional contact who can confirm your experience)"
-                  name="referralInfo"
-                  value={formData.referralInfo}
-                  onChange={handleChange}
-                  rows={3}
                 />
               </div>
 
