@@ -446,23 +446,6 @@ export default function ApplyPage() {
               </div>
             </Card>
 
-            {/* Requirements Display */}
-            <Card className="border border-amber-100 bg-amber-50/70 shadow-sm shadow-amber-100">
-              <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-3">
-                Requirements
-              </h2>
-              <ul className="space-y-2 text-sm text-slate-700">
-                <li>• Minimum Domain Authority: 20 or higher</li>
-                <li>
-                  • Minimum Monthly Traffic: DA 20-39 requires 150+ organic
-                  visitors, DA 40+ requires 500+ organic visitors
-                </li>
-                <li>• English language only</li>
-                <li>• Blogs must be updated within the last 90 days</li>
-                <li>• No subdomains, forums, or sponsored tags</li>
-              </ul>
-            </Card>
-
             {/* Submit Button */}
             <div className="flex justify-center">
               <Button
