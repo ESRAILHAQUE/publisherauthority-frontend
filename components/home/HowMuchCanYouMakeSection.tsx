@@ -7,9 +7,9 @@ export const HowMuchCanYouMakeSection: React.FC = () => {
         <div className="grid gap-10 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] md:items-center">
           <div>
             <h2 className="text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
-              How much can you make with
+              How much can you make with{' '}
               <span className="bg-gradient-to-r from-emerald-500 to-sky-500 bg-clip-text text-transparent">
-                publisherauthority
+                publisher authority
               </span>
               ?
             </h2>

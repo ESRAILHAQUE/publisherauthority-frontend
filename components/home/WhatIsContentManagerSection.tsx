@@ -8,7 +8,7 @@ export const WhatIsContentManagerSection: React.FC = () => {
           <h2 className="text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
             What is{' '}
             <span className="bg-gradient-to-r from-emerald-500 to-sky-500 bg-clip-text text-transparent">
-              publisherauthority?
+              publisher authority?
             </span>
           </h2>
           <p className="mt-3 text-sm text-slate-500 md:text-base">
@@ -18,7 +18,7 @@ export const WhatIsContentManagerSection: React.FC = () => {
 
         <div className="space-y-5 text-sm text-slate-600 md:w-7/12 md:text-base">
           <p>
-            publisherauthority connects well-established blogs with brands that want awareness,
+            Publisher Authority connects well-established blogs with brands that want awareness,
             authority, and search visibility – without interruptive display ads. Instead of
             cluttering your layout with banners, you publish high-quality editorial pieces
             that naturally feature these brands.

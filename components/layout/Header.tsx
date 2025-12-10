@@ -33,7 +33,7 @@ export const Header: React.FC = () => {
             PA
           </span>
           <span className="flex flex-col leading-tight">
-            <span>publisherauthority</span>
+            <span>publisher authority</span>
             <span className="text-[11px] font-normal text-slate-200 md:text-xs">
               Publisher Marketplace
             </span>
