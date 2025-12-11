@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Card } from "@/components/shared/Card";
 import { Badge } from "@/components/shared/Badge";
 import { Button } from "@/components/shared/Button";
@@ -54,19 +54,43 @@ export default function WebsitesPage() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedWebsiteForDetails, setSelectedWebsiteForDetails] = useState<Website | null>(null);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [showFilter, setShowFilter] = useState(false);
+
+
+  const filterRef = useRef<HTMLDivElement | null>(null);
+
+
   useEffect(() => {
     loadWebsites();
   }, []);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        showFilter &&
+        filterRef.current &&
+        !filterRef.current.contains(e.target as Node)
+      ) {
+        setShowFilter(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showFilter]);
+
 
   const loadWebsites = async () => {
     try {
       setLoading(true);
       const response = (await websitesApi.getWebsites()) as
         | {
-            data?: Website[] | { websites?: Website[]; [key: string]: unknown };
-            websites?: Website[];
-            [key: string]: unknown;
-          }
+          data?: Website[] | { websites?: Website[];[key: string]: unknown };
+          websites?: Website[];
+          [key: string]: unknown;
+        }
         | Website[];
       // Handle different response structures
       let websitesData: Website[] = [];
@@ -184,6 +208,24 @@ export default function WebsitesPage() {
     }
   };
 
+  const filteredWebsites = websites.filter((w) => {
+    const text = searchQuery.toLowerCase();
+
+    const matchesSearch =
+      (w.url || "").toLowerCase().includes(text) ||
+      (w.niche || "").toLowerCase().includes(text) ||
+      String(w.price || "").toLowerCase().includes(text) ||
+      formatStatus(w.status || "").toLowerCase().includes(text);
+
+    const matchesStatus =
+      statusFilter.length === 0
+        ? true
+        : statusFilter.includes((w.status || "").toLowerCase());
+
+    return matchesSearch && matchesStatus;
+  });
+
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -192,7 +234,69 @@ export default function WebsitesPage() {
             My Websites
           </h1>
           <p className="text-gray-600">Manage all your submitted websites.</p>
+          <div className="flex items-center justify-between my-6 gap-4">
+
+            {/* Search Input */}
+            <input
+              type="text"
+              placeholder="Search websites..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
+            />
+
+            {/* Status Filter */}
+            <div className="relative">
+              <button
+                onClick={() => setShowFilter((prev) => !prev)}
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50"
+              >
+                Status Filter
+              </button>
+
+              {showFilter && (
+                <div
+                  ref={filterRef}
+                  className="absolute mt-2 w-48 bg-white shadow-lg rounded-lg border border-gray-200 z-50"
+                >
+                  <div className="p-2 text-sm">
+
+                    {["pending", "active", "counter-offer", "rejected"].map((status) => (
+                      <label
+                        key={status}
+                        className="flex items-center gap-2 px-2 py-1 hover:bg-gray-50 rounded cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={statusFilter.includes(status)}
+                          onChange={() => {
+                            setStatusFilter((prev) =>
+                              prev.includes(status)
+                                ? prev.filter((s) => s !== status)
+                                : [...prev, status]
+                            );
+                          }}
+                        />
+                        <span className="capitalize">{formatStatus(status)}</span>
+                      </label>
+                    ))}
+
+                    <button
+                      onClick={() => setStatusFilter([])}
+                      className="text-xs mt-2 text-gray-500 hover:underline ml-2"
+                    >
+                      Clear filters
+                    </button>
+
+                  </div>
+                </div>
+              )}
+            </div>
+
+          </div>
+
         </div>
+
         <Link href="/dashboard/websites/add">
           <Button variant="primary">Add New Website</Button>
         </Link>
@@ -261,7 +365,7 @@ export default function WebsitesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {websites.length === 0 ? (
+                  {filteredWebsites.length === 0 ? (
                     <tr>
                       <td
                         colSpan={7}
@@ -275,126 +379,126 @@ export default function WebsitesPage() {
                       </td>
                     </tr>
                   ) : (
-                    websites.map((website) => (
-                  <tr
-                    key={website._id || website.id}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="py-4 px-4">
-                      <a
-                        href={website.url || "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-purple hover:text-[#2EE6B7] font-medium">
-                        {website.url || "N/A"}
-                      </a>
-                    </td>
-                    <td className="py-4 px-4 text-gray-700">
-                      {website.domainAuthority || website.da || "-"}
-                    </td>
-                    <td className="py-4 px-4 text-gray-700">
-                      {(
-                        (website.monthlyTraffic ||
-                          website.traffic ||
-                          0) as number
-                      ).toLocaleString()}
-                    </td>
-                    <td className="py-4 px-4 text-gray-700">
-                      ${(typeof website.price === 'number' ? website.price : 0).toFixed(2)}
-                      {website.counterOffer && (
-                        <div className="text-xs text-blue-600 mt-1">
-                          Offer: ${(typeof website.counterOffer.price === 'number' ? website.counterOffer.price : 0).toFixed(2)}
-                          {website.counterOffer.offeredBy === "admin" && (
-                            <span className="ml-1">(Admin)</span>
+                    filteredWebsites.map((website) => (
+                      <tr
+                        key={website._id || website.id}
+                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td className="py-4 px-4">
+                          <a
+                            href={website.url || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary-purple hover:text-[#2EE6B7] font-medium">
+                            {website.url || "N/A"}
+                          </a>
+                        </td>
+                        <td className="py-4 px-4 text-gray-700">
+                          {website.domainAuthority || website.da || "-"}
+                        </td>
+                        <td className="py-4 px-4 text-gray-700">
+                          {(
+                            (website.monthlyTraffic ||
+                              website.traffic ||
+                              0) as number
+                          ).toLocaleString()}
+                        </td>
+                        <td className="py-4 px-4 text-gray-700">
+                          ${(typeof website.price === 'number' ? website.price : 0).toFixed(2)}
+                          {website.counterOffer && (
+                            <div className="text-xs text-blue-600 mt-1">
+                              Offer: ${(typeof website.counterOffer.price === 'number' ? website.counterOffer.price : 0).toFixed(2)}
+                              {website.counterOffer.offeredBy === "admin" && (
+                                <span className="ml-1">(Admin)</span>
+                              )}
+                            </div>
                           )}
-                        </div>
-                      )}
-                    </td>
-                    <td className="py-4 px-4">
-                      <Badge variant={getStatusBadge(website.status)}>
-                        {formatStatus(website.status)}
-                      </Badge>
-                      {website.counterOffer && website.counterOffer.status === "pending" && (
-                        <div className="text-xs text-blue-600 mt-1">
-                          {website.counterOffer.offeredBy === "admin" 
-                            ? "Admin counter offer - respond below"
-                            : "Your counter offer - waiting for admin"}
-                        </div>
-                      )}
-                    </td>
-                    <td className="py-4 px-4 text-gray-600">
-                      {website.verifiedAt
-                        ? new Date(
-                            website.verifiedAt as string | Date
-                          ).toLocaleDateString()
-                        : "-"}
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex flex-col items-start space-y-2">
-                        <button
-                          onClick={() => {
-                            setSelectedWebsiteForDetails(website);
-                            setShowDetailsModal(true);
-                          }}
-                          className="text-primary-purple hover:text-[#2EE6B7] text-sm font-medium transition-colors">
-                          View Details
-                        </button>
-                        {website.status === "pending" && (
-                          <button
-                            onClick={() => {
-                              const websiteId = website._id || website.id;
-                              if (websiteId) {
-                                setSelectedWebsite(website);
-                              }
-                            }}
-                            className="text-green-600 hover:text-green-700 text-sm font-medium transition-colors">
-                            Verify
-                          </button>
-                        )}
-                        {website.status === "counter-offer" && 
-                         website.counterOffer?.status === "pending" && 
-                         website.counterOffer?.offeredBy === "admin" && (
-                          <div className="flex flex-col space-y-1">
+                        </td>
+                        <td className="py-4 px-4">
+                          <Badge variant={getStatusBadge(website.status)}>
+                            {formatStatus(website.status)}
+                          </Badge>
+                          {website.counterOffer && website.counterOffer.status === "pending" && (
+                            <div className="text-xs text-blue-600 mt-1">
+                              {website.counterOffer.offeredBy === "admin"
+                                ? "Admin counter offer - respond below"
+                                : "Your counter offer - waiting for admin"}
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-4 px-4 text-gray-600">
+                          {website.verifiedAt
+                            ? new Date(
+                              website.verifiedAt as string | Date
+                            ).toLocaleDateString()
+                            : "-"}
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex flex-col items-start space-y-2">
                             <button
                               onClick={() => {
-                                const websiteId = website._id || website.id;
-                                if (websiteId) {
-                                  handleRespondToCounterOffer(String(websiteId), true);
-                                }
+                                setSelectedWebsiteForDetails(website);
+                                setShowDetailsModal(true);
                               }}
-                              className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors">
-                              Accept
+                              className="text-primary-purple hover:text-[#2EE6B7] text-sm font-medium transition-colors">
+                              View Details
                             </button>
-                            <button
-                              onClick={() => {
-                                const websiteId = website._id || website.id;
-                                if (websiteId) {
-                                  handleRespondToCounterOffer(String(websiteId), false);
-                                }
-                              }}
-                              className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors">
-                              Reject
-                            </button>
-                            <button
-                              onClick={() => {
-                                const websiteId = website._id || website.id;
-                                if (websiteId) {
-                                  handleOpenCounterOfferModal(String(websiteId), website.price);
-                                }
-                              }}
-                              className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors">
-                              Counter Offer
-                            </button>
+                            {website.status === "pending" && (
+                              <button
+                                onClick={() => {
+                                  const websiteId = website._id || website.id;
+                                  if (websiteId) {
+                                    setSelectedWebsite(website);
+                                  }
+                                }}
+                                className="text-green-600 hover:text-green-700 text-sm font-medium transition-colors">
+                                Verify
+                              </button>
+                            )}
+                            {website.status === "counter-offer" &&
+                              website.counterOffer?.status === "pending" &&
+                              website.counterOffer?.offeredBy === "admin" && (
+                                <div className="flex flex-col space-y-1">
+                                  <button
+                                    onClick={() => {
+                                      const websiteId = website._id || website.id;
+                                      if (websiteId) {
+                                        handleRespondToCounterOffer(String(websiteId), true);
+                                      }
+                                    }}
+                                    className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors">
+                                    Accept
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      const websiteId = website._id || website.id;
+                                      if (websiteId) {
+                                        handleRespondToCounterOffer(String(websiteId), false);
+                                      }
+                                    }}
+                                    className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors">
+                                    Reject
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      const websiteId = website._id || website.id;
+                                      if (websiteId) {
+                                        handleOpenCounterOfferModal(String(websiteId), website.price);
+                                      }
+                                    }}
+                                    className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors">
+                                    Counter Offer
+                                  </button>
+                                </div>
+                              )}
+                            {website.status === "counter-offer" &&
+                              website.counterOffer?.offeredBy === "user" && (
+                                <span className="text-xs text-gray-500">
+                                  Waiting for admin response
+                                </span>
+                              )}
                           </div>
-                        )}
-                        {website.status === "counter-offer" && 
-                         website.counterOffer?.offeredBy === "user" && (
-                          <span className="text-xs text-gray-500">
-                            Waiting for admin response
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+                        </td>
+                      </tr>
                     ))
                   )}
                 </tbody>
