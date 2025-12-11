@@ -17,6 +17,7 @@ export default function DashboardPage() {
     activeWebsites: 0,
     accountLevel: "Silver",
     ordersForNextLevel: 0,
+    counterOffers: 0, // new stat
   });
   const [recentOrders, setRecentOrders] = useState<Record<string, unknown>[]>(
     []
@@ -64,38 +65,45 @@ export default function DashboardPage() {
         | undefined;
       const levelProgressData = data?.levelProgress as
         | {
-            currentLevel?: string;
-            nextLevel?: string;
-            ordersNeeded?: number;
-            progressPercentage?: number;
-          }
+          currentLevel?: string;
+          nextLevel?: string;
+          ordersNeeded?: number;
+          progressPercentage?: number;
+        }
         | undefined;
 
       setStats({
         totalEarnings:
           typeof statsData?.totalEarnings === "number"
-            ? statsData.totalEarnings
+            ? (statsData.totalEarnings as number)
             : 0,
         pendingOrders:
-          typeof ordersData?.pending === "number" ? ordersData.pending : 0,
+          typeof ordersData?.pending === "number" ? (ordersData.pending as number) : 0,
         readyToPost:
           typeof ordersData?.readyToPost === "number"
-            ? ordersData.readyToPost
+            ? (ordersData.readyToPost as number)
             : 0,
         verifying:
-          typeof ordersData?.verifying === "number" ? ordersData.verifying : 0,
+          typeof ordersData?.verifying === "number" ? (ordersData.verifying as number) : 0,
         completed:
-          typeof ordersData?.completed === "number" ? ordersData.completed : 0,
+          typeof ordersData?.completed === "number" ? (ordersData.completed as number) : 0,
         activeWebsites:
-          typeof websitesData?.active === "number" ? websitesData.active : 0,
+          typeof websitesData?.active === "number" ? (websitesData.active as number) : 0,
         accountLevel:
           typeof userData?.accountLevel === "string"
-            ? userData.accountLevel
+            ? (userData.accountLevel as string)
             : "silver",
         ordersForNextLevel:
           typeof levelProgressData?.ordersNeeded === "number"
-            ? levelProgressData.ordersNeeded
+            ? (levelProgressData.ordersNeeded as number)
             : 0,
+        counterOffers:
+          // try orders.counterOffers first, then stats.counterOffers
+          typeof ordersData?.counterOffers === "number"
+            ? (ordersData.counterOffers as number)
+            : typeof statsData?.counterOffers === "number"
+              ? (statsData.counterOffers as number)
+              : 0,
       });
 
       setLevelProgress({
@@ -164,9 +172,9 @@ export default function DashboardPage() {
             <Badge
               variant={
                 getLevelBadgeColor(stats.accountLevel) as
-                  | "default"
-                  | "warning"
-                  | "purple"
+                | "default"
+                | "warning"
+                | "purple"
               }
               size="md"
               className="text-lg px-4 py-2">
@@ -198,7 +206,7 @@ export default function DashboardPage() {
       </Card>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-1">
         <Card hover>
           <div className="flex items-center justify-between">
             <div>
@@ -274,6 +282,32 @@ export default function DashboardPage() {
           </div>
         </Card>
 
+        {/* New Counter Offers Card */}
+        <Card hover>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Counter Offers</p>
+              <p className="text-2xl font-bold text-primary-purple">
+                {stats.counterOffers}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <svg
+                className="w-6 h-6 text-purple-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M7 8h10M7 12h6m2 8l4-4-4-4M3 4v16a1 1 0 001 1h4"
+                />
+              </svg>
+            </div>
+          </div>
+        </Card>
+
         <Card hover>
           <div className="flex items-center justify-between">
             <div>
@@ -342,61 +376,61 @@ export default function DashboardPage() {
                   </tr>
                 ) : (
                   recentOrders.map((order) => {
-                  const orderId = order._id || order.id;
-                  const orderTitle =
-                    typeof order.title === "string"
-                      ? order.title
-                      : "Untitled Order";
-                  const orderStatus =
-                    typeof order.status === "string" ? order.status : undefined;
-                  const orderDeadline = order.deadline;
-                  const orderEarnings =
-                    typeof order.earnings === "number" ? order.earnings : 0;
+                    const orderId = (order as any)._id || (order as any).id;
+                    const orderTitle =
+                      typeof (order as any).title === "string"
+                        ? (order as any).title
+                        : "Untitled Order";
+                    const orderStatus =
+                      typeof (order as any).status === "string" ? (order as any).status : undefined;
+                    const orderDeadline = (order as any).deadline;
+                    const orderEarnings =
+                      typeof (order as any).earnings === "number" ? (order as any).earnings : 0;
 
-                  return (
-                    <tr
-                      key={orderId ? String(orderId) : undefined}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                      <td className="py-4 px-4">
-                        <p className="font-medium text-gray-900">
-                          {orderTitle}
-                        </p>
-                      </td>
-                      <td className="py-4 px-4">
-                        <Badge
-                          variant={
-                            orderStatus === "completed"
-                              ? "success"
-                              : orderStatus === "ready-to-post"
-                              ? "info"
-                              : orderStatus === "verifying"
-                              ? "warning"
-                              : "default"
-                          }>
-                          {orderStatus
-                            ? orderStatus.replace("-", " ")
-                            : "Pending"}
-                        </Badge>
-                      </td>
-                      <td className="py-4 px-4 text-gray-600">
-                        {orderDeadline &&
-                        (typeof orderDeadline === "string" ||
-                          orderDeadline instanceof Date)
-                          ? new Date(orderDeadline).toLocaleDateString()
-                          : "-"}
-                      </td>
-                      <td className="py-4 px-4 font-semibold text-primary-purple">
-                        ${orderEarnings}
-                      </td>
-                      <td className="py-4 px-4">
-                        <a
-                          href={`/dashboard/orders/${orderId || ""}`}
-                          className="text-primary-purple hover:text-accent-teal font-medium transition-colors">
-                          View →
-                        </a>
-                      </td>
-                    </tr>
-                  );
+                    return (
+                      <tr
+                        key={orderId ? String(orderId) : undefined}
+                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td className="py-4 px-4">
+                          <p className="font-medium text-gray-900">
+                            {orderTitle}
+                          </p>
+                        </td>
+                        <td className="py-4 px-4">
+                          <Badge
+                            variant={
+                              orderStatus === "completed"
+                                ? "success"
+                                : orderStatus === "ready-to-post"
+                                  ? "info"
+                                  : orderStatus === "verifying"
+                                    ? "warning"
+                                    : "default"
+                            }>
+                            {orderStatus
+                              ? orderStatus.replace("-", " ")
+                              : "Pending"}
+                          </Badge>
+                        </td>
+                        <td className="py-4 px-4 text-gray-600">
+                          {orderDeadline &&
+                            (typeof orderDeadline === "string" ||
+                              orderDeadline instanceof Date)
+                            ? new Date(orderDeadline as any).toLocaleDateString()
+                            : "-"}
+                        </td>
+                        <td className="py-4 px-4 font-semibold text-primary-purple">
+                          ${orderEarnings}
+                        </td>
+                        <td className="py-4 px-4">
+                          <a
+                            href={`/dashboard/orders/${orderId || ""}`}
+                            className="text-primary-purple hover:text-accent-teal font-medium transition-colors">
+                            View →
+                          </a>
+                        </td>
+                      </tr>
+                    );
                   })
                 )}
               </tbody>
