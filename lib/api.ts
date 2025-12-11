@@ -137,8 +137,8 @@ async function apiRequest<T>(
     ) {
       throw new Error(
         `Unable to connect to backend server at ${API_URL}. ` +
-          `Please ensure the backend is running on port 5003. ` +
-          `Error: ${apiError.message || "Unknown error"}`
+        `Please ensure the backend is running on port 5003. ` +
+        `Error: ${apiError.message || "Unknown error"}`
       );
     }
     throw error;
@@ -356,11 +356,7 @@ export const applicationsApi = {
       return fetch(`${API_URL}/applications`, {
         method: "POST",
         body: data,
-        headers: token
-          ? {
-              Authorization: `Bearer ${token}`,
-            }
-          : {},
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       }).then(async (res) => {
         if (!res.ok) {
           const error = await res
@@ -368,8 +364,16 @@ export const applicationsApi = {
             .catch(() => ({ message: "An error occurred" }));
           throw new Error(error.message || `HTTP error! status: ${res.status}`);
         }
-        return res.json();
+
+        // SAFE PARSE — supports empty response
+        const text = await res.text();
+        try {
+          return text ? JSON.parse(text) : {};
+        } catch {
+          return {}; // fallback for non-JSON
+        }
       });
+
     }
 
     // Otherwise use regular apiRequest
