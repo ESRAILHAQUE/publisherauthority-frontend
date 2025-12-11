@@ -455,6 +455,18 @@ export const adminApi = {
       method: "GET",
     });
   },
+  getUserPayments: (userId: string, filters?: Filters, page = 1, limit = 100) => {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+    if (filters?.status) params.append("status", filters.status);
+    return apiRequest(`/admin/payments/user/${userId}?${params.toString()}`, {
+      method: "GET",
+    });
+  },
+  getUserPaymentStats: (userId: string) =>
+    apiRequest(`/admin/payments/user/${userId}/stats`, { method: "GET" }),
   processPayment: (id: string) =>
     apiRequest(`/admin/payments/${id}/process`, { method: "PUT" }),
   markPaymentAsPaid: (id: string) =>
