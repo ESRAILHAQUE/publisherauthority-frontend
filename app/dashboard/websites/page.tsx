@@ -426,12 +426,26 @@ export default function WebsitesPage() {
                           )}
                         </td>
                         <td className="py-4 px-4 text-gray-600">
-                          {website.verifiedAt
-                            ? new Date(
-                              website.verifiedAt as string | Date
-                            ).toLocaleDateString()
-                            : "-"}
+                          {website.verifiedAt ? (
+                            new Date(website.verifiedAt as string | Date).toLocaleDateString()
+                          ) : website.status === "pending" ? (
+                            <button
+                              onClick={() => {
+                                const websiteId = website._id || website.id;
+                                if (websiteId) {
+                                  setSelectedWebsite(website);
+                                }
+                              }}
+                              className="text-green-600 hover:text-green-700 text-sm font-medium transition-colors"
+                            >
+                              Verify
+                            </button>
+                          ) : (
+                            "-" // not verified AND not pending
+                          )}
                         </td>
+
+
                         <td className="py-4 px-4">
                           <div className="flex flex-col items-start space-y-2">
                             <button
@@ -442,18 +456,6 @@ export default function WebsitesPage() {
                               className="text-primary-purple hover:text-[#2EE6B7] text-sm font-medium transition-colors">
                               View Details
                             </button>
-                            {website.status === "pending" && (
-                              <button
-                                onClick={() => {
-                                  const websiteId = website._id || website.id;
-                                  if (websiteId) {
-                                    setSelectedWebsite(website);
-                                  }
-                                }}
-                                className="text-green-600 hover:text-green-700 text-sm font-medium transition-colors">
-                                Verify
-                              </button>
-                            )}
                             {website.status === "counter-offer" &&
                               website.counterOffer?.status === "pending" &&
                               website.counterOffer?.offeredBy === "admin" && (
