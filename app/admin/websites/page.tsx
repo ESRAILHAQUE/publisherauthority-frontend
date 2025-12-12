@@ -6,6 +6,8 @@ import { Card } from "@/components/shared/Card";
 import { Badge } from "@/components/shared/Badge";
 import { Button } from "@/components/shared/Button";
 import { Loader } from "@/components/shared/Loader";
+import { Modal } from "@/components/shared/Modal";
+import { Textarea } from "@/components/shared/Textarea";
 import { CounterOfferModal } from "@/components/websites/CounterOfferModal";
 import { WebsiteDetailsModal } from "@/components/websites/WebsiteDetailsModal";
 import { AddOrderModal } from "@/components/admin/AddOrderModal";
@@ -61,6 +63,9 @@ export default function AdminWebsitesPage() {
   const [selectedWebsiteForDetails, setSelectedWebsiteForDetails] = useState<Website | null>(null);
   const [showAddOrderModal, setShowAddOrderModal] = useState(false);
   const [selectedWebsiteForOrder, setSelectedWebsiteForOrder] = useState<Website | null>(null);
+  const [showRejectionModal, setShowRejectionModal] = useState(false);
+  const [selectedWebsiteForRejection, setSelectedWebsiteForRejection] = useState<{ id: string; url?: string } | null>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
   const [dropdownPosition, setDropdownPosition] = useState<{
     top: number;
     right: number;
@@ -167,18 +172,14 @@ export default function AdminWebsitesPage() {
 
   const handleUpdateStatus = async (websiteId: string, status: string) => {
     if (status === "rejected") {
-      const reason = prompt("Enter rejection reason:");
-      if (!reason) return;
-
-      try {
-        await adminApi.updateWebsiteStatus(websiteId, status, reason);
-        toast.success("Website status updated");
-        await loadWebsites();
-      } catch (error: unknown) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Failed to update status";
-        toast.error(errorMessage);
-      }
+      // Open rejection modal
+      const website = websites.find(w => (w._id || w.id) === websiteId);
+      setSelectedWebsiteForRejection({ 
+        id: websiteId, 
+        url: website?.url 
+      });
+      setRejectionReason("");
+      setShowRejectionModal(true);
     } else {
       try {
         await adminApi.updateWebsiteStatus(websiteId, status);
@@ -189,6 +190,30 @@ export default function AdminWebsitesPage() {
           error instanceof Error ? error.message : "Failed to update status";
         toast.error(errorMessage);
       }
+    }
+  };
+
+  const handleConfirmRejection = async () => {
+    if (!selectedWebsiteForRejection || !rejectionReason.trim()) {
+      toast.error("Please enter a rejection reason");
+      return;
+    }
+
+    try {
+      await adminApi.updateWebsiteStatus(
+        selectedWebsiteForRejection.id, 
+        "rejected", 
+        rejectionReason.trim()
+      );
+      toast.success("Website rejected successfully");
+      setShowRejectionModal(false);
+      setSelectedWebsiteForRejection(null);
+      setRejectionReason("");
+      await loadWebsites();
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to reject website";
+      toast.error(errorMessage);
     }
   };
 
@@ -241,8 +266,9 @@ export default function AdminWebsitesPage() {
     title: string;
     websiteId: string;
     publisherId: string;
-    description?: string;
-    requirements?: string;
+    anchorText: string;
+    targetUrl: string;
+    content: string;
     deadline: string;
     earnings: number;
   }) => {
@@ -479,9 +505,10 @@ export default function AdminWebsitesPage() {
                         <Badge variant={getStatusBadge(website.status)}>
                           {formatStatus(website.status)}
                         </Badge>
-                        {website.rejectedReason && (
-                          <div className="text-xs text-red-600 mt-1">
-                            {website.rejectedReason}
+                        {website.status === "rejected" && website.rejectedReason && (
+                          <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <p className="text-xs font-semibold text-red-800 mb-1">Rejection Reason:</p>
+                            <p className="text-sm text-red-700">{website.rejectedReason}</p>
                           </div>
                         )}
                         {website.counterOffer && website.counterOffer.status === "pending" && (
@@ -539,13 +566,28 @@ export default function AdminWebsitesPage() {
                                   View Details
                                 </button>
                                 {website.status === "active" && (
-                                  <button
-                                    onClick={() => {
-                                      handleOpenAddOrderModal(website);
-                                    }}
-                                    className="block w-full text-left px-4 py-2 text-sm text-primary-purple hover:bg-purple-50 font-medium">
-                                    Add Order
-                                  </button>
+                                  <>
+                                    <button
+                                      onClick={() => {
+                                        handleOpenAddOrderModal(website);
+                                      }}
+                                      className="block w-full text-left px-4 py-2 text-sm text-primary-purple hover:bg-purple-50 font-medium">
+                                      Add Order
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        const websiteId =
+                                          website._id || website.id;
+                                        if (websiteId) {
+                                          handleOpenCounterOfferModal(String(websiteId), website.price);
+                                          setShowActions(null);
+                                          setDropdownPosition(null);
+                                        }
+                                      }}
+                                      className="block w-full text-left px-4 py-2 text-sm text-blue-700 hover:bg-blue-50">
+                                      Send Counter Offer
+                                    </button>
+                                  </>
                                 )}
                                 {website.status === "pending" && (
                                   <>
@@ -682,6 +724,59 @@ export default function AdminWebsitesPage() {
           website={selectedWebsiteForDetails}
         />
       )}
+
+      {/* Rejection Modal */}
+      <Modal
+        isOpen={showRejectionModal}
+        onClose={() => {
+          setShowRejectionModal(false);
+          setSelectedWebsiteForRejection(null);
+          setRejectionReason("");
+        }}
+        title="Reject Website"
+        size="md"
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowRejectionModal(false);
+                setSelectedWebsiteForRejection(null);
+                setRejectionReason("");
+              }}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleConfirmRejection}
+              disabled={!rejectionReason.trim()}>
+              Reject Website
+            </Button>
+          </div>
+        }>
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm text-gray-600 mb-2">
+              Website: <span className="font-medium text-gray-900">{selectedWebsiteForRejection?.url || "N/A"}</span>
+            </p>
+            <p className="text-sm text-gray-600 mb-4">
+              Please provide a reason for rejecting this website. This reason will be visible to the publisher.
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Rejection Reason <span className="text-red-500">*</span>
+            </label>
+            <Textarea
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder="Enter the reason for rejecting this website..."
+              rows={5}
+              required
+            />
+          </div>
+        </div>
+      </Modal>
 
       {/* Add Order Modal */}
       {selectedWebsiteForOrder && (

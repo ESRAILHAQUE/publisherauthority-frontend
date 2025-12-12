@@ -13,8 +13,9 @@ interface AddOrderModalProps {
     title: string;
     websiteId: string;
     publisherId: string;
-    description?: string;
-    requirements?: string;
+    anchorText: string;
+    targetUrl: string;
+    content: string;
     deadline: string;
     earnings: number;
   }) => Promise<void>;
@@ -35,13 +36,17 @@ export function AddOrderModal({
 }: AddOrderModalProps) {
   const [formData, setFormData] = useState({
     title: "",
-    description: "",
-    requirements: "",
+    anchorText: "",
+    targetUrl: "",
+    content: "",
     deadline: "",
     earnings: "",
   });
   const [errors, setErrors] = useState<{
     title?: string;
+    anchorText?: string;
+    targetUrl?: string;
+    content?: string;
     deadline?: string;
     earnings?: string;
   }>({});
@@ -57,6 +62,29 @@ export function AddOrderModal({
     // Validation
     if (!formData.title.trim()) {
       setErrors({ title: "Order title is required" });
+      return;
+    }
+
+    if (!formData.anchorText.trim()) {
+      setErrors({ anchorText: "Anchor text is required" });
+      return;
+    }
+
+    if (!formData.targetUrl.trim()) {
+      setErrors({ targetUrl: "Target URL is required" });
+      return;
+    }
+
+    // Validate URL format
+    try {
+      new URL(formData.targetUrl.trim());
+    } catch {
+      setErrors({ targetUrl: "Please enter a valid URL" });
+      return;
+    }
+
+    if (!formData.content.trim()) {
+      setErrors({ content: "Content is required" });
       return;
     }
 
@@ -85,16 +113,18 @@ export function AddOrderModal({
         title: formData.title.trim(),
         websiteId,
         publisherId,
-        description: formData.description.trim() || undefined,
-        requirements: formData.requirements.trim() || undefined,
+        anchorText: formData.anchorText.trim(),
+        targetUrl: formData.targetUrl.trim(),
+        content: formData.content.trim(),
         deadline: new Date(formData.deadline).toISOString(),
         earnings,
       });
       // Reset form
       setFormData({
         title: "",
-        description: "",
-        requirements: "",
+        anchorText: "",
+        targetUrl: "",
+        content: "",
         deadline: "",
         earnings: "",
       });
@@ -113,8 +143,9 @@ export function AddOrderModal({
     if (!isSubmitting) {
       setFormData({
         title: "",
-        description: "",
-        requirements: "",
+        anchorText: "",
+        targetUrl: "",
+        content: "",
         deadline: "",
         earnings: "",
       });
@@ -148,6 +179,12 @@ export function AddOrderModal({
         </>
       }>
       <form id="add-order-form" onSubmit={handleSubmit} className="space-y-4">
+        {/* Order ID Display */}
+        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <p className="text-sm font-medium text-gray-700 mb-1">Order ID</p>
+          <p className="text-sm text-gray-900 font-mono">ORD-{Date.now()}-{Math.floor(Math.random() * 1000)}</p>
+        </div>
+
         {/* Website and Publisher Info */}
         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -173,6 +210,48 @@ export function AddOrderModal({
           placeholder="e.g., SEO Best Practices Guide"
           required
           error={errors.title}
+          disabled={isSubmitting}
+        />
+
+        <Input
+          label="Anchor Text"
+          name="anchorText"
+          type="text"
+          value={formData.anchorText}
+          onChange={(e) =>
+            setFormData({ ...formData, anchorText: e.target.value })
+          }
+          placeholder="e.g., best SEO practices"
+          required
+          error={errors.anchorText}
+          disabled={isSubmitting}
+        />
+
+        <Input
+          label="Target URL"
+          name="targetUrl"
+          type="url"
+          value={formData.targetUrl}
+          onChange={(e) =>
+            setFormData({ ...formData, targetUrl: e.target.value })
+          }
+          placeholder="https://example.com/target-page"
+          required
+          error={errors.targetUrl}
+          disabled={isSubmitting}
+        />
+
+        <Textarea
+          label="Content"
+          name="content"
+          value={formData.content}
+          onChange={(e) =>
+            setFormData({ ...formData, content: e.target.value })
+          }
+          rows={8}
+          placeholder="Enter the content for the order..."
+          required
+          error={errors.content}
           disabled={isSubmitting}
         />
 
@@ -207,30 +286,6 @@ export function AddOrderModal({
             disabled={isSubmitting}
           />
         </div>
-
-        <Textarea
-          label="Description (Optional)"
-          name="description"
-          value={formData.description}
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
-          rows={4}
-          placeholder="Order description..."
-          disabled={isSubmitting}
-        />
-
-        <Textarea
-          label="Requirements (Optional)"
-          name="requirements"
-          value={formData.requirements}
-          onChange={(e) =>
-            setFormData({ ...formData, requirements: e.target.value })
-          }
-          rows={6}
-          placeholder="Detailed requirements for the order..."
-          disabled={isSubmitting}
-        />
       </form>
     </Modal>
   );

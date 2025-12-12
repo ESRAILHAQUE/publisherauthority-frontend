@@ -27,6 +27,7 @@ interface Payment {
     lastName?: string;
     email?: string;
     paypalEmail?: string;
+    paymentMethod?: string;
   };
   orderIds?: Array<{ _id?: string; orderId?: string; title?: string }>;
   [key: string]: unknown;
@@ -64,6 +65,12 @@ export default function AdminPaymentsPage() {
       // Debug logging
       if (process.env.NODE_ENV === "development") {
         console.log("Payments API Response:", response);
+        console.log("Response structure:", {
+          hasData: !!response?.data,
+          hasPayments: !!response?.data?.payments,
+          paymentsCount: response?.data?.payments?.length || 0,
+          firstPayment: response?.data?.payments?.[0]
+        });
       }
 
       // Handle different response structures
@@ -99,6 +106,13 @@ export default function AdminPaymentsPage() {
 
       if (process.env.NODE_ENV === "development") {
         console.log("Extracted payments:", paymentsData.length, paymentsData);
+        if (paymentsData.length > 0) {
+          console.log("First payment fields:", Object.keys(paymentsData[0]));
+          console.log("First payment paymentMethod:", paymentsData[0]?.paymentMethod);
+          console.log("First payment userId:", paymentsData[0]?.userId);
+          console.log("First payment userId.paymentMethod:", paymentsData[0]?.userId?.paymentMethod);
+          console.log("First payment userId.paypalEmail:", paymentsData[0]?.userId?.paypalEmail);
+        }
       }
 
       setPayments(paymentsData);
@@ -201,10 +215,24 @@ export default function AdminPaymentsPage() {
           {payments.map((payment) => {
             const statusInfo = getStatusBadge(payment.status);
             const paypalEmail = payment.paypalEmail || payment.userId?.paypalEmail;
+            const paymentMethod = payment.paymentMethod || payment.userId?.paymentMethod || "PayPal";
             const amount = ((payment.amount || 0) as number).toLocaleString(undefined, { 
               minimumFractionDigits: 2, 
               maximumFractionDigits: 2 
             });
+            
+            if (process.env.NODE_ENV === "development") {
+              console.log("Payment data:", {
+                id: payment._id || payment.id,
+                paymentMethod: payment.paymentMethod,
+                userIdPaymentMethod: payment.userId?.paymentMethod,
+                finalPaymentMethod: paymentMethod,
+                paypalEmail: payment.paypalEmail,
+                userIdPaypalEmail: payment.userId?.paypalEmail,
+                finalPaypalEmail: paypalEmail,
+                userId: payment.userId
+              });
+            }
             
             return (
               <Card key={payment._id || payment.id} className="hover:shadow-lg transition-shadow">
@@ -251,7 +279,7 @@ export default function AdminPaymentsPage() {
                           Payment Method
                         </label>
                         <p className="mt-1 text-base font-semibold text-blue-900">
-                          {payment.paymentMethod || "PayPal"}
+                          {paymentMethod}
                         </p>
                       </div>
                       <div className="border-t border-blue-200 pt-2">

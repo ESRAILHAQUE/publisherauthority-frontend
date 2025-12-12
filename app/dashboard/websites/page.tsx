@@ -631,6 +631,12 @@ function WebsitesPageContent() {
                           <Badge variant={getStatusBadge(website.status)}>
                             {formatStatus(website.status)}
                           </Badge>
+                          {website.status === "rejected" && website.rejectedReason && (
+                            <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                              <p className="text-xs font-semibold text-red-800 mb-1">Rejection Reason:</p>
+                              <p className="text-sm text-red-700">{website.rejectedReason}</p>
+                            </div>
+                          )}
                           {website.counterOffer && website.counterOffer.status === "pending" && (
                             <div className="text-xs text-blue-600 mt-1">
                               {website.counterOffer.offeredBy === "admin"
@@ -744,6 +750,18 @@ function WebsitesPageContent() {
                                   Waiting for admin response
                                 </span>
                               )}
+                            {website.status === "active" && (
+                              <button
+                                onClick={() => {
+                                  const websiteId = website._id || website.id;
+                                  if (websiteId) {
+                                    handleOpenCounterOfferModal(String(websiteId), website.price);
+                                  }
+                                }}
+                                className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors">
+                                Send Counter Offer
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

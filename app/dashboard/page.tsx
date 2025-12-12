@@ -13,9 +13,13 @@ export default function DashboardPage() {
   const [stats, setStats] = useState({
     totalEarnings: 0,
     pendingOrders: 0,
+    pendingEarnings: 0,
     readyToPost: 0,
+    readyToPostEarnings: 0,
     verifying: 0,
+    verifyingEarnings: 0,
     completed: 0,
+    completedEarnings: 0,
     activeWebsites: 0,
     accountLevel: "Silver",
     ordersForNextLevel: 0,
@@ -102,14 +106,22 @@ export default function DashboardPage() {
             : 0,
         pendingOrders:
           typeof ordersData?.pending === "number" ? (ordersData.pending as number) : 0,
+        pendingEarnings:
+          typeof statsData?.pendingEarnings === "number" ? (statsData.pendingEarnings as number) : 0,
         readyToPost:
           typeof ordersData?.readyToPost === "number"
             ? (ordersData.readyToPost as number)
             : 0,
+        readyToPostEarnings:
+          typeof statsData?.readyToPostEarnings === "number" ? (statsData.readyToPostEarnings as number) : 0,
         verifying:
           typeof ordersData?.verifying === "number" ? (ordersData.verifying as number) : 0,
+        verifyingEarnings:
+          typeof statsData?.verifyingEarnings === "number" ? (statsData.verifyingEarnings as number) : 0,
         completed:
           typeof ordersData?.completed === "number" ? (ordersData.completed as number) : 0,
+        completedEarnings:
+          typeof statsData?.completedEarnings === "number" ? (statsData.completedEarnings as number) : 0,
         activeWebsites:
           typeof websitesData?.active === "number" ? (websitesData.active as number) : 0,
         accountLevel:
@@ -174,9 +186,13 @@ export default function DashboardPage() {
       setStats({
         totalEarnings: 0,
         pendingOrders: 0,
+        pendingEarnings: 0,
         readyToPost: 0,
+        readyToPostEarnings: 0,
         verifying: 0,
+        verifyingEarnings: 0,
         completed: 0,
+        completedEarnings: 0,
         activeWebsites: 0,
         accountLevel: "silver",
         ordersForNextLevel: 0,
@@ -261,99 +277,27 @@ export default function DashboardPage() {
         </div>
       </Card>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-1">
-        <Card hover>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Total Earnings</p>
-              <p className="text-2xl font-bold text-primary-purple">
-                ${stats.totalEarnings.toLocaleString()}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-              <svg
-                className="w-6 h-6 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-          </div>
-        </Card>
-
-        <Card hover>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Pending Orders</p>
-              <p className="text-2xl font-bold text-primary-purple">
-                {stats.pendingOrders}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-              <svg
-                className="w-6 h-6 text-yellow-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-          </div>
-        </Card>
-
-        <Card hover>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Ready To Post</p>
-              <p className="text-2xl font-bold text-primary-purple">
-                {stats.readyToPost}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <svg
-                className="w-6 h-6 text-blue-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </div>
-          </div>
-        </Card>
-
-        {/* New Counter Offers Card */}
-        <div
-          onClick={() => router.push("/dashboard/websites?filter=counter-offer")}
-          className="cursor-pointer"
-        >
+      {/* Stats Cards - First Row: 4 boxes */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        {/* Total Earnings Card */}
+        <div className="cursor-pointer border border-primary-purple rounded-lg">
           <Card hover>
+            <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Counter Offers</p>
-                <p className="text-2xl font-bold text-primary-purple">
-                  {stats.counterOffers}
+                <h3 className="text-lg font-bold text-gray-900 mb-1">TOTAL EARNINGS</h3>
+                <p className="text-sm text-gray-500">Your total earnings from all orders.</p>
+              </div>
+            </div>
+            <div className="flex items-end justify-between pt-2 border-t border-gray-100">
+              <div>
+                <p className="text-3xl font-bold text-gray-900 mb-1">
+                  ${(stats.totalEarnings || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-primary-purple rounded-full flex items-center justify-center">
                 <svg
-                  className="w-6 h-6 text-purple-600"
+                  className="w-4 h-4 text-primary-purple"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24">
@@ -361,38 +305,206 @@ export default function DashboardPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M7 8h10M7 12h6m2 8l4-4-4-4M3 4v16a1 1 0 001 1h4"
+                    d="M9 5l7 7-7 7"
                   />
                 </svg>
               </div>
             </div>
+          </div>
           </Card>
         </div>
 
-        <Card hover>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Completed</p>
-              <p className="text-2xl font-bold text-primary-purple">
-                {stats.completed}
-              </p>
+        {/* Pending Orders Card */}
+        <div onClick={() => router.push("/dashboard/orders?status=pending")} className="cursor-pointer">
+          <Card hover>
+            <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">PENDING ORDERS</h3>
+                <p className="text-sm text-gray-500">Orders waiting to be processed.</p>
+              </div>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-              <svg
-                className="w-6 h-6 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+            <div className="flex items-end justify-between pt-2 border-t border-gray-100">
+              <div>
+                <p className="text-3xl font-bold text-gray-900 mb-1">
+                  {stats.pendingOrders}
+                </p>
+                <p className="text-sm text-gray-500">
+                  ${(stats.pendingEarnings || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+              </div>
+              <div className="w-8 h-8 border-2 border-primary-purple rounded-full flex items-center justify-center">
+                <svg
+                  className="w-4 h-4 text-primary-purple"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
-        </Card>
+          </Card>
+        </div>
+
+        {/* Ready To Post Card */}
+        <div onClick={() => router.push("/dashboard/orders?status=ready-to-post")} className="cursor-pointer border border-primary-purple rounded-lg">
+          <Card hover>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">READY TO POST</h3>
+                <p className="text-sm text-gray-500">Jobs ready to post on your sites.</p>
+              </div>
+              {stats.readyToPost > 0 && (
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-primary-purple rounded-full"></div>
+                  <span className="text-xs text-primary-purple font-medium">New</span>
+                </div>
+              )}
+            </div>
+            <div className="flex items-end justify-between pt-2 border-t border-gray-100">
+              <div>
+                <p className="text-3xl font-bold text-gray-900 mb-1">
+                  {stats.readyToPost}
+                </p>
+                <p className="text-sm text-gray-500">
+                  ${(stats.readyToPostEarnings || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+              </div>
+              <div className="w-8 h-8 border-2 border-primary-purple rounded-full flex items-center justify-center bg-white">
+                <svg
+                  className="w-4 h-4 text-primary-purple"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+          </Card>
+        </div>
+
+        {/* Counter Offers Card */}
+        <div onClick={() => router.push("/dashboard/websites?filter=counter-offer")} className="cursor-pointer">
+          <Card hover>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">COUNTER OFFERS</h3>
+                <p className="text-sm text-gray-500">Pending counter offer negotiations.</p>
+              </div>
+            </div>
+            <div className="flex items-end justify-between pt-2 border-t border-gray-100">
+              <div>
+                <p className="text-3xl font-bold text-gray-900 mb-1">
+                  {stats.counterOffers}
+                </p>
+              </div>
+              <div className="w-8 h-8 border-2 border-primary-purple rounded-full flex items-center justify-center">
+                <svg
+                  className="w-4 h-4 text-primary-purple"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+          </Card>
+        </div>
+      </div>
+
+      {/* Stats Cards - Second Row: 2 boxes */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div onClick={() => router.push("/dashboard/orders?status=completed")} className="cursor-pointer">
+          <Card hover>
+            <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">COMPLETED</h3>
+                <p className="text-sm text-gray-500">Jobs that you've completed.</p>
+              </div>
+            </div>
+            <div className="flex items-end justify-between pt-2 border-t border-gray-100">
+              <div>
+                <p className="text-3xl font-bold text-gray-900 mb-1">
+                  {stats.completed}
+                </p>
+                <p className="text-sm text-gray-500">
+                  ${(stats.completedEarnings || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+              </div>
+              <div className="w-8 h-8 border-2 border-primary-purple rounded-full flex items-center justify-center">
+                <svg
+                  className="w-4 h-4 text-primary-purple"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+          </Card>
+        </div>
+
+        {/* Active Websites Card */}
+        <div onClick={() => router.push("/dashboard/websites?status=active")} className="cursor-pointer border border-primary-purple rounded-lg">
+          <Card hover>
+            <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">ACTIVE WEBSITES</h3>
+                <p className="text-sm text-gray-500">Your verified and active websites.</p>
+              </div>
+            </div>
+            <div className="flex items-end justify-between pt-2 border-t border-gray-100">
+              <div>
+                <p className="text-3xl font-bold text-gray-900 mb-1">
+                  {stats.activeWebsites}
+                </p>
+              </div>
+              <div className="w-8 h-8 border-2 border-primary-purple rounded-full flex items-center justify-center bg-white">
+                <svg
+                  className="w-4 h-4 text-primary-purple"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+          </Card>
+        </div>
       </div>
 
       {/* Recent Orders */}

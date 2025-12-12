@@ -100,7 +100,7 @@ export default function ApplyPage() {
 
       await applicationsApi.submitApplication(formDataToSend);
       toast.success(
-        "Application submitted successfully! We will review your application and get back to you soon."
+        "Thank you for applying to Publisherauthority.com! A verification link has been sent to your email. Please click the link to verify your email address."
       );
       // Reset form
       setFormData({

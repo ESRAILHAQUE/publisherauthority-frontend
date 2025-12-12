@@ -194,11 +194,14 @@ async function apiRequest<T>(
     if (process.env.NODE_ENV === "development") {
       try {
         const errorInfo = error instanceof Error 
-          ? { message: error.message, name: error.name }
+          ? { message: error.message, name: error.name, stack: error.stack }
           : { error: String(error || "Unknown error") };
         console.error("API request failed:", errorInfo);
         console.error("Endpoint:", endpoint);
         console.error("Full URL:", `${API_URL}${endpoint}`);
+        if (options.body) {
+          console.error("Request body:", JSON.stringify(options.body, null, 2));
+        }
       } catch (logError) {
         // Silently ignore logging errors
       }
@@ -306,10 +309,10 @@ export const paymentsApi = {
   getPayments: () => apiRequest("/payments", { method: "GET" }),
   getInvoices: () => apiRequest("/payments", { method: "GET" }), // Same endpoint
   getPaymentStats: () => apiRequest("/payments/stats", { method: "GET" }),
-  updatePaypalEmail: (email: string) =>
+  updatePaypalEmail: (email: string, paymentMethod?: string) =>
     apiRequest("/payments/settings", {
       method: "PUT",
-      body: { paypalEmail: email },
+      body: { paypalEmail: email, paymentMethod },
     }),
   downloadInvoice: (id: string) => {
     const token = localStorage.getItem("authToken");

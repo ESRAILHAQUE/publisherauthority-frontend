@@ -6,11 +6,13 @@ import { Input } from "@/components/shared/Input";
 import { Button } from "@/components/shared/Button";
 import { Badge } from "@/components/shared/Badge";
 import { Loader } from "@/components/shared/Loader";
+import { Select } from "@/components/shared/Select";
 import { paymentsApi, profileApi } from "@/lib/api";
 import toast from "react-hot-toast";
 
 export default function PaymentsPage() {
   const [paypalEmail, setPaypalEmail] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("PayPal");
   const [invoices, setInvoices] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -37,30 +39,41 @@ export default function PaymentsPage() {
       
       // Handle profile data - Backend returns { success: true, data: { user: {...} } }
       let paypalEmailValue = "";
+      let paymentMethodValue = "PayPal";
       if (profileData) {
         const profile = profileData as {
           success?: boolean;
           data?: {
-            user?: { paypalEmail?: string };
+            user?: { paypalEmail?: string; paymentMethod?: string };
             paypalEmail?: string;
+            paymentMethod?: string;
             [key: string]: unknown;
           };
-          user?: { paypalEmail?: string };
+          user?: { paypalEmail?: string; paymentMethod?: string };
           paypalEmail?: string;
+          paymentMethod?: string;
           [key: string]: unknown;
         };
         
-        // Backend format: { success: true, data: { user: { paypalEmail: "..." } } }
+        // Backend format: { success: true, data: { user: { paypalEmail: "...", paymentMethod: "..." } } }
         paypalEmailValue = 
           profile?.data?.user?.paypalEmail ||
           profile?.data?.paypalEmail ||
           profile?.user?.paypalEmail ||
           profile?.paypalEmail ||
           "";
+        
+        paymentMethodValue = 
+          profile?.data?.user?.paymentMethod ||
+          profile?.data?.paymentMethod ||
+          profile?.user?.paymentMethod ||
+          profile?.paymentMethod ||
+          "PayPal";
       }
       
       // Always update state to ensure latest data is shown
       setPaypalEmail(paypalEmailValue);
+      setPaymentMethod(paymentMethodValue);
       if (paypalEmailValue) {
         setOriginalPaypalEmail(paypalEmailValue);
       }
@@ -156,18 +169,20 @@ export default function PaymentsPage() {
 
     try {
       setSaving(true);
-      const response = await paymentsApi.updatePaypalEmail(paypalEmail.trim());
+      const response = await paymentsApi.updatePaypalEmail(paypalEmail.trim(), paymentMethod);
       
-      // Handle response - Backend returns { success: true, data: { user: { paypalEmail: "..." } } }
+      // Handle response - Backend returns { success: true, data: { user: { paypalEmail: "...", paymentMethod: "..." } } }
       const responseData = response as {
         success?: boolean;
         data?: {
-          user?: { paypalEmail?: string };
+          user?: { paypalEmail?: string; paymentMethod?: string };
           paypalEmail?: string;
+          paymentMethod?: string;
           [key: string]: unknown;
         };
-        user?: { paypalEmail?: string };
+        user?: { paypalEmail?: string; paymentMethod?: string };
         paypalEmail?: string;
+        paymentMethod?: string;
         [key: string]: unknown;
       };
       
@@ -179,8 +194,16 @@ export default function PaymentsPage() {
         responseData?.paypalEmail ||
         paypalEmail.trim();
       
+      const updatedPaymentMethod = 
+        responseData?.data?.user?.paymentMethod ||
+        responseData?.data?.paymentMethod ||
+        responseData?.user?.paymentMethod ||
+        responseData?.paymentMethod ||
+        paymentMethod;
+      
       // Update state immediately
       setPaypalEmail(updatedEmail);
+      setPaymentMethod(updatedPaymentMethod);
       setOriginalPaypalEmail(updatedEmail);
       setIsEditing(false);
       
@@ -258,7 +281,7 @@ export default function PaymentsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-white p-4 rounded-lg border border-gray-200">
                     <p className="text-sm text-gray-600 mb-1">Payment Method</p>
-                    <p className="text-lg font-semibold text-gray-900">PayPal</p>
+                    <p className="text-lg font-semibold text-gray-900">{paymentMethod || "PayPal"}</p>
                   </div>
                   <div className="bg-white p-4 rounded-lg border border-gray-200">
                     <p className="text-sm text-gray-600 mb-1">PayPal Email</p>
@@ -318,11 +341,24 @@ export default function PaymentsPage() {
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-white p-4 rounded-lg border border-gray-200">
-                    <p className="text-sm text-gray-600 mb-1">Payment Method</p>
-                    <div className="p-2 bg-gray-50 border border-gray-200 rounded-md">
-                      <span className="text-gray-700 font-medium">PayPal</span>
-                      <span className="ml-2 text-xs text-gray-500">(Currently supported)</span>
-                    </div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Payment Method <span className="text-red-500">*</span>
+                    </label>
+                    <Select
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      options={[
+                        { value: "PayPal", label: "PayPal" },
+                        { value: "Bank Transfer", label: "Bank Transfer" },
+                        { value: "Wise", label: "Wise" },
+                        { value: "Payoneer", label: "Payoneer" },
+                        { value: "Other", label: "Other" },
+                      ]}
+                      required
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Select your preferred payment method
+                    </p>
                   </div>
                   <div className="bg-white p-4 rounded-lg border border-gray-200">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
