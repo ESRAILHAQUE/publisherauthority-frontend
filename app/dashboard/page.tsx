@@ -280,9 +280,9 @@ export default function DashboardPage() {
       {/* Stats Cards - First Row: 4 boxes */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         {/* Total Earnings Card */}
-        <div className="cursor-pointer border border-primary-purple rounded-lg">
-          <Card hover>
-            <div className="space-y-4">
+        <div className="cursor-pointer h-full flex flex-col">
+          <Card hover className="h-full flex flex-col">
+            <div className="space-y-3 flex-1 flex flex-col">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold text-gray-900 mb-1">TOTAL EARNINGS</h3>
@@ -315,9 +315,9 @@ export default function DashboardPage() {
         </div>
 
         {/* Pending Orders Card */}
-        <div onClick={() => router.push("/dashboard/orders?status=pending")} className="cursor-pointer">
-          <Card hover>
-            <div className="space-y-4">
+        <div onClick={() => router.push("/dashboard/orders?status=pending")} className="cursor-pointer h-full flex flex-col">
+          <Card hover className="h-full flex flex-col">
+            <div className="space-y-3 flex-1 flex flex-col">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold text-gray-900 mb-1">PENDING ORDERS</h3>
@@ -353,9 +353,9 @@ export default function DashboardPage() {
         </div>
 
         {/* Ready To Post Card */}
-        <div onClick={() => router.push("/dashboard/orders?status=ready-to-post")} className="cursor-pointer border border-primary-purple rounded-lg">
-          <Card hover>
-          <div className="space-y-4">
+        <div onClick={() => router.push("/dashboard/orders?status=ready-to-post")} className="cursor-pointer h-full flex flex-col">
+          <Card hover className="h-full flex flex-col">
+            <div className="space-y-3 flex-1 flex flex-col">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold text-gray-900 mb-1">READY TO POST</h3>
@@ -396,47 +396,10 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Counter Offers Card */}
-        <div onClick={() => router.push("/dashboard/websites?filter=counter-offer")} className="cursor-pointer">
-          <Card hover>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-1">COUNTER OFFERS</h3>
-                <p className="text-sm text-gray-500">Pending counter offer negotiations.</p>
-              </div>
-            </div>
-            <div className="flex items-end justify-between pt-2 border-t border-gray-100">
-              <div>
-                <p className="text-3xl font-bold text-gray-900 mb-1">
-                  {stats.counterOffers}
-                </p>
-              </div>
-              <div className="w-8 h-8 border-2 border-primary-purple rounded-full flex items-center justify-center">
-                <svg
-                  className="w-4 h-4 text-primary-purple"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-          </Card>
-        </div>
-      </div>
-
-      {/* Stats Cards - Second Row: 2 boxes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div onClick={() => router.push("/dashboard/orders?status=completed")} className="cursor-pointer">
-          <Card hover>
-            <div className="space-y-4">
+        {/* COMPLETED Card */}
+        <div onClick={() => router.push("/dashboard/orders?status=completed")} className="cursor-pointer h-full flex flex-col">
+          <Card hover className="h-full flex flex-col">
+            <div className="space-y-3 flex-1 flex flex-col">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold text-gray-900 mb-1">COMPLETED</h3>
@@ -470,11 +433,49 @@ export default function DashboardPage() {
           </div>
           </Card>
         </div>
+      </div>
+
+      {/* Stats Cards - Second Row: 2 boxes */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Counter Offers Card */}
+        <div onClick={() => router.push("/dashboard/websites?filter=counter-offer")} className="cursor-pointer h-full flex flex-col">
+          <Card hover className="h-full flex flex-col">
+            <div className="space-y-3 flex-1 flex flex-col">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">COUNTER OFFERS</h3>
+                <p className="text-sm text-gray-500">Pending counter offer negotiations.</p>
+              </div>
+            </div>
+            <div className="flex items-end justify-between pt-2 border-t border-gray-100">
+              <div>
+                <p className="text-3xl font-bold text-gray-900 mb-1">
+                  {stats.counterOffers}
+                </p>
+              </div>
+              <div className="w-8 h-8 border-2 border-primary-purple rounded-full flex items-center justify-center">
+                <svg
+                  className="w-4 h-4 text-primary-purple"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+          </Card>
+        </div>
 
         {/* Active Websites Card */}
-        <div onClick={() => router.push("/dashboard/websites?status=active")} className="cursor-pointer border border-primary-purple rounded-lg">
-          <Card hover>
-            <div className="space-y-4">
+        <div onClick={() => router.push("/dashboard/websites?status=active")} className="cursor-pointer h-full flex flex-col">
+          <Card hover className="h-full flex flex-col">
+            <div className="space-y-3 flex-1 flex flex-col">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold text-gray-900 mb-1">ACTIVE WEBSITES</h3>
