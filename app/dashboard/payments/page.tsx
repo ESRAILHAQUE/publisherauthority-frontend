@@ -14,6 +14,13 @@ export default function PaymentsPage() {
   const [invoices, setInvoices] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [paymentStats, setPaymentStats] = useState<{
+    totalPayments?: number;
+    pendingPayments?: number;
+    paidPayments?: number;
+    totalAmount?: number;
+    pendingAmount?: number;
+  }>({});
 
   useEffect(() => {
     loadData();
@@ -22,36 +29,177 @@ export default function PaymentsPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [profileData, invoicesData] = await Promise.all([
+      const [profileData, invoicesData, statsData] = await Promise.all([
         profileApi.getProfile().catch(() => ({ paypalEmail: "" })),
         paymentsApi.getInvoices().catch(() => []),
+        paymentsApi.getPaymentStats().catch(() => ({})),
       ]);
-      const profile = profileData as {
-        paypalEmail?: string;
-        [key: string]: unknown;
-      };
-      setPaypalEmail(profile.paypalEmail || "");
-      const invoicesArray = Array.isArray(invoicesData)
-        ? invoicesData
-        : (invoicesData as { invoices?: Record<string, unknown>[] }).invoices ||
+      
+      // Handle profile data - Backend returns { success: true, data: { user: {...} } }
+      let paypalEmailValue = "";
+      if (profileData) {
+        const profile = profileData as {
+          success?: boolean;
+          data?: {
+            user?: { paypalEmail?: string };
+            paypalEmail?: string;
+            [key: string]: unknown;
+          };
+          user?: { paypalEmail?: string };
+          paypalEmail?: string;
+          [key: string]: unknown;
+        };
+        
+        // Backend format: { success: true, data: { user: { paypalEmail: "..." } } }
+        paypalEmailValue = 
+          profile?.data?.user?.paypalEmail ||
+          profile?.data?.paypalEmail ||
+          profile?.user?.paypalEmail ||
+          profile?.paypalEmail ||
+          "";
+      }
+      
+      // Always update state to ensure latest data is shown
+      setPaypalEmail(paypalEmailValue);
+      if (paypalEmailValue) {
+        setOriginalPaypalEmail(paypalEmailValue);
+      }
+      
+      // Handle invoices data - Backend returns { success: true, data: { payments: [...], total, page, pages } }
+      let invoicesArray: Record<string, unknown>[] = [];
+      if (invoicesData) {
+        const invoices = invoicesData as {
+          success?: boolean;
+          data?: {
+            payments?: Record<string, unknown>[];
+            invoices?: Record<string, unknown>[];
+            total?: number;
+            page?: number;
+            pages?: number;
+            [key: string]: unknown;
+          };
+          payments?: Record<string, unknown>[];
+          invoices?: Record<string, unknown>[];
+          [key: string]: unknown;
+        };
+        
+        // Backend format: { success: true, data: { payments: [...], total, page, pages } }
+        invoicesArray = 
+          (Array.isArray(invoicesData) ? invoicesData : []) ||
+          invoices?.data?.payments ||
+          invoices?.data?.invoices ||
+          invoices?.payments ||
+          invoices?.invoices ||
           [];
+      }
       setInvoices(invoicesArray);
+      
+      // Set payment stats - handle different response structures
+      const stats = statsData as {
+        data?: {
+          totalPayments?: number;
+          pendingPayments?: number;
+          paidPayments?: number;
+          totalAmount?: number;
+          pendingAmount?: number;
+        };
+        totalPayments?: number;
+        pendingPayments?: number;
+        paidPayments?: number;
+        totalAmount?: number;
+        pendingAmount?: number;
+      };
+      setPaymentStats(stats?.data || stats || {});
+      
+      // Log for debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Payment data loaded:', {
+          paypalEmail: paypalEmailValue,
+          invoicesCount: invoicesArray.length,
+          stats: stats?.data || stats,
+        });
+      }
     } catch (error) {
       console.error("Failed to load payment data:", error);
+      toast.error("Failed to load payment data");
     } finally {
       setLoading(false);
     }
   };
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [originalPaypalEmail, setOriginalPaypalEmail] = useState("");
+
+  useEffect(() => {
+    if (paypalEmail) {
+      setOriginalPaypalEmail(paypalEmail);
+    }
+  }, [paypalEmail]);
+
+  const handleCancelEdit = () => {
+    setPaypalEmail(originalPaypalEmail);
+    setIsEditing(false);
+  };
+
   const handleSavePaypal = async () => {
+    if (!paypalEmail || paypalEmail.trim() === "") {
+      toast.error("Please enter a valid PayPal email address");
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(paypalEmail.trim())) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
     try {
       setSaving(true);
-      await paymentsApi.updatePaypalEmail(paypalEmail);
-      toast.success("PayPal email saved successfully");
+      const response = await paymentsApi.updatePaypalEmail(paypalEmail.trim());
+      
+      // Handle response - Backend returns { success: true, data: { user: { paypalEmail: "..." } } }
+      const responseData = response as {
+        success?: boolean;
+        data?: {
+          user?: { paypalEmail?: string };
+          paypalEmail?: string;
+          [key: string]: unknown;
+        };
+        user?: { paypalEmail?: string };
+        paypalEmail?: string;
+        [key: string]: unknown;
+      };
+      
+      // Update PayPal email from response
+      const updatedEmail = 
+        responseData?.data?.user?.paypalEmail ||
+        responseData?.data?.paypalEmail ||
+        responseData?.user?.paypalEmail ||
+        responseData?.paypalEmail ||
+        paypalEmail.trim();
+      
+      // Update state immediately
+      setPaypalEmail(updatedEmail);
+      setOriginalPaypalEmail(updatedEmail);
+      setIsEditing(false);
+      
+      toast.success("Payment settings saved successfully");
+      
+      // Reload all data to ensure consistency with database
+      // Use setTimeout to ensure state updates are processed first
+      setTimeout(async () => {
+        await loadData();
+      }, 500);
     } catch (error: unknown) {
+      console.error("Save payment error:", error);
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to save PayPal email";
+        error instanceof Error ? error.message : "Failed to save payment settings";
       toast.error(errorMessage);
+      // Revert to original email on error
+      if (originalPaypalEmail) {
+        setPaypalEmail(originalPaypalEmail);
+      }
     } finally {
       setSaving(false);
     }
@@ -82,59 +230,166 @@ export default function PaymentsPage() {
         </p>
       </div>
 
-      {/* Payment Settings */}
+      {/* Payment Information - Combined View & Edit */}
       <Card>
-        <h2 className="text-xl font-semibold text-primary-purple mb-6">
-          Payment Settings
-        </h2>
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Payment Method: PayPal
-            </label>
-            <Input
-              type="email"
-              value={paypalEmail}
-              onChange={(e) => setPaypalEmail(e.target.value)}
-              placeholder="your@paypal.com"
-            />
-          </div>
-          <Button
-            onClick={handleSavePaypal}
-            isLoading={saving}
-            disabled={saving}>
-            Save Payment Settings
-          </Button>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-primary-purple">
+            Payment Information
+          </h2>
         </div>
-      </Card>
+        <div className="prose max-w-none text-gray-700 space-y-4">
+          {/* Display Saved Payment Details from Database */}
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200 p-6 rounded-lg shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900">Your Payment Information</h3>
+              {!isEditing && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsEditing(true)}>
+                  {paypalEmail ? "Edit Payment Info" : "Add Payment Info"}
+                </Button>
+              )}
+            </div>
 
-      {/* Payment Information */}
-      <Card>
-        <h2 className="text-xl font-semibold text-primary-purple mb-4">
-          Payment Information
-        </h2>
-        <div className="prose max-w-none text-gray-700 space-y-3">
-          <p>
-            <strong>Key information about your payments.</strong>
-          </p>
-          <p>
-            Payments are sent on the 1st and 15th of each month. If either of
-            those days falls on a weekend, the payment will be moved to the next
-            business day. Please allow a few business days for the payment to be
-            processed.
-          </p>
-          <p>
-            All payments are sent in USD. If you are outside the US, your bank
-            may charge you a currency conversion fee.
-          </p>
-          <p>
-            All links are monitored to ensure they remain active. If a link is
-            removed, the payment for it will be excluded from the payment cycle.
-            If the link is re-added, the payment will be reinstated in the
-            cycle. Please note that if a paid link is removed, any future
-            payments will also be excluded from the payment cycle until the link
-            is restored.
-          </p>
+            {!isEditing ? (
+              // View Mode
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <p className="text-sm text-gray-600 mb-1">Payment Method</p>
+                    <p className="text-lg font-semibold text-gray-900">PayPal</p>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <p className="text-sm text-gray-600 mb-1">PayPal Email</p>
+                    {paypalEmail ? (
+                      <p className="text-lg font-semibold text-primary-purple break-all">{paypalEmail}</p>
+                    ) : (
+                      <p className="text-sm text-yellow-600 italic">Not set - Click Edit to add</p>
+                    )}
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <p className="text-sm text-gray-600 mb-1">Currency</p>
+                    <p className="text-lg font-semibold text-gray-900">USD</p>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <p className="text-sm text-gray-600 mb-1">Payment Schedule</p>
+                    <p className="text-lg font-semibold text-gray-900">1st & 15th of each month</p>
+                  </div>
+                </div>
+                
+                {/* Payment Statistics */}
+                {(paymentStats.totalPayments !== undefined || paymentStats.totalAmount !== undefined) && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-3">Payment Statistics</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {paymentStats.totalPayments !== undefined && (
+                        <div className="text-center">
+                          <p className="text-xs text-gray-600">Total Payments</p>
+                          <p className="text-lg font-bold text-primary-purple">{paymentStats.totalPayments}</p>
+                        </div>
+                      )}
+                      {paymentStats.pendingPayments !== undefined && (
+                        <div className="text-center">
+                          <p className="text-xs text-gray-600">Pending</p>
+                          <p className="text-lg font-bold text-yellow-600">{paymentStats.pendingPayments}</p>
+                        </div>
+                      )}
+                      {paymentStats.paidPayments !== undefined && (
+                        <div className="text-center">
+                          <p className="text-xs text-gray-600">Paid</p>
+                          <p className="text-lg font-bold text-green-600">{paymentStats.paidPayments}</p>
+                        </div>
+                      )}
+                      {paymentStats.totalAmount !== undefined && (
+                        <div className="text-center">
+                          <p className="text-xs text-gray-600">Total Amount</p>
+                          <p className="text-lg font-bold text-primary-purple">
+                            ${(paymentStats.totalAmount || 0).toLocaleString()}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              // Edit Mode - Inline editing
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <p className="text-sm text-gray-600 mb-1">Payment Method</p>
+                    <div className="p-2 bg-gray-50 border border-gray-200 rounded-md">
+                      <span className="text-gray-700 font-medium">PayPal</span>
+                      <span className="ml-2 text-xs text-gray-500">(Currently supported)</span>
+                    </div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      PayPal Email Address <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      type="email"
+                      value={paypalEmail}
+                      onChange={(e) => setPaypalEmail(e.target.value)}
+                      placeholder="your@paypal.com"
+                      required
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Enter the PayPal email address where you want to receive payments
+                    </p>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <p className="text-sm text-gray-600 mb-1">Currency</p>
+                    <p className="text-lg font-semibold text-gray-900">USD</p>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <p className="text-sm text-gray-600 mb-1">Payment Schedule</p>
+                    <p className="text-lg font-semibold text-gray-900">1st & 15th of each month</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
+                  <Button
+                    onClick={handleSavePaypal}
+                    isLoading={saving}
+                    disabled={saving || !paypalEmail}>
+                    {paypalEmail && originalPaypalEmail ? "Update Payment Info" : "Save Payment Info"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleCancelEdit}
+                    disabled={saving}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Payment Policy Information */}
+          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+            <p className="font-semibold text-blue-900 mb-2">
+              Payment Policy Information
+            </p>
+            <ul className="list-disc list-inside space-y-2 text-blue-800">
+              <li>
+                Payments are sent on the <strong>1st and 15th</strong> of each month. 
+                If either of those days falls on a weekend, the payment will be moved to the next business day.
+              </li>
+              <li>
+                Please allow a few business days for the payment to be processed.
+              </li>
+              <li>
+                All payments are sent in <strong>USD</strong>. If you are outside the US, 
+                your bank may charge you a currency conversion fee.
+              </li>
+              <li>
+                All links are monitored to ensure they remain active. If a link is removed, 
+                the payment for it will be excluded from the payment cycle.
+              </li>
+            </ul>
+          </div>
         </div>
       </Card>
 

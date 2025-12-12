@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Card } from "@/components/shared/Card";
 import { Button } from "@/components/shared/Button";
 import { Badge } from "@/components/shared/Badge";
+import { Input } from "@/components/shared/Input";
 
 interface WebsiteVerificationProps {
   website: {
@@ -13,7 +14,7 @@ interface WebsiteVerificationProps {
     status: string;
     verificationMethod?: "tag" | "article";
   };
-  onVerify: (method: "tag" | "article") => Promise<void>;
+  onVerify: (method: "tag" | "article", articleUrl?: string) => Promise<void>;
 }
 
 export function WebsiteVerification({
@@ -24,11 +25,17 @@ export function WebsiteVerification({
   const [selectedMethod, setSelectedMethod] = useState<
     "tag" | "article" | null
   >(null);
+  const [articleUrl, setArticleUrl] = useState("");
 
   const handleVerify = async (method: "tag" | "article") => {
+    if (method === "article" && !articleUrl.trim()) {
+      alert("Please enter the article URL containing the anchor link");
+      return;
+    }
+
     setVerifying(true);
     try {
-      await onVerify(method);
+      await onVerify(method, method === "article" ? articleUrl.trim() : undefined);
       setSelectedMethod(method);
     } catch (error) {
       console.error("Verification failed:", error);
@@ -111,7 +118,7 @@ export function WebsiteVerification({
                 Method 2: Verification Article
               </h4>
               <p className="text-sm text-gray-600">
-                Publish a temporary verification article with a specific link
+                Publish the specified content with a required anchor link.
               </p>
             </div>
             {selectedMethod === "article" && (
@@ -119,31 +126,53 @@ export function WebsiteVerification({
             )}
           </div>
 
-          <div className="bg-gray-50 rounded p-4 mb-4">
-            <p className="text-sm text-gray-700 mb-2">
-              <strong>Verification Link:</strong>
+          <div className="mb-4">
+            <p className="text-sm text-gray-700 mb-3">
+              <strong>Instructions:</strong>
             </p>
-            <a
-              href={`${website.url}/publisherauthority-verification-${website.verificationCode}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary-purple hover:underline break-all">
-              {website.url}/publisherauthority-verification-
-              {website.verificationCode}
-            </a>
-          </div>
+            <p className="text-sm text-gray-700 mb-3">
+              Place the text below — with the required anchor text and link — in the body of an article on your site.
+            </p>
 
-          <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700 mb-4">
-            <li>Create a new article on your website</li>
-            <li>Include the verification link above in the article content</li>
-            <li>Publish the article (it can be temporary)</li>
-            <li>Click &quot;Verify via Article&quot; below</li>
-          </ol>
+            <div className="bg-gray-50 rounded p-4 mb-3 space-y-2">
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-1">
+                  Anchor text: <span className="font-normal">Publisher Authority</span>
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-1">
+                  Link: <a href="https://publisherauthority.com" target="_blank" rel="noopener noreferrer" className="text-primary-purple hover:underline font-normal">https://publisherauthority.com</a>
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-3">
+              <p className="text-sm text-yellow-800">
+                <strong>Important:</strong> Make sure the text is not placed in a comment section, profile description, footer, or any secondary area.
+              </p>
+            </div>
+
+            <p className="text-sm text-gray-700 mb-3">
+              The article URL containing the anchor link can be temporary.
+            </p>
+
+            <div className="mt-4">
+              <Input
+                label="Article URL containing the anchor link:"
+                type="url"
+                value={articleUrl}
+                onChange={(e) => setArticleUrl(e.target.value)}
+                placeholder="https://example.com/article-url"
+                disabled={verifying || selectedMethod !== null}
+              />
+            </div>
+          </div>
 
           <Button
             variant="outline"
             onClick={() => handleVerify("article")}
-            disabled={verifying || selectedMethod !== null}
+            disabled={verifying || selectedMethod !== null || !articleUrl.trim()}
             isLoading={verifying && selectedMethod === null}>
             Verify via Article
           </Button>

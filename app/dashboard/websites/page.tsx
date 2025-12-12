@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/shared/Card";
 import { Badge } from "@/components/shared/Badge";
 import { Button } from "@/components/shared/Button";
@@ -42,7 +43,8 @@ interface Website {
   [key: string]: unknown;
 }
 
-export default function WebsitesPage() {
+function WebsitesPageContent() {
+  const searchParams = useSearchParams();
   const [websites, setWebsites] = useState<Website[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedWebsite, setSelectedWebsite] = useState<Website | null>(null);
@@ -61,6 +63,13 @@ export default function WebsitesPage() {
 
   const filterRef = useRef<HTMLDivElement | null>(null);
 
+  // Check URL params for filter and apply counter-offer filter
+  useEffect(() => {
+    const filterParam = searchParams.get("filter");
+    if (filterParam === "counter-offer") {
+      setStatusFilter(["counter-offer"]);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     loadWebsites();
@@ -119,6 +128,7 @@ export default function WebsitesPage() {
       ) {
         websitesData = response.websites;
       }
+      console.log("Loaded websites:", websitesData.length, "websites");
       setWebsites(websitesData);
     } catch (error) {
       console.error("Failed to load websites:", error);
@@ -131,19 +141,26 @@ export default function WebsitesPage() {
 
   const handleVerify = async (
     websiteId: string,
-    method: "tag" | "article"
+    method: "tag" | "article",
+    articleUrl?: string
   ): Promise<void> => {
     try {
+      console.log("Verifying website:", { websiteId, method, articleUrl });
+      
       if (method === "tag") {
         await websitesApi.verifyWebsite(websiteId);
       } else {
-        // For article verification, we'd need the article URL
-        // This is a placeholder - you may need to adjust based on your API
-        await websitesApi.verifyWebsite(websiteId);
+        if (!articleUrl || articleUrl.trim() === "") {
+          toast.error("Please provide the article URL");
+          return;
+        }
+        await websitesApi.verifyWebsiteArticle(websiteId, articleUrl.trim());
       }
+      toast.success("Verification submitted successfully. Status is pending and admin will manually check.");
       await loadWebsites();
       setSelectedWebsite(null);
     } catch (error: unknown) {
+      console.error("Verification error:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Verification failed";
       toast.error(errorMessage);
@@ -249,9 +266,18 @@ export default function WebsitesPage() {
             <div className="relative">
               <button
                 onClick={() => setShowFilter((prev) => !prev)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50"
+                className={`px-3 py-2 border rounded-md text-sm bg-white hover:bg-gray-50 ${
+                  statusFilter.length > 0
+                    ? "border-primary-purple bg-purple-50 text-primary-purple font-medium"
+                    : "border-gray-300"
+                }`}
               >
                 Status Filter
+                {statusFilter.length > 0 && (
+                  <span className="ml-2 px-1.5 py-0.5 bg-primary-purple text-white text-xs rounded-full">
+                    {statusFilter.length}
+                  </span>
+                )}
               </button>
 
               {showFilter && (
@@ -323,9 +349,13 @@ export default function WebsitesPage() {
                 ? (selectedWebsite.verificationMethod as "tag" | "article")
                 : undefined,
           }}
-          onVerify={async (method) => {
+          onVerify={async (method, articleUrl) => {
             const websiteId = selectedWebsite._id || selectedWebsite.id;
-            if (websiteId) await handleVerify(String(websiteId), method);
+            if (!websiteId) {
+              toast.error("Website ID not found");
+              return;
+            }
+            await handleVerify(String(websiteId), method, articleUrl);
           }}
         />
       )}
@@ -535,5 +565,17 @@ export default function WebsitesPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function WebsitesPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-20">
+        <Loader size="lg" text="Loading..." />
+      </div>
+    }>
+      <WebsitesPageContent />
+    </Suspense>
   );
 }

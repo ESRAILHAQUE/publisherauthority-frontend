@@ -109,15 +109,43 @@ async function apiRequest<T>(
     const response = await fetch(`${API_URL}${endpoint}`, config);
 
     if (!response.ok) {
-      const error = await response
-        .json()
-        .catch(() => ({ message: "An error occurred" }));
+      let error: { message?: string; error?: { message?: string }; [key: string]: unknown };
+      try {
+        const text = await response.text();
+        if (text) {
+          try {
+            error = JSON.parse(text);
+          } catch (parseErr) {
+            // If it's not JSON, use the text as error message
+            error = { message: text || `HTTP error! status: ${response.status}` };
+          }
+        } else {
+          error = { message: `HTTP error! status: ${response.status} ${response.statusText || ""}`.trim() };
+        }
+      } catch (parseError) {
+        // If text() fails, create a meaningful error message
+        error = { 
+          message: `HTTP error! status: ${response.status} ${response.statusText || ""}`.trim()
+        };
+      }
+      
       // Extract error message from backend response format
       // Backend returns: { success: false, message: "...", error: {...} }
       const errorMessage =
         error.message ||
         error.error?.message ||
         `HTTP error! status: ${response.status}`;
+      
+      // Log more details in development
+      if (process.env.NODE_ENV === "development") {
+        console.error("API Error Details:", {
+          status: response.status,
+          statusText: response.statusText,
+          url: `${API_URL}${endpoint}`,
+          error: errorMessage,
+        });
+      }
+      
       throw new Error(errorMessage);
     }
 
@@ -126,21 +154,40 @@ async function apiRequest<T>(
     // Return data directly (it already has success, message, data structure)
     return data;
   } catch (error: unknown) {
-    console.error("API request failed:", error);
-    console.error("API URL:", `${API_URL}${endpoint}`);
-    // Handle network errors
+    // Handle network errors first
     const apiError = error as ApiError;
     if (
       apiError.name === "TypeError" &&
       (apiError.message?.includes("fetch") ||
         apiError.message === "Failed to fetch")
     ) {
-      throw new Error(
+      const networkError = new Error(
         `Unable to connect to backend server at ${API_URL}. ` +
         `Please ensure the backend is running on port 5003. ` +
         `Error: ${apiError.message || "Unknown error"}`
       );
+      // Safe error logging - only in development
+      if (process.env.NODE_ENV === "development") {
+        try {
+          console.error("Network error:", networkError.message);
+        } catch (logError) {
+          // Silently ignore logging errors
+        }
+      }
+      throw networkError;
     }
+    
+    // For other errors, log in development
+    if (process.env.NODE_ENV === "development") {
+      try {
+        console.error("API request failed:", error);
+        console.error("Endpoint:", endpoint);
+        console.error("Full URL:", `${API_URL}${endpoint}`);
+      } catch (logError) {
+        // Silently ignore logging errors
+      }
+    }
+    
     throw error;
   }
 }
@@ -177,10 +224,9 @@ export const websitesApi = {
   verifyWebsite: (id: string) =>
     apiRequest(`/websites/${id}/verify/tag`, {
       method: "POST",
-      body: { tag: "" },
-    }), // Will be handled by component
-  verifyWebsiteTag: (id: string, tag: string) =>
-    apiRequest(`/websites/${id}/verify/tag`, { method: "POST", body: { tag } }),
+    }),
+  verifyWebsiteTag: (id: string) =>
+    apiRequest(`/websites/${id}/verify/tag`, { method: "POST" }),
   verifyWebsiteArticle: (id: string, articleUrl: string) =>
     apiRequest(`/websites/${id}/verify/article`, {
       method: "POST",
@@ -243,6 +289,7 @@ export const ordersApi = {
 export const paymentsApi = {
   getPayments: () => apiRequest("/payments", { method: "GET" }),
   getInvoices: () => apiRequest("/payments", { method: "GET" }), // Same endpoint
+  getPaymentStats: () => apiRequest("/payments/stats", { method: "GET" }),
   updatePaypalEmail: (email: string) =>
     apiRequest("/payments/settings", {
       method: "PUT",

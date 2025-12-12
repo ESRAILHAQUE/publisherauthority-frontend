@@ -13,6 +13,7 @@ import { Select } from "@/components/shared/Select";
 
 export default function AddWebsitePage() {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<"individual" | "bulk">("individual");
   const [formData, setFormData] = useState({
     url: "",
     domainAuthority: "",
@@ -28,35 +29,62 @@ export default function AddWebsitePage() {
   const [isUploadingBulk, setIsUploadingBulk] = useState(false);
 
   const handleBulkUpload = async () => {
-    if (!csvFile) return;
+    if (!csvFile) {
+      setError("Please select a CSV file");
+      return;
+    }
 
     setIsUploadingBulk(true);
     setError("");
+    setSuccess(false);
 
     try {
       const text = await csvFile.text();
       const lines = text.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        throw new Error("CSV file must contain at least a header row and one data row");
+      }
+
       const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
       
-      const websites = lines.slice(1).map(line => {
+      const websites = lines.slice(1).map((line, index) => {
         const values = line.split(',').map(v => v.trim());
         const website: Record<string, unknown> = {};
-        headers.forEach((header, index) => {
-          const value = values[index] || '';
-          if (header === 'domainauthority' || header === 'monthlytraffic') {
-            website[header === 'domainauthority' ? 'domainAuthority' : 'monthlyTraffic'] = parseInt(value) || 0;
+        headers.forEach((header, idx) => {
+          const value = values[idx] || '';
+          if (header === 'domainauthority' || header === 'da') {
+            website.domainAuthority = parseInt(value) || 0;
+          } else if (header === 'monthlytraffic' || header === 'traffic') {
+            website.monthlyTraffic = parseInt(value) || 0;
           } else if (header === 'price') {
             website.price = parseFloat(value) || 0;
+          } else if (header === 'url' || header === 'website' || header === 'domain') {
+            website.url = value;
+          } else if (header === 'niche' || header === 'category') {
+            website.niche = value;
+          } else if (header === 'description' || header === 'desc') {
+            website.description = value;
           } else {
             website[header] = value;
           }
         });
         return website;
-      }).filter(w => w.url);
+      }).filter(w => w.url && (w.url as string).trim() !== '');
+
+      if (websites.length === 0) {
+        throw new Error("No valid websites found in CSV file. Please check the format.");
+      }
 
       await websitesApi.bulkAddWebsites(websites as any);
+      setSuccess(true);
       toast.success(`${websites.length} websites uploaded successfully!`);
       setCsvFile(null);
+      
+      // Reset file input
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+      
       setTimeout(() => {
         router.push("/dashboard/websites");
       }, 2000);
@@ -113,6 +141,32 @@ export default function AddWebsitePage() {
         </p>
       </div>
 
+      {/* Tabs */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab("individual")}
+            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === "individual"
+                ? "border-primary-purple text-primary-purple"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            }`}>
+            Individual
+          </button>
+          <button
+            onClick={() => setActiveTab("bulk")}
+            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === "bulk"
+                ? "border-green-600 text-gray-900 px-4"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            }`}>
+            Bulk
+          </button>
+        </nav>
+      </div>
+
+      {/* Individual Tab Content */}
+      {activeTab === "individual" && (
       <Card>
         <div className="prose max-w-none mb-8 text-gray-700 space-y-4">
           <p>
@@ -271,59 +325,98 @@ export default function AddWebsitePage() {
           </div>
         </form>
       </Card>
+      )}
 
+      {/* Bulk Tab Content */}
+      {activeTab === "bulk" && (
       <Card>
-        <h2 className="text-xl font-semibold text-primary-purple mb-4">
-          Bulk Add Websites
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          Upload a CSV File to Add or Edit Your Domains
         </h2>
-        <p className="text-gray-600 mb-4">
-          Upload a CSV file to add multiple websites at once. CSV format: url, domainAuthority, monthlyTraffic, niche, description, price
-        </p>
-        <div className="space-y-4">
-          <div className="flex items-center space-x-4">
-            <button
-              type="button"
-              onClick={() => {
-                const csvContent = "url,domainAuthority,monthlyTraffic,niche,description,price\nhttps://example.com,30,5000,Technology,Great tech blog,100";
-                const blob = new Blob([csvContent], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'website_template.csv';
-                a.click();
-                window.URL.revokeObjectURL(url);
-              }}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium transition-colors">
-              Download CSV Template
-            </button>
-            <input
-              type="file"
-              accept=".csv"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setCsvFile(file);
-                }
-              }}
-              className="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#3F207F] file:text-white hover:file:bg-[#5A2F9F] cursor-pointer"
-            />
+
+        <div className="space-y-6">
+          <div className="prose max-w-none text-gray-700">
+            <p className="mb-4">
+              To start, please make a copy of the template file that has been published on Google Sheets. 
+              Once you have your own copy, proceed to add your domains along with their corresponding values into the file. 
+              After ensuring that all your domains and values are correctly entered, export the file in CSV format. 
+              Lastly, you can upload the exported CSV file here.
+            </p>
           </div>
-          {csvFile && (
-            <div className="flex items-center space-x-4">
-              <p className="text-sm text-gray-600">
-                Selected: {csvFile.name}
-              </p>
+
+          <div className="mb-6">
+            <a
+              href="https://docs.google.com/spreadsheets/d/1YOUR_TEMPLATE_ID/edit?usp=sharing"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors">
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                />
+              </svg>
+              Make a copy of the template file (Google Sheets)
+            </a>
+          </div>
+
+          {error && activeTab === "bulk" && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+              {error}
+            </div>
+          )}
+
+          {success && activeTab === "bulk" && (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
+              Websites uploaded successfully! Redirecting...
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                CSV file
+              </label>
+              <input
+                type="file"
+                accept=".csv"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setCsvFile(file);
+                    setError("");
+                  }
+                }}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer border border-gray-300 rounded-lg p-2"
+              />
+              {csvFile && (
+                <p className="mt-2 text-sm text-gray-600">
+                  Selected: <span className="font-medium">{csvFile.name}</span>
+                </p>
+              )}
+            </div>
+
+            <div className="flex justify-end">
               <Button
                 type="button"
                 onClick={handleBulkUpload}
                 isLoading={isUploadingBulk}
-                disabled={isUploadingBulk}>
-                Upload CSV
+                disabled={isUploadingBulk || !csvFile}
+                className="bg-green-600 hover:bg-green-700 text-white">
+                Submit CSV file
               </Button>
             </div>
-          )}
+          </div>
         </div>
       </Card>
+      )}
+
     </div>
   );
 }

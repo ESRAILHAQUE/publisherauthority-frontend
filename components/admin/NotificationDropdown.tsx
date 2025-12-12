@@ -199,6 +199,25 @@ export const NotificationDropdown: React.FC = () => {
           icon: "💬",
         });
         break;
+        
+      case "verification_submitted":
+        const verificationMethodText = data.verificationMethod === "article" 
+          ? `via article (${data.articleUrl || "N/A"})` 
+          : "via verification tag";
+        newNotification = {
+          id: `verification_submitted_${data.websiteId}_${timestamp}`,
+          type: "website",
+          title: "Website Verification Submitted",
+          message: `${data.userName} (${data.userEmail}) submitted website for verification: ${data.url} ${verificationMethodText}`,
+          link: `/admin/websites?status=pending`,
+          createdAt: timestamp,
+          read: false,
+          data,
+        };
+        toast.success(`Verification submitted for ${data.url}`, {
+          icon: "✅",
+        });
+        break;
     }
     
     if (newNotification) {

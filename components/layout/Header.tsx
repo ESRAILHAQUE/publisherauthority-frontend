@@ -1,18 +1,38 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "../shared/Button";
+import { authApi } from "@/lib/api";
 
 export const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoggedIn] = useState(() => {
-    // Check if user is logged in on initial render
-    if (typeof window !== "undefined") {
-      return !!localStorage.getItem("authToken");
-    }
-    return false;
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check if user is logged in and get their role
+    const checkAuth = async () => {
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem("authToken");
+        if (token) {
+          setIsLoggedIn(true);
+          try {
+            const response = (await authApi.getMe()) as {
+              data?: { user?: { role?: string } };
+              user?: { role?: string };
+              [key: string]: unknown;
+            };
+            const user = response.data?.user || response.user;
+            setUserRole(user?.role || null);
+          } catch (error) {
+            console.error("Failed to get user role:", error);
+          }
+        }
+      }
+    };
+    checkAuth();
+  }, []);
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -53,7 +73,7 @@ export const Header: React.FC = () => {
 
           <div className="ml-2 flex items-center gap-3">
             {isLoggedIn ? (
-              <Link href="/dashboard">
+              <Link href={userRole === "admin" ? "/admin" : "/dashboard"}>
                 <Button
                   variant="primary"
                   size="sm"
@@ -87,7 +107,7 @@ export const Header: React.FC = () => {
         {/* Mobile actions */}
         <div className="flex items-center gap-2 md:hidden">
           {isLoggedIn ? (
-            <Link href="/dashboard">
+            <Link href={userRole === "admin" ? "/admin" : "/dashboard"}>
               <Button
                 variant="primary"
                 size="sm"
@@ -148,7 +168,7 @@ export const Header: React.FC = () => {
         <div className="mt-4 flex gap-2">
           {isLoggedIn ? (
             <Link
-              href="/dashboard"
+              href={userRole === "admin" ? "/admin" : "/dashboard"}
               onClick={() => setIsMenuOpen(false)}
               className="flex-1">
               <Button

@@ -8,7 +8,8 @@ import { Button } from "@/components/shared/Button";
 import { Loader } from "@/components/shared/Loader";
 import { CounterOfferModal } from "@/components/websites/CounterOfferModal";
 import { WebsiteDetailsModal } from "@/components/websites/WebsiteDetailsModal";
-import { adminApi, websitesApi } from "@/lib/api";
+import { AddOrderModal } from "@/components/admin/AddOrderModal";
+import { adminApi, websitesApi, ordersApi } from "@/lib/api";
 import toast from "react-hot-toast";
 
 interface Website {
@@ -58,6 +59,8 @@ export default function AdminWebsitesPage() {
   } | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedWebsiteForDetails, setSelectedWebsiteForDetails] = useState<Website | null>(null);
+  const [showAddOrderModal, setShowAddOrderModal] = useState(false);
+  const [selectedWebsiteForOrder, setSelectedWebsiteForOrder] = useState<Website | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState<{
     top: number;
     right: number;
@@ -222,6 +225,39 @@ export default function AdminWebsitesPage() {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to accept counter offer";
       toast.error(errorMessage);
+    }
+  };
+
+  const handleOpenAddOrderModal = (website: Website) => {
+    setSelectedWebsiteForOrder(website);
+    setShowAddOrderModal(true);
+    setShowActions(null);
+    setDropdownPosition(null);
+  };
+
+  const handleCreateOrder = async (data: {
+    title: string;
+    websiteId: string;
+    publisherId: string;
+    description?: string;
+    requirements?: string;
+    deadline: string;
+    earnings: number;
+  }) => {
+    try {
+      await ordersApi.createOrder({
+        ...data,
+        status: "ready-to-post",
+      });
+      toast.success("Order created successfully!");
+      await loadWebsites();
+      setShowAddOrderModal(false);
+      setSelectedWebsiteForOrder(null);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create order";
+      toast.error(errorMessage);
+      throw error; // Re-throw to let modal handle it
     }
   };
 
@@ -500,6 +536,15 @@ export default function AdminWebsitesPage() {
                                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                   View Details
                                 </button>
+                                {website.status === "active" && (
+                                  <button
+                                    onClick={() => {
+                                      handleOpenAddOrderModal(website);
+                                    }}
+                                    className="block w-full text-left px-4 py-2 text-sm text-primary-purple hover:bg-purple-50 font-medium">
+                                    Add Order
+                                  </button>
+                                )}
                                 {website.status === "pending" && (
                                   <>
                                     <button
@@ -633,6 +678,26 @@ export default function AdminWebsitesPage() {
             setSelectedWebsiteForDetails(null);
           }}
           website={selectedWebsiteForDetails}
+        />
+      )}
+
+      {/* Add Order Modal */}
+      {selectedWebsiteForOrder && (
+        <AddOrderModal
+          isOpen={showAddOrderModal}
+          onClose={() => {
+            setShowAddOrderModal(false);
+            setSelectedWebsiteForOrder(null);
+          }}
+          onSubmit={handleCreateOrder}
+          websiteId={selectedWebsiteForOrder._id || selectedWebsiteForOrder.id || ""}
+          publisherId={selectedWebsiteForOrder.userId?._id || ""}
+          websiteUrl={selectedWebsiteForOrder.url}
+          publisherName={
+            selectedWebsiteForOrder.userId
+              ? `${selectedWebsiteForOrder.userId.firstName || ""} ${selectedWebsiteForOrder.userId.lastName || ""}`.trim()
+              : undefined
+          }
         />
       )}
 

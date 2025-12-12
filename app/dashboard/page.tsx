@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/shared/Card";
 import { Badge } from "@/components/shared/Badge";
 import { Loader } from "@/components/shared/Loader";
-import { dashboardApi } from "@/lib/api";
+import { dashboardApi, authApi } from "@/lib/api";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalEarnings: 0,
@@ -30,8 +32,28 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
+    // Check if user is admin and redirect to admin dashboard
+    const checkUserRole = async () => {
+      try {
+        const response = (await authApi.getMe()) as {
+          data?: { user?: { role?: string } };
+          user?: { role?: string };
+          [key: string]: unknown;
+        };
+        const user = response.data?.user || response.user;
+        
+        if (user?.role === "admin") {
+          router.push("/admin");
+          return;
+        }
+      } catch (error) {
+        console.error("Failed to check user role:", error);
+      }
+    };
+
+    checkUserRole();
     loadDashboardData();
-  }, []);
+  }, [router]);
 
   const loadDashboardData = async () => {
     try {
@@ -72,6 +94,7 @@ export default function DashboardPage() {
         }
         | undefined;
 
+      // Extract all stats from database response
       setStats({
         totalEarnings:
           typeof statsData?.totalEarnings === "number"
@@ -98,12 +121,14 @@ export default function DashboardPage() {
             ? (levelProgressData.ordersNeeded as number)
             : 0,
         counterOffers:
-          // try orders.counterOffers first, then stats.counterOffers
+          // Try multiple possible locations for counter offers count
           typeof ordersData?.counterOffers === "number"
             ? (ordersData.counterOffers as number)
             : typeof statsData?.counterOffers === "number"
               ? (statsData.counterOffers as number)
-              : 0,
+              : typeof websitesData?.counterOffers === "number"
+                ? (websitesData.counterOffers as number)
+                : 0,
       });
 
       setLevelProgress({
@@ -124,9 +149,40 @@ export default function DashboardPage() {
             ? levelProgressData.progressPercentage
             : 0,
       });
-      setRecentOrders(data?.recentOrders || []);
+      // Set recent orders - ensure it's an array
+      const orders = Array.isArray(data?.recentOrders) 
+        ? data.recentOrders 
+        : Array.isArray(response?.recentOrders)
+          ? response.recentOrders
+          : [];
+      setRecentOrders(orders);
+
+      // Log for debugging in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Dashboard data loaded:', {
+          stats: statsData,
+          orders: ordersData,
+          websites: websitesData,
+          user: userData,
+          levelProgress: levelProgressData,
+          recentOrders: orders.length,
+        });
+      }
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
+      // Set empty states on error
+      setStats({
+        totalEarnings: 0,
+        pendingOrders: 0,
+        readyToPost: 0,
+        verifying: 0,
+        completed: 0,
+        activeWebsites: 0,
+        accountLevel: "silver",
+        ordersForNextLevel: 0,
+        counterOffers: 0,
+      });
+      setRecentOrders([]);
     } finally {
       setLoading(false);
     }
@@ -283,30 +339,35 @@ export default function DashboardPage() {
         </Card>
 
         {/* New Counter Offers Card */}
-        <Card hover>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Counter Offers</p>
-              <p className="text-2xl font-bold text-primary-purple">
-                {stats.counterOffers}
-              </p>
+        <div
+          onClick={() => router.push("/dashboard/websites?filter=counter-offer")}
+          className="cursor-pointer"
+        >
+          <Card hover>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Counter Offers</p>
+                <p className="text-2xl font-bold text-primary-purple">
+                  {stats.counterOffers}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-purple-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 8h10M7 12h6m2 8l4-4-4-4M3 4v16a1 1 0 001 1h4"
+                  />
+                </svg>
+              </div>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-              <svg
-                className="w-6 h-6 text-purple-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 8h10M7 12h6m2 8l4-4-4-4M3 4v16a1 1 0 001 1h4"
-                />
-              </svg>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
 
         <Card hover>
           <div className="flex items-center justify-between">
@@ -376,7 +437,8 @@ export default function DashboardPage() {
                   </tr>
                 ) : (
                   recentOrders.map((order) => {
-                    const orderId = (order as any)._id || (order as any).id;
+                    // Get order ID - MongoDB _id or orderId field
+                    const orderId = (order as any)._id || (order as any).id || (order as any).orderId;
                     const orderTitle =
                       typeof (order as any).title === "string"
                         ? (order as any).title
