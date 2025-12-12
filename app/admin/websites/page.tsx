@@ -148,12 +148,14 @@ export default function AdminWebsitesPage() {
   };
 
   const handleVerify = async (websiteId: string, method: "tag" | "article") => {
+    if (!websiteId || websiteId.trim() === "") {
+      toast.error("Website ID is missing");
+      return;
+    }
+
     try {
-      if (method === "tag") {
-        await websitesApi.verifyWebsite(websiteId);
-      } else {
-        await websitesApi.verifyWebsite(websiteId);
-      }
+      // Use admin API endpoint for verification (no ownership check)
+      await adminApi.verifyWebsite(websiteId, method);
       toast.success("Website verified successfully");
       await loadWebsites();
     } catch (error: unknown) {

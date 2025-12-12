@@ -136,14 +136,27 @@ async function apiRequest<T>(
         error.error?.message ||
         `HTTP error! status: ${response.status}`;
       
-      // Log more details in development
+      // Log more details in development only
       if (process.env.NODE_ENV === "development") {
-        console.error("API Error Details:", {
-          status: response.status,
-          statusText: response.statusText,
-          url: `${API_URL}${endpoint}`,
-          error: errorMessage,
-        });
+        try {
+          const errorDetails: Record<string, unknown> = {
+            status: response.status,
+            statusText: response.statusText || "",
+            url: `${API_URL}${endpoint}`,
+            errorMessage: errorMessage || "Unknown error",
+          };
+          
+          // Only add errorObject if it has meaningful content
+          if (error && typeof error === "object" && Object.keys(error).length > 0) {
+            errorDetails.errorObject = error;
+          } else if (error) {
+            errorDetails.errorObject = String(error);
+          }
+          
+          console.error("API Error Details:", errorDetails);
+        } catch (logError) {
+          // Silently ignore logging errors
+        }
       }
       
       throw new Error(errorMessage);
@@ -180,7 +193,10 @@ async function apiRequest<T>(
     // For other errors, log in development
     if (process.env.NODE_ENV === "development") {
       try {
-        console.error("API request failed:", error);
+        const errorInfo = error instanceof Error 
+          ? { message: error.message, name: error.name }
+          : { error: String(error || "Unknown error") };
+        console.error("API request failed:", errorInfo);
         console.error("Endpoint:", endpoint);
         console.error("Full URL:", `${API_URL}${endpoint}`);
       } catch (logError) {
@@ -455,6 +471,11 @@ export const adminApi = {
       method: "GET",
     });
   },
+  verifyWebsite: (id: string, method: "tag" | "article") =>
+    apiRequest(`/admin/websites/${id}/verify`, {
+      method: "PUT",
+      body: { method },
+    }),
   updateWebsiteStatus: (id: string, status: string, reason?: string) =>
     apiRequest(`/admin/websites/${id}/status`, {
       method: "PUT",
