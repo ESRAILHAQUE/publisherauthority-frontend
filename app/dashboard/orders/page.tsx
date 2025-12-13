@@ -38,10 +38,29 @@ export default function OrdersPage() {
   const loadOrders = async () => {
     try {
       setLoading(true);
-      const data = (await ordersApi.getOrders()) as
+      const response = (await ordersApi.getOrders()) as
         | Order[]
-        | { orders?: Order[]; [key: string]: unknown };
-      setOrders(Array.isArray(data) ? data : data.orders || []);
+        | { 
+            success?: boolean;
+            data?: { orders?: Order[]; [key: string]: unknown };
+            orders?: Order[];
+            [key: string]: unknown;
+          };
+      
+      // Handle different response structures
+      let ordersData: Order[] = [];
+      if (Array.isArray(response)) {
+        ordersData = response;
+      } else if (response && typeof response === "object") {
+        // Backend returns { success: true, data: { orders: [...], total, page, pages } }
+        if (response.data && typeof response.data === "object" && "orders" in response.data) {
+          ordersData = Array.isArray(response.data.orders) ? response.data.orders : [];
+        } else if ("orders" in response && Array.isArray(response.orders)) {
+          ordersData = response.orders;
+        }
+      }
+      
+      setOrders(ordersData);
     } catch (error) {
       console.error("Failed to load orders:", error);
     } finally {
