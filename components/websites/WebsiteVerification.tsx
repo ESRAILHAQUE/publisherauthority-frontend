@@ -114,9 +114,12 @@ export function WebsiteVerification({
         <div className="border border-gray-200 rounded-lg p-6">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">
-                Method 2: Verification Article
-              </h4>
+              <div className="flex items-center gap-2 mb-2">
+                <h4 className="font-semibold text-gray-900">
+                  Method 2: Verification Article
+                </h4>
+                <Badge variant="info">Recommended</Badge>
+              </div>
               <p className="text-sm text-gray-600">
                 Publish the specified content with a required anchor link.
               </p>
