@@ -99,17 +99,32 @@ export default function AddWebsitePage() {
 
       // Parse headers using improved CSV parser
       const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+      const originalHeaders = parseCSVLine(lines[0]).map(h => h.trim()); // Keep original case for error messages
       
       // Debug: Log headers to help with troubleshooting
       console.log('CSV Headers found:', headers);
+      console.log('Original Headers:', originalHeaders);
       
       // Check for required columns
       const hasUrl = headers.some(h => 
         h === 'url' || h === 'website' || h === 'websites' || h === 'domain'
       );
       
+      const hasNiche = headers.some(h => 
+        h === 'niche' || h === 'category' || h === 'niche/category'
+      );
+      
       if (!hasUrl) {
         throw new Error("CSV file must contain a 'Websites' or 'URL' column. Please check the header row.");
+      }
+      
+      if (!hasNiche) {
+        const foundHeaders = originalHeaders.join(', ');
+        throw new Error(
+          `CSV file is missing the 'Niche' or 'Category' column.\n\n` +
+          `Found columns: ${foundHeaders}\n\n` +
+          `Please add a 'Niche' or 'Category' column to your CSV file with the website niche/category for each row.`
+        );
       }
 
       const websites = lines.slice(1)
@@ -171,7 +186,10 @@ export default function AddWebsitePage() {
           }
           
           if (!website.niche || (website.niche as string).trim() === '') {
-            throw new Error(`Row ${lineNum}: Niche/Category is required but missing. Please add a 'Niche' or 'Category' column to your CSV file.`);
+            throw new Error(
+              `Row ${lineNum}: Niche/Category is required but the value is empty.\n\n` +
+              `Please ensure the 'Niche' or 'Category' column has a value for this row.`
+            );
           }
           
           return website;
@@ -461,8 +479,14 @@ export default function AddWebsitePage() {
                 <li><strong>Description</strong> - Website description (optional)</li>
                 <li><strong>Website Owner</strong> - Owner information (optional)</li>
               </ul>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
+                <p className="text-xs text-yellow-800 font-semibold mb-1">⚠️ Important:</p>
+                <p className="text-xs text-yellow-700">
+                  <strong>The Niche/Category column is REQUIRED.</strong> If your template doesn't have this column, please add a new column named "Niche" or "Category" and fill it with the appropriate niche for each website.
+                </p>
+              </div>
               <p className="text-xs text-gray-600 mt-3">
-                <strong>Note:</strong> All fields marked as "required" must be present in your CSV file. The Niche/Category field is required and should be included in your CSV file.
+                <strong>Note:</strong> All fields marked as "required" must be present in your CSV file with valid values.
               </p>
             </div>
           </div>
