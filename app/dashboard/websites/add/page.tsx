@@ -66,6 +66,19 @@ export default function AddWebsitePage() {
     return parseInt(cleaned, 10) || 0;
   };
 
+  // Helper function to normalize URL
+  const normalizeUrl = (url: string): string => {
+    if (!url) return '';
+    url = url.trim();
+    // Remove quotes if present
+    url = url.replace(/^["']|["']$/g, '');
+    // Add http:// if no protocol is present
+    if (url && !url.match(/^https?:\/\//i)) {
+      url = 'http://' + url;
+    }
+    return url;
+  };
+
   const handleBulkUpload = async () => {
     if (!csvFile) {
       setError("Please select a CSV file");
@@ -87,40 +100,89 @@ export default function AddWebsitePage() {
       // Parse headers using improved CSV parser
       const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
       
-      const websites = lines.slice(1).map((line, index) => {
-        const values = parseCSVLine(line);
-        const website: Record<string, unknown> = {};
-        
-        headers.forEach((header, idx) => {
-          const value = values[idx] || '';
+      // Debug: Log headers to help with troubleshooting
+      console.log('CSV Headers found:', headers);
+      
+      // Check for required columns
+      const hasUrl = headers.some(h => 
+        h === 'url' || h === 'website' || h === 'websites' || h === 'domain'
+      );
+      
+      if (!hasUrl) {
+        throw new Error("CSV file must contain a 'Websites' or 'URL' column. Please check the header row.");
+      }
+
+      const websites = lines.slice(1)
+        .map((line, index) => {
+          const lineNum = index + 2; // +2 because index is 0-based and we skip header
+          const values = parseCSVLine(line);
+          const website: Record<string, unknown> = {};
           
-          // Handle different header name variations from the template
-          if (header === 'domainauthority' || header === 'da' || header === 'domain authority') {
-            website.domainAuthority = parseIntWithCommas(value);
-          } else if (header === 'monthlytraffic' || header === 'traffic' || header === 'monthly traffic') {
-            website.monthlyTraffic = parseIntWithCommas(value);
-          } else if (header === 'price') {
-            website.price = parseNumber(value);
-          } else if (header === 'url' || header === 'website' || header === 'websites' || header === 'domain') {
-            website.url = value;
-          } else if (header === 'niche' || header === 'category') {
-            website.niche = value;
-          } else if (header === 'description' || header === 'desc') {
-            website.description = value;
-          } else if (header === 'website owner' || header === 'owner') {
-            // Store owner info but don't use it for website creation
-            // Could be used for metadata if needed
-          } else {
-            // Store any other fields
-            website[header] = value;
+          // Skip empty rows
+          if (values.every(v => !v || v.trim() === '')) {
+            return null;
           }
-        });
-        return website;
-      }).filter(w => w.url && (w.url as string).trim() !== '');
+          
+          headers.forEach((header, idx) => {
+            const value = (values[idx] || '').trim();
+            
+            // Handle different header name variations from the template
+            if (header === 'domainauthority' || header === 'da' || header === 'domain authority') {
+              website.domainAuthority = parseIntWithCommas(value);
+            } else if (header === 'monthlytraffic' || header === 'traffic' || header === 'monthly traffic') {
+              website.monthlyTraffic = parseIntWithCommas(value);
+            } else if (header === 'price') {
+              website.price = parseNumber(value);
+            } else if (header === 'url' || header === 'website' || header === 'websites' || header === 'domain') {
+              website.url = normalizeUrl(value);
+            } else if (header === 'niche' || header === 'category' || header === 'niche/category') {
+              website.niche = value;
+            } else if (header === 'description' || header === 'desc') {
+              website.description = value;
+            } else if (header === 'website owner' || header === 'owner') {
+              // Store owner info but don't use it for website creation
+              // Could be used for metadata if needed
+            } else {
+              // Store any other fields
+              website[header] = value;
+            }
+          });
+          
+          // Validate required fields
+          if (!website.url || (website.url as string).trim() === '') {
+            console.warn(`Row ${lineNum}: Missing URL, skipping`);
+            return null;
+          }
+          
+          // Set defaults for required fields if missing
+          if (!website.domainAuthority || website.domainAuthority === 0) {
+            console.warn(`Row ${lineNum}: Missing or invalid DA, defaulting to 0`);
+            website.domainAuthority = 0;
+          }
+          
+          if (!website.monthlyTraffic || website.monthlyTraffic === 0) {
+            console.warn(`Row ${lineNum}: Missing or invalid Monthly Traffic, defaulting to 0`);
+            website.monthlyTraffic = 0;
+          }
+          
+          if (!website.price || website.price === 0) {
+            console.warn(`Row ${lineNum}: Missing or invalid Price, defaulting to 0`);
+            website.price = 0;
+          }
+          
+          if (!website.niche || (website.niche as string).trim() === '') {
+            throw new Error(`Row ${lineNum}: Niche/Category is required but missing. Please add a 'Niche' or 'Category' column to your CSV file.`);
+          }
+          
+          return website;
+        })
+        .filter((w): w is Record<string, unknown> => w !== null);
 
       if (websites.length === 0) {
-        throw new Error("No valid websites found in CSV file. Please check the format.");
+        throw new Error("No valid websites found in CSV file. Please check that:\n- URLs are provided in the 'Websites' column\n- Rows are not empty\n- CSV format is correct");
       }
+
+      console.log(`Parsed ${websites.length} websites:`, websites);
 
       await websitesApi.bulkAddWebsites(websites as any);
       setSuccess(true);
@@ -391,12 +453,17 @@ export default function AddWebsitePage() {
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-4">
               <p className="font-semibold text-gray-900 mb-2">Expected CSV Format:</p>
               <ul className="list-disc pl-6 space-y-1 text-sm">
-                <li><strong>Websites</strong> - Website URL (e.g., http://example.com/)</li>
-                <li><strong>DA</strong> - Domain Authority (number, e.g., 30)</li>
-                <li><strong>Monthly Traffic</strong> - Monthly organic traffic (can include commas, e.g., 1,000)</li>
-                <li><strong>Price</strong> - Price per article (can include $ and commas, e.g., $20.00)</li>
+                <li><strong>Websites</strong> - Website URL (required, e.g., http://example.com/ or example.com)</li>
+                <li><strong>DA</strong> - Domain Authority (required, number, e.g., 30)</li>
+                <li><strong>Monthly Traffic</strong> - Monthly organic traffic (required, can include commas, e.g., 1,000)</li>
+                <li><strong>Price</strong> - Price per article (required, can include $ and commas, e.g., $20.00)</li>
+                <li><strong>Niche</strong> or <strong>Category</strong> - Website niche/category (required, must match available niches)</li>
+                <li><strong>Description</strong> - Website description (optional)</li>
                 <li><strong>Website Owner</strong> - Owner information (optional)</li>
               </ul>
+              <p className="text-xs text-gray-600 mt-3">
+                <strong>Note:</strong> All fields marked as "required" must be present in your CSV file. The Niche/Category field is required and should be included in your CSV file.
+              </p>
             </div>
           </div>
 
