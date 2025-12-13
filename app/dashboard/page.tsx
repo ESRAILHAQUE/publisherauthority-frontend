@@ -279,20 +279,23 @@ export default function DashboardPage() {
 
       {/* Stats Cards - First Row: 4 boxes */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        {/* Total Earnings Card */}
-        <div className="cursor-pointer h-full flex flex-col">
+        {/* Verifying Card */}
+        <div onClick={() => router.push("/dashboard/orders?status=verifying")} className="cursor-pointer h-full flex flex-col">
           <Card hover className="h-full flex flex-col">
             <div className="space-y-3 flex-1 flex flex-col">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">TOTAL EARNINGS</h3>
-                <p className="text-sm text-gray-500">Your total earnings from all orders.</p>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">VERIFYING</h3>
+                <p className="text-sm text-gray-500">Orders currently being verified.</p>
               </div>
             </div>
             <div className="flex items-end justify-between pt-2 border-t border-gray-100">
               <div>
                 <p className="text-3xl font-bold text-gray-900 mb-1">
-                  ${(stats.totalEarnings || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {stats.verifying}
+                </p>
+                <p className="text-sm text-gray-500">
+                  ${(stats.verifyingEarnings || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
               </div>
               <div className="w-8 h-8 border-2 border-primary-purple rounded-full flex items-center justify-center">
