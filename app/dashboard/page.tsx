@@ -208,9 +208,9 @@ export default function DashboardPage() {
     const levelLower = level.toLowerCase();
     switch (levelLower) {
       case "silver":
-        return "default";
+        return "silver";
       case "gold":
-        return "warning";
+        return "gold";
       case "premium":
         return "purple";
       default:
@@ -247,6 +247,8 @@ export default function DashboardPage() {
                 | "default"
                 | "warning"
                 | "purple"
+                | "silver"
+                | "gold"
               }
               size="md"
               className="text-lg px-4 py-2">
