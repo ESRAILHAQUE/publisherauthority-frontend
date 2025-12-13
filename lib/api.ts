@@ -275,6 +275,8 @@ export const ordersApi = {
     return apiRequest(`/orders${query}`, { method: "GET" });
   },
   getOrder: (id: string) => apiRequest(`/orders/${id}`, { method: "GET" }),
+  approveOrderTopic: (id: string) =>
+    apiRequest(`/orders/${id}/approve`, { method: "POST" }),
   createOrder: (data: OrderData) =>
     apiRequest("/admin/orders", { method: "POST", body: data }),
   updateOrder: (id: string, data: OrderData) =>

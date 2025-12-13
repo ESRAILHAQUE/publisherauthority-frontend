@@ -19,6 +19,7 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [approving, setApproving] = useState(false);
   const [submissionData, setSubmissionData] = useState({
     articleUrl: "",
     notes: "",
@@ -27,11 +28,24 @@ export default function OrderDetailPage() {
   const loadOrder = async () => {
     try {
       setLoading(true);
-      const data = (await ordersApi.getOrder(orderId)) as Record<
-        string,
-        unknown
-      >;
-      setOrder(data);
+      const response = (await ordersApi.getOrder(orderId)) as
+        | Record<string, unknown>
+        | { data?: { order?: Record<string, unknown> }; order?: Record<string, unknown> };
+      
+      // Handle different response structures
+      let orderData: Record<string, unknown> | null = null;
+      if (response && typeof response === "object") {
+        if ("data" in response && response.data && typeof response.data === "object" && "order" in response.data) {
+          orderData = response.data.order as Record<string, unknown>;
+        } else if ("order" in response) {
+          orderData = response.order as Record<string, unknown>;
+        } else {
+          // Direct order object
+          orderData = response as Record<string, unknown>;
+        }
+      }
+      
+      setOrder(orderData);
     } catch (error) {
       console.error("Failed to load order:", error);
     } finally {
@@ -42,6 +56,25 @@ export default function OrderDetailPage() {
   useEffect(() => {
     loadOrder();
   }, [orderId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleApproveTopic = async () => {
+    if (!confirm("Are you sure you want to approve this topic? The order will move to 'Ready To Post' status.")) {
+      return;
+    }
+
+    try {
+      setApproving(true);
+      await ordersApi.approveOrderTopic(orderId);
+      toast.success("Topic approved! Order is now ready to post.");
+      await loadOrder();
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to approve topic";
+      toast.error(errorMessage);
+    } finally {
+      setApproving(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,8 +114,8 @@ export default function OrderDetailPage() {
   }
 
   const orderStatus = order ? String(order.status || "") : "";
-  const canSubmit =
-    orderStatus === "ready-to-post" || orderStatus === "pending";
+  const isPending = orderStatus === "pending";
+  const canSubmit = orderStatus === "ready-to-post";
   const isCompleted = orderStatus === "completed";
   const isVerifying = orderStatus === "verifying";
 
@@ -199,6 +232,69 @@ export default function OrderDetailPage() {
               ) : null}
             </div>
           </Card>
+
+          {/* Topic Approval Section */}
+          {isPending && (
+            <Card>
+              <h2 className="text-xl font-semibold text-primary-purple mb-4">
+                Review & Approve Topic
+              </h2>
+              <div className="space-y-4">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-yellow-800">
+                    <strong>Note:</strong> Please review the topic/content below. Once approved, the order will move to "Ready To Post" status and you can proceed with creating the article.
+                  </p>
+                </div>
+                
+                {(() => {
+                  const content = order.content;
+                  const contentStr = content ? (typeof content === "string" ? content : String(content)) : "";
+                  return contentStr.trim() ? (
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 mb-2">Topic/Content:</p>
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <p className="text-gray-700 whitespace-pre-line">{contentStr}</p>
+                      </div>
+                    </div>
+                  ) : null;
+                })()}
+
+                {(() => {
+                  const anchorText = order.anchorText;
+                  return anchorText ? (
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 mb-1">Anchor Text:</p>
+                      <p className="text-gray-900 font-medium">{String(anchorText)}</p>
+                    </div>
+                  ) : null;
+                })()}
+
+                {(() => {
+                  const targetUrl = order.targetUrl;
+                  return targetUrl ? (
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 mb-1">Target URL:</p>
+                      <a
+                        href={String(targetUrl)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-purple hover:underline break-all">
+                        {String(targetUrl)}
+                      </a>
+                    </div>
+                  ) : null;
+                })()}
+
+                <Button
+                  onClick={handleApproveTopic}
+                  isLoading={approving}
+                  disabled={approving}
+                  className="w-full">
+                  Approve Topic & Move to Ready To Post
+                </Button>
+              </div>
+            </Card>
+          )}
 
           {/* Submission Form */}
           {canSubmit && !isCompleted && (
