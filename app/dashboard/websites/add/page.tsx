@@ -28,6 +28,44 @@ export default function AddWebsitePage() {
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [isUploadingBulk, setIsUploadingBulk] = useState(false);
 
+  // Helper function to parse CSV line handling quoted fields
+  const parseCSVLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  };
+
+  // Helper function to parse number with commas (e.g., "1,000" -> 1000)
+  const parseNumber = (value: string): number => {
+    if (!value) return 0;
+    // Remove commas, $ signs, and whitespace
+    const cleaned = value.replace(/[$,]/g, '').trim();
+    return parseFloat(cleaned) || 0;
+  };
+
+  // Helper function to parse integer with commas (e.g., "1,000" -> 1000)
+  const parseIntWithCommas = (value: string): number => {
+    if (!value) return 0;
+    // Remove commas and whitespace
+    const cleaned = value.replace(/,/g, '').trim();
+    return parseInt(cleaned, 10) || 0;
+  };
+
   const handleBulkUpload = async () => {
     if (!csvFile) {
       setError("Please select a CSV file");
@@ -46,26 +84,34 @@ export default function AddWebsitePage() {
         throw new Error("CSV file must contain at least a header row and one data row");
       }
 
-      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      // Parse headers using improved CSV parser
+      const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
       
       const websites = lines.slice(1).map((line, index) => {
-        const values = line.split(',').map(v => v.trim());
+        const values = parseCSVLine(line);
         const website: Record<string, unknown> = {};
+        
         headers.forEach((header, idx) => {
           const value = values[idx] || '';
-          if (header === 'domainauthority' || header === 'da') {
-            website.domainAuthority = parseInt(value) || 0;
-          } else if (header === 'monthlytraffic' || header === 'traffic') {
-            website.monthlyTraffic = parseInt(value) || 0;
+          
+          // Handle different header name variations from the template
+          if (header === 'domainauthority' || header === 'da' || header === 'domain authority') {
+            website.domainAuthority = parseIntWithCommas(value);
+          } else if (header === 'monthlytraffic' || header === 'traffic' || header === 'monthly traffic') {
+            website.monthlyTraffic = parseIntWithCommas(value);
           } else if (header === 'price') {
-            website.price = parseFloat(value) || 0;
-          } else if (header === 'url' || header === 'website' || header === 'domain') {
+            website.price = parseNumber(value);
+          } else if (header === 'url' || header === 'website' || header === 'websites' || header === 'domain') {
             website.url = value;
           } else if (header === 'niche' || header === 'category') {
             website.niche = value;
           } else if (header === 'description' || header === 'desc') {
             website.description = value;
+          } else if (header === 'website owner' || header === 'owner') {
+            // Store owner info but don't use it for website creation
+            // Could be used for metadata if needed
           } else {
+            // Store any other fields
             website[header] = value;
           }
         });
@@ -342,11 +388,21 @@ export default function AddWebsitePage() {
               After ensuring that all your domains and values are correctly entered, export the file in CSV format. 
               Lastly, you can upload the exported CSV file here.
             </p>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-4">
+              <p className="font-semibold text-gray-900 mb-2">Expected CSV Format:</p>
+              <ul className="list-disc pl-6 space-y-1 text-sm">
+                <li><strong>Websites</strong> - Website URL (e.g., http://example.com/)</li>
+                <li><strong>DA</strong> - Domain Authority (number, e.g., 30)</li>
+                <li><strong>Monthly Traffic</strong> - Monthly organic traffic (can include commas, e.g., 1,000)</li>
+                <li><strong>Price</strong> - Price per article (can include $ and commas, e.g., $20.00)</li>
+                <li><strong>Website Owner</strong> - Owner information (optional)</li>
+              </ul>
+            </div>
           </div>
 
           <div className="mb-6">
             <a
-              href="https://docs.google.com/spreadsheets/d/1YOUR_TEMPLATE_ID/edit?usp=sharing"
+              href="https://docs.google.com/spreadsheets/d/1MZ9kgP7eTfDv1CR31vr7zwsTB5OrDq4KzUDbOhsCVkg/edit?gid=0#gid=0"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors">
