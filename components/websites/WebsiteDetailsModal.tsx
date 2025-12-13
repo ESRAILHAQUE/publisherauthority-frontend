@@ -437,6 +437,9 @@ export function WebsiteDetailsModal({
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Verification Information
               </h3>
+              <p className="text-xs text-gray-500 mb-3 italic">
+                Note: Verification information is read-only and cannot be edited.
+              </p>
               <div className="space-y-3">
                 {website.verificationMethod && (
                   <div>
@@ -455,6 +458,9 @@ export function WebsiteDetailsModal({
                     <p className="text-sm text-gray-600 mb-1">Verification Code</p>
                     <p className="font-mono text-sm bg-gray-100 p-2 rounded break-all">
                       {website.verificationCode}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 italic">
+                      (Read-only - Cannot be edited)
                     </p>
                   </div>
                 )}
