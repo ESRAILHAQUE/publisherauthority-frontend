@@ -7,10 +7,12 @@ import { Badge } from "@/components/shared/Badge";
 import { Button } from "@/components/shared/Button";
 import { Loader } from "@/components/shared/Loader";
 import { ordersApi } from "@/lib/api";
+import toast from "react-hot-toast";
 
 interface Order {
   _id?: string;
   id?: string;
+  orderId?: string;
   orderNumber?: string;
   title?: string;
   status?: string;
@@ -38,31 +40,48 @@ export default function OrdersPage() {
   const loadOrders = async () => {
     try {
       setLoading(true);
-      const response = (await ordersApi.getOrders()) as
-        | Order[]
-        | { 
-            success?: boolean;
-            data?: { orders?: Order[]; [key: string]: unknown };
-            orders?: Order[];
-            [key: string]: unknown;
-          };
+      const response = await ordersApi.getOrders();
+      
+      // Debug logging (only in development)
+      if (process.env.NODE_ENV === "development") {
+        console.log("Orders API Response:", response);
+      }
       
       // Handle different response structures
       let ordersData: Order[] = [];
+      
       if (Array.isArray(response)) {
+        // Direct array response
         ordersData = response;
       } else if (response && typeof response === "object") {
-        // Backend returns { success: true, data: { orders: [...], total, page, pages } }
-        if (response.data && typeof response.data === "object" && "orders" in response.data) {
-          ordersData = Array.isArray(response.data.orders) ? response.data.orders : [];
-        } else if ("orders" in response && Array.isArray(response.orders)) {
-          ordersData = response.orders;
+        // Backend returns { success: true, message: '...', data: { orders: [...], total, page, pages } }
+        const responseObj = response as {
+          success?: boolean;
+          data?: { orders?: Order[]; [key: string]: unknown };
+          orders?: Order[];
+          [key: string]: unknown;
+        };
+        
+        if (responseObj.data && typeof responseObj.data === "object" && "orders" in responseObj.data) {
+          // Standard backend response: { success: true, data: { orders: [...] } }
+          ordersData = Array.isArray(responseObj.data.orders) ? responseObj.data.orders : [];
+        } else if ("orders" in responseObj && Array.isArray(responseObj.orders)) {
+          // Alternative structure: { orders: [...] }
+          ordersData = responseObj.orders;
         }
+      }
+      
+      if (process.env.NODE_ENV === "development") {
+        console.log("Parsed orders count:", ordersData.length);
+        console.log("Parsed orders:", ordersData);
       }
       
       setOrders(ordersData);
     } catch (error) {
       console.error("Failed to load orders:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to load orders";
+      toast.error(errorMessage);
+      setOrders([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -202,8 +221,9 @@ export default function OrdersPage() {
                     className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td className="py-4 px-4 text-gray-600">
                       #
-                      {order.orderNumber ||
-                        (order._id ? order._id.slice(-8) : "") ||
+                      {order.orderId || 
+                        order.orderNumber ||
+                        (order._id ? String(order._id).slice(-8) : "") ||
                         order.id ||
                         "N/A"}
                     </td>
