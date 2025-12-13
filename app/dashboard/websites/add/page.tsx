@@ -479,12 +479,6 @@ export default function AddWebsitePage() {
                 <li><strong>Description</strong> - Website description (optional)</li>
                 <li><strong>Website Owner</strong> - Owner information (optional)</li>
               </ul>
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
-                <p className="text-xs text-yellow-800 font-semibold mb-1">⚠️ Important:</p>
-                <p className="text-xs text-yellow-700">
-                  <strong>The Niche/Category column is REQUIRED.</strong> If your template doesn't have this column, please add a new column named "Niche" or "Category" and fill it with the appropriate niche for each website.
-                </p>
-              </div>
               <p className="text-xs text-gray-600 mt-3">
                 <strong>Note:</strong> All fields marked as "required" must be present in your CSV file with valid values.
               </p>
