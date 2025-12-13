@@ -239,7 +239,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Account Level
+              ACCOUNT LEVEL
             </h2>
             <Badge
               variant={
