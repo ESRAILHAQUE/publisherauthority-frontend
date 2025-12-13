@@ -795,6 +795,7 @@ export default function AdminWebsitesPage() {
               ? `${selectedWebsiteForOrder.userId.firstName || ""} ${selectedWebsiteForOrder.userId.lastName || ""}`.trim()
               : undefined
           }
+          websitePrice={typeof selectedWebsiteForOrder.price === "number" ? selectedWebsiteForOrder.price : undefined}
         />
       )}
 

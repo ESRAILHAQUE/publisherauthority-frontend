@@ -23,6 +23,7 @@ interface AddOrderModalProps {
   publisherId: string;
   websiteUrl?: string;
   publisherName?: string;
+  websitePrice?: number;
 }
 
 export function AddOrderModal({
@@ -33,6 +34,7 @@ export function AddOrderModal({
   publisherId,
   websiteUrl,
   publisherName,
+  websitePrice,
 }: AddOrderModalProps) {
   const [formData, setFormData] = useState({
     title: "",
@@ -40,7 +42,6 @@ export function AddOrderModal({
     targetUrl: "",
     content: "",
     deadline: "",
-    earnings: "",
   });
   const [errors, setErrors] = useState<{
     title?: string;
@@ -48,7 +49,6 @@ export function AddOrderModal({
     targetUrl?: string;
     content?: string;
     deadline?: string;
-    earnings?: string;
   }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -101,9 +101,10 @@ export function AddOrderModal({
       return;
     }
 
-    const earnings = parseFloat(formData.earnings);
-    if (!formData.earnings || isNaN(earnings) || earnings <= 0) {
-      setErrors({ earnings: "Please enter a valid earnings amount greater than 0" });
+    // Use website price as earnings (price is already set)
+    const earnings = websitePrice || 0;
+    if (earnings <= 0) {
+      setErrors({ deadline: "Website price is not set. Please set a price for the website first." });
       return;
     }
 
@@ -126,7 +127,6 @@ export function AddOrderModal({
         targetUrl: "",
         content: "",
         deadline: "",
-        earnings: "",
       });
       setErrors({});
       onClose();
@@ -147,7 +147,6 @@ export function AddOrderModal({
         targetUrl: "",
         content: "",
         deadline: "",
-        earnings: "",
       });
       setErrors({});
       onClose();
@@ -255,37 +254,32 @@ export function AddOrderModal({
           disabled={isSubmitting}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            label="Deadline"
-            name="deadline"
-            type="date"
-            value={formData.deadline}
-            onChange={(e) =>
-              setFormData({ ...formData, deadline: e.target.value })
-            }
-            min={today}
-            required
-            error={errors.deadline}
-            disabled={isSubmitting}
-          />
+        <Input
+          label="Deadline"
+          name="deadline"
+          type="date"
+          value={formData.deadline}
+          onChange={(e) =>
+            setFormData({ ...formData, deadline: e.target.value })
+          }
+          min={today}
+          required
+          error={errors.deadline}
+          disabled={isSubmitting}
+        />
 
-          <Input
-            label="Earnings ($)"
-            name="earnings"
-            type="number"
-            value={formData.earnings}
-            onChange={(e) =>
-              setFormData({ ...formData, earnings: e.target.value })
-            }
-            placeholder="150.00"
-            min="0"
-            step="0.01"
-            required
-            error={errors.earnings}
-            disabled={isSubmitting}
-          />
-        </div>
+        {/* Display Earnings (read-only, from website price) */}
+        {websitePrice !== undefined && (
+          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <p className="text-sm font-medium text-gray-700 mb-1">Earnings</p>
+            <p className="text-lg font-semibold text-primary-purple">
+              ${(websitePrice || 0).toFixed(2)}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              (Based on website price)
+            </p>
+          </div>
+        )}
       </form>
     </Modal>
   );
