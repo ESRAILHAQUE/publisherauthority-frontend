@@ -27,7 +27,7 @@ export const HowItWorksSection: React.FC = () => {
       <div className="mx-auto w-full max-w-7xl px-4">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
-            How it works for publishers
+            How It Works for Publishers
           </h2>
           <p className="mt-3 text-sm text-slate-600 md:text-base">
             A simple, repeatable flow designed so you spend more time publishing and less time

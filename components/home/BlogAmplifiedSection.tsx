@@ -24,9 +24,9 @@ export const BlogAmplifiedSection: React.FC = () => {
       <div className="mx-auto w-full max-w-7xl px-4">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
-            Your blog,{' '}
+            Your Blog,{' '}
             <span className="bg-gradient-to-r from-emerald-500 via-sky-500 to-indigo-500 bg-clip-text text-transparent">
-              amplified
+              Amplified
             </span>
           </h2>
           <p className="mt-3 text-sm text-slate-500 md:text-base">

@@ -51,9 +51,9 @@ export const FAQSection: React.FC = () => {
       <div className="mx-auto w-full max-w-7xl px-4">
         <div className="mb-10 text-center">
           <h2 className="text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
-            Questions from publishers,{' '}
+            Questions From Publishers,{' '}
             <span className="bg-linear-to-r from-emerald-500 to-sky-500 bg-clip-text text-transparent">
-              answered
+              Answered
             </span>
           </h2>
           <p className="mt-3 text-sm text-slate-600 md:text-base">

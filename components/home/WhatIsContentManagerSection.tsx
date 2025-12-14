@@ -8,7 +8,7 @@ export const WhatIsContentManagerSection: React.FC = () => {
           <h2 className="text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
             What is{' '}
             <span className="bg-gradient-to-r from-emerald-500 to-sky-500 bg-clip-text text-transparent">
-              publisher authority?
+              Publisher Authority?
             </span>
           </h2>
           <p className="mt-3 text-sm text-slate-500 md:text-base">
