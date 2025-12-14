@@ -214,6 +214,11 @@ export const AdminSidebar: React.FC = () => {
       <div className={`p-6 border-b border-gray-800 ${isCollapsed ? 'px-4' : ''}`}>
         <div className="flex items-center justify-between">
           <Link href="/admin" className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'}`}>
+            <img
+              src="/logo/logo.png"
+              alt="Publisher Authority Logo"
+              className={`${isCollapsed ? "h-8 w-auto" : "h-8 w-auto"}`}
+            />
             {!isCollapsed && <span className="text-xl font-bold whitespace-nowrap">Admin Panel</span>}
           </Link>
           <button

@@ -210,6 +210,11 @@ export const Sidebar: React.FC = () => {
             className={`flex items-center ${
               isCollapsed ? "justify-center" : "space-x-2"
             }`}>
+            <img
+              src="/logo/logo.png"
+              alt="Publisher Authority Logo"
+              className={`${isCollapsed ? "h-8 w-auto" : "h-8 w-auto"}`}
+            />
             {!isCollapsed && (
               <span className="text-xl font-bold text-primary-purple whitespace-nowrap">
                 Dashboard

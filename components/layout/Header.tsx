@@ -49,9 +49,11 @@ export const Header: React.FC = () => {
         <Link
           href="/"
           className="flex items-center gap-2 text-base font-semibold tracking-tight text-white md:text-lg">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/95 text-sm font-bold text-[#12244f] shadow-md shadow-slate-900/40 md:h-10 md:w-10">
-            PA
-          </span>
+          <img
+            src="/logo/logo.png"
+            alt="Publisher Authority Logo"
+            className="h-9 w-auto md:h-10"
+          />
           <span className="flex flex-col leading-tight">
             <span>publisher authority</span>
             <span className="text-[11px] font-normal text-slate-200 md:text-xs">
