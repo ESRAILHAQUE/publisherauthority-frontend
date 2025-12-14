@@ -274,15 +274,15 @@ export default function PaymentsPage() {
       </div>
 
       {/* Payout Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <Card padding="sm">
           <h3 className="text-sm font-semibold text-gray-700 mb-2">Awaiting Payout</h3>
           <p className="text-3xl font-bold text-primary-purple">
             ${(awaitingPayout || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
           <p className="text-xs text-gray-500 mt-1">Completed orders not paid yet</p>
         </Card>
-        <Card>
+        <Card padding="sm">
           <h3 className="text-sm font-semibold text-gray-700 mb-2">Total Earned</h3>
           <p className="text-3xl font-bold text-primary-purple">
             ${(totalEarned || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -292,7 +292,7 @@ export default function PaymentsPage() {
       </div>
 
       {/* Payment Information - Combined View & Edit */}
-      <Card>
+      <Card padding="sm">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-primary-purple">
             Payment Information
@@ -434,7 +434,7 @@ export default function PaymentsPage() {
       </Card>
 
       {/* Invoice History */}
-      <Card>
+      <Card padding="sm">
         <h2 className="text-xl font-semibold text-primary-purple mb-6">
           Invoice History
         </h2>
