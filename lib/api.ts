@@ -518,6 +518,7 @@ export const adminApi = {
     const query = params.toString() ? `?${params.toString()}` : "";
     return apiRequest(`/admin/orders${query}`, { method: "GET" });
   },
+  getOrder: (id: string) => apiRequest(`/admin/orders/${id}`, { method: "GET" }),
   getAllPayments: (filters?: Filters, page = 1, limit = 100) => {
     const params = new URLSearchParams({
       page: String(page),
