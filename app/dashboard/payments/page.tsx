@@ -40,48 +40,68 @@ export default function PaymentsPage() {
         paymentsApi.getInvoices().catch(() => []),
         paymentsApi.getPaymentStats().catch(() => ({})),
       ]);
-      
+
       // Handle profile data - Backend returns { success: true, data: { user: {...} } }
       let paypalEmailValue = "";
       let paymentMethodValue = "PayPal";
+      let userTotalEarnings = 0;
+      let userCompletedOrders = 0;
       if (profileData) {
         const profile = profileData as {
           success?: boolean;
           data?: {
-            user?: { paypalEmail?: string; paymentMethod?: string };
+            user?: {
+              paypalEmail?: string;
+              paymentMethod?: string;
+              totalEarnings?: number;
+              completedOrders?: number;
+            };
             paypalEmail?: string;
             paymentMethod?: string;
             [key: string]: unknown;
           };
-          user?: { paypalEmail?: string; paymentMethod?: string };
+          user?: {
+            paypalEmail?: string;
+            paymentMethod?: string;
+            totalEarnings?: number;
+            completedOrders?: number;
+          };
           paypalEmail?: string;
           paymentMethod?: string;
           [key: string]: unknown;
         };
-        
+
         // Backend format: { success: true, data: { user: { paypalEmail: "...", paymentMethod: "..." } } }
-        paypalEmailValue = 
+        paypalEmailValue =
           profile?.data?.user?.paypalEmail ||
           profile?.data?.paypalEmail ||
           profile?.user?.paypalEmail ||
           profile?.paypalEmail ||
           "";
-        
-        paymentMethodValue = 
+
+        paymentMethodValue =
           profile?.data?.user?.paymentMethod ||
           profile?.data?.paymentMethod ||
           profile?.user?.paymentMethod ||
           profile?.paymentMethod ||
           "PayPal";
+
+        const profileUser = profile?.data?.user || profile?.user;
+        if (typeof profileUser?.totalEarnings === "number") {
+          userTotalEarnings = profileUser.totalEarnings;
+        }
+        if (typeof profileUser?.completedOrders === "number") {
+          userCompletedOrders = profileUser.completedOrders;
+        }
       }
-      
+
       // Always update state to ensure latest data is shown
       setPaypalEmail(paypalEmailValue);
       setPaymentMethod(paymentMethodValue);
       if (paypalEmailValue) {
         setOriginalPaypalEmail(paypalEmailValue);
       }
-      
+
       // Handle invoices data - Backend returns { success: true, data: { payments: [...], total, page, pages } }
       let invoicesArray: Record<string, unknown>[] = [];
       if (invoicesData) {
@@ -99,9 +119,9 @@ export default function PaymentsPage() {
           invoices?: Record<string, unknown>[];
           [key: string]: unknown;
         };
-        
+
         // Backend format: { success: true, data: { payments: [...], total, page, pages } }
-        invoicesArray = 
+        invoicesArray =
           (Array.isArray(invoicesData) ? invoicesData : []) ||
           invoices?.data?.payments ||
           invoices?.data?.invoices ||
@@ -110,7 +130,7 @@ export default function PaymentsPage() {
           [];
       }
       setInvoices(invoicesArray);
-      
+
       // Set payment stats - handle different response structures
       const stats = statsData as {
         data?: {
@@ -133,12 +153,32 @@ export default function PaymentsPage() {
         awaitingPayout?: number;
         completedOrders?: number;
         completedEarnings?: number;
-        };
-      setPaymentStats(stats?.data || stats || {});
-      
+      };
+      const mergedStats = { ...(stats?.data || stats || {}) } as {
+        totalPayments?: number;
+        pendingPayments?: number;
+        paidPayments?: number;
+        totalAmount?: number;
+        pendingAmount?: number;
+        paidAmount?: number;
+        awaitingPayout?: number;
+        completedOrders?: number;
+        completedEarnings?: number;
+      };
+      if (mergedStats.completedEarnings === undefined && userTotalEarnings) {
+        mergedStats.completedEarnings = userTotalEarnings;
+      }
+      if (mergedStats.totalAmount === undefined && userTotalEarnings) {
+        mergedStats.totalAmount = userTotalEarnings;
+      }
+      if (mergedStats.totalPayments === undefined && userCompletedOrders) {
+        mergedStats.totalPayments = userCompletedOrders;
+      }
+      setPaymentStats(mergedStats);
+
       // Log for debugging
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Payment data loaded:', {
+      if (process.env.NODE_ENV === "development") {
+        console.log("Payment data loaded:", {
           paypalEmail: paypalEmailValue,
           invoicesCount: invoicesArray.length,
           stats: stats?.data || stats,
@@ -181,8 +221,11 @@ export default function PaymentsPage() {
 
     try {
       setSaving(true);
-      const response = await paymentsApi.updatePaypalEmail(paypalEmail.trim(), paymentMethod);
-      
+      const response = await paymentsApi.updatePaypalEmail(
+        paypalEmail.trim(),
+        paymentMethod
+      );
+
       // Handle response - Backend returns { success: true, data: { user: { paypalEmail: "...", paymentMethod: "..." } } }
       const responseData = response as {
         success?: boolean;
@@ -197,30 +240,30 @@ export default function PaymentsPage() {
         paymentMethod?: string;
         [key: string]: unknown;
       };
-      
+
       // Update PayPal email from response
-      const updatedEmail = 
+      const updatedEmail =
         responseData?.data?.user?.paypalEmail ||
         responseData?.data?.paypalEmail ||
         responseData?.user?.paypalEmail ||
         responseData?.paypalEmail ||
         paypalEmail.trim();
-      
-      const updatedPaymentMethod = 
+
+      const updatedPaymentMethod =
         responseData?.data?.user?.paymentMethod ||
         responseData?.data?.paymentMethod ||
         responseData?.user?.paymentMethod ||
         responseData?.paymentMethod ||
         paymentMethod;
-      
+
       // Update state immediately
       setPaypalEmail(updatedEmail);
       setPaymentMethod(updatedPaymentMethod);
       setOriginalPaypalEmail(updatedEmail);
       setIsEditing(false);
-      
+
       toast.success("Payment settings saved successfully");
-      
+
       // Reload all data to ensure consistency with database
       // Use setTimeout to ensure state updates are processed first
       setTimeout(async () => {
@@ -229,7 +272,9 @@ export default function PaymentsPage() {
     } catch (error: unknown) {
       console.error("Save payment error:", error);
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to save payment settings";
+        error instanceof Error
+          ? error.message
+          : "Failed to save payment settings";
       toast.error(errorMessage);
       // Revert to original email on error
       if (originalPaypalEmail) {
@@ -276,18 +321,34 @@ export default function PaymentsPage() {
       {/* Payout Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <Card padding="sm">
-          <h3 className="text-sm font-semibold text-gray-700 mb-2">Awaiting Payout</h3>
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">
+            Awaiting Payout
+          </h3>
           <p className="text-3xl font-bold text-primary-purple">
-            ${(awaitingPayout || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            $
+            {(awaitingPayout || 0).toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
           </p>
-          <p className="text-xs text-gray-500 mt-1">Completed orders not paid yet</p>
+          <p className="text-xs text-gray-500 mt-1">
+            Completed orders not paid yet
+          </p>
         </Card>
         <Card padding="sm">
-          <h3 className="text-sm font-semibold text-gray-700 mb-2">Total Earned</h3>
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">
+            Total Earned
+          </h3>
           <p className="text-3xl font-bold text-primary-purple">
-            ${(totalEarned || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            $
+            {(totalEarned || 0).toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
           </p>
-          <p className="text-xs text-gray-500 mt-1">All earnings already paid out</p>
+          <p className="text-xs text-gray-500 mt-1">
+            All earnings already paid out
+          </p>
         </Card>
       </div>
 
@@ -302,7 +363,9 @@ export default function PaymentsPage() {
           {/* Display Saved Payment Details from Database */}
           <div className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200 p-6 rounded-lg shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-900">Your Payment Information</h3>
+              <h3 className="text-lg font-bold text-gray-900">
+                Your Payment Information
+              </h3>
               {!isEditing && (
                 <Button
                   variant="outline"
@@ -319,14 +382,20 @@ export default function PaymentsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-white p-4 rounded-lg border border-gray-200">
                     <p className="text-sm text-gray-600 mb-1">Payment Method</p>
-                    <p className="text-lg font-semibold text-gray-900">{paymentMethod || "PayPal"}</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {paymentMethod || "PayPal"}
+                    </p>
                   </div>
                   <div className="bg-white p-4 rounded-lg border border-gray-200">
                     <p className="text-sm text-gray-600 mb-1">PayPal Email</p>
                     {paypalEmail ? (
-                      <p className="text-lg font-semibold text-primary-purple break-all">{paypalEmail}</p>
+                      <p className="text-lg font-semibold text-primary-purple break-all">
+                        {paypalEmail}
+                      </p>
                     ) : (
-                      <p className="text-sm text-yellow-600 italic">Not set - Click Edit to add</p>
+                      <p className="text-sm text-yellow-600 italic">
+                        Not set - Click Edit to add
+                      </p>
                     )}
                   </div>
                   <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -334,11 +403,14 @@ export default function PaymentsPage() {
                     <p className="text-lg font-semibold text-gray-900">USD</p>
                   </div>
                   <div className="bg-white p-4 rounded-lg border border-gray-200">
-                    <p className="text-sm text-gray-600 mb-1">Payment Schedule</p>
-                    <p className="text-lg font-semibold text-gray-900">1st & 15th of each month</p>
+                    <p className="text-sm text-gray-600 mb-1">
+                      Payment Schedule
+                    </p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      1st & 15th of each month
+                    </p>
                   </div>
                 </div>
-                
               </>
             ) : (
               // Edit Mode - Inline editing
@@ -366,7 +438,8 @@ export default function PaymentsPage() {
                   </div>
                   <div className="bg-white p-4 rounded-lg border border-gray-200">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      PayPal Email Address <span className="text-red-500">*</span>
+                      PayPal Email Address{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <Input
                       type="email"
@@ -376,7 +449,8 @@ export default function PaymentsPage() {
                       required
                     />
                     <p className="mt-1 text-xs text-gray-500">
-                      Enter the PayPal email address where you want to receive payments
+                      Enter the PayPal email address where you want to receive
+                      payments
                     </p>
                   </div>
                   <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -384,8 +458,12 @@ export default function PaymentsPage() {
                     <p className="text-lg font-semibold text-gray-900">USD</p>
                   </div>
                   <div className="bg-white p-4 rounded-lg border border-gray-200">
-                    <p className="text-sm text-gray-600 mb-1">Payment Schedule</p>
-                    <p className="text-lg font-semibold text-gray-900">1st & 15th of each month</p>
+                    <p className="text-sm text-gray-600 mb-1">
+                      Payment Schedule
+                    </p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      1st & 15th of each month
+                    </p>
                   </div>
                 </div>
 
@@ -394,7 +472,9 @@ export default function PaymentsPage() {
                     onClick={handleSavePaypal}
                     isLoading={saving}
                     disabled={saving || !paypalEmail}>
-                    {paypalEmail && originalPaypalEmail ? "Update Payment Info" : "Save Payment Info"}
+                    {paypalEmail && originalPaypalEmail
+                      ? "Update Payment Info"
+                      : "Save Payment Info"}
                   </Button>
                   <Button
                     variant="outline"
@@ -414,19 +494,23 @@ export default function PaymentsPage() {
             </p>
             <ul className="list-disc list-inside space-y-2 text-blue-800">
               <li>
-                Payments are sent on the <strong>1st and 15th</strong> of each month. 
-                If either of those days falls on a weekend, the payment will be moved to the next business day.
+                Payments are sent on the <strong>1st and 15th</strong> of each
+                month. If either of those days falls on a weekend, the payment
+                will be moved to the next business day.
               </li>
               <li>
-                Please allow a few business days for the payment to be processed.
+                Please allow a few business days for the payment to be
+                processed.
               </li>
               <li>
-                All payments are sent in <strong>USD</strong>. If you are outside the US, 
-                your bank may charge you a currency conversion fee.
+                All payments are sent in <strong>USD</strong>. If you are
+                outside the US, your bank may charge you a currency conversion
+                fee.
               </li>
               <li>
-                All links are monitored to ensure they remain active. If a link is removed, 
-                the payment for it will be excluded from the payment cycle.
+                All links are monitored to ensure they remain active. If a link
+                is removed, the payment for it will be excluded from the payment
+                cycle.
               </li>
             </ul>
           </div>
@@ -471,9 +555,7 @@ export default function PaymentsPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td
-                    colSpan={8}
-                    className="py-8 px-4 text-center">
+                  <td colSpan={8} className="py-8 px-4 text-center">
                     <div className="flex items-center justify-center py-12">
                       <Loader size="md" text="Loading invoices..." />
                     </div>

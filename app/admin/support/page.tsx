@@ -8,6 +8,7 @@ import { Button } from "@/components/shared/Button";
 import { Loader } from "@/components/shared/Loader";
 import { adminApi } from "@/lib/api";
 import toast from "react-hot-toast";
+import { useMemo } from "react";
 
 interface Ticket {
   _id?: string;
@@ -32,15 +33,22 @@ export default function AdminSupportPage() {
   const router = useRouter();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [priorityFilter, setPriorityFilter] = useState<string>("");
+  const [search, setSearch] = useState<string>("");
 
   useEffect(() => {
     loadTickets();
-  }, []);
+  }, [statusFilter, priorityFilter]);
 
   const loadTickets = async () => {
     try {
       setLoading(true);
-      const response = (await adminApi.getAllSupportTickets()) as {
+      const filters: Record<string, string> = {};
+      if (statusFilter) filters.status = statusFilter;
+      if (priorityFilter) filters.priority = priorityFilter;
+
+      const response = (await adminApi.getAllSupportTickets(filters)) as {
         success?: boolean;
         data?: {
           tickets?: Ticket[];
@@ -60,6 +68,25 @@ export default function AdminSupportPage() {
     }
   };
 
+  const filteredTickets = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return tickets;
+    return tickets.filter((t) => {
+      const subject = t.subject || "";
+      const ticketNumber = t.ticketNumber || "";
+      const userName = t.userId
+        ? `${t.userId.firstName || ""} ${t.userId.lastName || ""}`.trim()
+        : "";
+      const email = t.userId?.email || "";
+      return (
+        subject.toLowerCase().includes(term) ||
+        ticketNumber.toLowerCase().includes(term) ||
+        userName.toLowerCase().includes(term) ||
+        email.toLowerCase().includes(term)
+      );
+    });
+  }, [tickets, search]);
+
   const handleUpdateStatus = async (ticketId: string, status: string) => {
     try {
       await adminApi.updateTicketStatus(ticketId, status);
@@ -74,11 +101,50 @@ export default function AdminSupportPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-primary-purple mb-2">
-          Support Tickets
-        </h1>
-        <p className="text-gray-600">Manage customer support tickets.</p>
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-primary-purple mb-2">
+            Support Tickets
+          </h1>
+          <p className="text-gray-600">Manage customer support tickets.</p>
+        </div>
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            Status:
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-purple focus:ring-primary-purple">
+              <option value="">All</option>
+              <option value="open">Open</option>
+              <option value="in-progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+          </label>
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            Priority:
+            <select
+              value={priorityFilter}
+              onChange={(e) => setPriorityFilter(e.target.value)}
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-purple focus:ring-primary-purple">
+              <option value="">All</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </label>
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            Search:
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Ticket, subject, user..."
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-purple focus:ring-primary-purple"
+            />
+          </label>
+        </div>
       </div>
 
       <Card>
@@ -115,7 +181,7 @@ export default function AdminSupportPage() {
                 </tr>
               </thead>
               <tbody>
-                {tickets.length === 0 ? (
+                {filteredTickets.length === 0 ? (
                 <tr>
                   <td
                     colSpan={7}
@@ -124,7 +190,7 @@ export default function AdminSupportPage() {
                   </td>
                 </tr>
               ) : (
-                tickets.map((ticket) => (
+                filteredTickets.map((ticket) => (
                   <tr
                     key={ticket._id || ticket.id}
                     className="border-b border-gray-100 hover:bg-gray-50 transition-colors">

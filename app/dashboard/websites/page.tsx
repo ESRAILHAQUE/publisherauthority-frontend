@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/shared/Card";
 import { Badge } from "@/components/shared/Badge";
 import { Button } from "@/components/shared/Button";
@@ -50,6 +51,7 @@ interface Website {
 
 function WebsitesPageContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [websites, setWebsites] = useState<Website[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedWebsite, setSelectedWebsite] = useState<Website | null>(null);
@@ -78,6 +80,25 @@ function WebsitesPageContent() {
       setStatusFilter(["counter-offer"]);
     }
   }, [searchParams]);
+
+  // If an admin lands on the dashboard websites page, send them to the admin websites manager
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const me = (await import("@/lib/api").then((m) => m.authApi.getMe())) as any;
+        const user = me?.data?.user || me?.user;
+        if (mounted && user?.role === "admin") {
+          router.replace("/admin/websites");
+        }
+      } catch (err) {
+        // ignore; stay on page for regular users
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [router]);
 
   useEffect(() => {
     loadWebsites();
