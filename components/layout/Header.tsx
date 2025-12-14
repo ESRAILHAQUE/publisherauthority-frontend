@@ -44,7 +44,7 @@ export const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-30 border-b border-[#243b6b] bg-[#12244f]/95 backdrop-blur-xl">
-      <nav className="mx-auto flex w-full max-w-7xl items-center justify-between px-1 py-1 ">
+      <nav className="mx-auto flex w-full max-w-7xl items-center justify-between px-1 py-0">
         {/* Logo */}
         <Link
           href="/"
@@ -52,7 +52,7 @@ export const Header: React.FC = () => {
           <img
             src="/logo/logo.png"
             alt="Publisher Authority Logo"
-            className="h-28 w-auto md:h-32 -mr-2"
+            className="h-20 w-auto md:h-24 -mr-2"
           />
           <span className="flex flex-col leading-tight -ml-2">
             <span>publisher authority</span>
@@ -68,7 +68,7 @@ export const Header: React.FC = () => {
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm font-medium text-slate-100/90 transition-colors hover:text-white">
+              className="text-[15px] font-semibold text-slate-100/90 transition-colors hover:text-white">
               {item.label}
             </Link>
           ))}

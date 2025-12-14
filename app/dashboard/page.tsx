@@ -326,7 +326,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Ready To Post</h3>
-                <p className="text-sm text-gray-500">Jobs ready to post on your sites.</p>
+                <p className="text-sm text-gray-500">Orders ready to post on your sites.</p>
               </div>
               {stats.readyToPost > 0 && (
                 <div className="flex items-center gap-1">
@@ -408,7 +408,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Completed</h3>
-                <p className="text-sm text-gray-500">Jobs that you've completed.</p>
+                <p className="text-sm text-gray-500">Orders that you've completed.</p>
               </div>
             </div>
             <div className="flex items-end justify-between pt-2 border-t border-gray-100">

@@ -22,6 +22,8 @@ export default function PaymentsPage() {
     paidPayments?: number;
     totalAmount?: number;
     pendingAmount?: number;
+    completedOrders?: number;
+    completedEarnings?: number;
   }>({});
 
   useEffect(() => {
@@ -121,7 +123,7 @@ export default function PaymentsPage() {
         paidPayments?: number;
         totalAmount?: number;
         pendingAmount?: number;
-      };
+        };
       setPaymentStats(stats?.data || stats || {});
       
       // Log for debugging
@@ -302,7 +304,7 @@ export default function PaymentsPage() {
                 </div>
                 
                 {/* Payment Statistics */}
-                {(paymentStats.totalPayments !== undefined || paymentStats.totalAmount !== undefined) && (
+                {(paymentStats.totalPayments !== undefined || paymentStats.totalAmount !== undefined || paymentStats.completedOrders !== undefined || paymentStats.completedEarnings !== undefined) && (
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <h4 className="text-sm font-semibold text-gray-700 mb-3">Payment Statistics</h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -324,11 +326,25 @@ export default function PaymentsPage() {
                           <p className="text-lg font-bold text-green-600">{paymentStats.paidPayments}</p>
                         </div>
                       )}
+                      {paymentStats.completedOrders !== undefined && (
+                        <div className="text-center">
+                          <p className="text-xs text-gray-600">Completed Orders</p>
+                          <p className="text-lg font-bold text-primary-purple">{paymentStats.completedOrders}</p>
+                        </div>
+                      )}
                       {paymentStats.totalAmount !== undefined && (
                         <div className="text-center">
                           <p className="text-xs text-gray-600">Total Amount</p>
                           <p className="text-lg font-bold text-primary-purple">
                             ${(paymentStats.totalAmount || 0).toLocaleString()}
+                          </p>
+                        </div>
+                      )}
+                      {paymentStats.completedEarnings !== undefined && (
+                        <div className="text-center">
+                          <p className="text-xs text-gray-600">Completed Earnings</p>
+                          <p className="text-lg font-bold text-primary-purple">
+                            ${(paymentStats.completedEarnings || 0).toLocaleString()}
                           </p>
                         </div>
                       )}
