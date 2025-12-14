@@ -591,6 +591,16 @@ export const adminApi = {
       method: "POST",
       body: { message },
     }),
+  manualPay: (id: string, amount?: number) =>
+    apiRequest(`/admin/payments/${id}/manual-pay`, {
+      method: "POST",
+      body: { amount },
+    }),
+  manualPayCreate: (payload: { userId: string; amount: number; paymentMethod?: string; paypalEmail?: string }) =>
+    apiRequest(`/admin/payments/manual/create-and-pay`, {
+      method: "POST",
+      body: payload,
+    }),
   getSettings: () => apiRequest("/admin/settings", { method: "GET" }),
   updateSettings: (data: {
     platformName?: string;

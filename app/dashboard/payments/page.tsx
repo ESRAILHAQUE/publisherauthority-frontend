@@ -28,6 +28,29 @@ export default function PaymentsPage() {
     awaitingPayout?: number;
   }>({});
 
+  const handleDownloadInvoice = async (
+    invoiceId?: string,
+    invoiceNumber?: string
+  ) => {
+    if (!invoiceId) return;
+    try {
+      const blob = await paymentsApi.downloadInvoice(String(invoiceId));
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = invoiceNumber
+        ? `invoice-${invoiceNumber}.pdf`
+        : "invoice.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.error("Failed to download invoice");
+      console.error("Invoice download failed", err);
+    }
+  };
+
   useEffect(() => {
     loadData();
   }, []);
@@ -122,11 +145,11 @@ export default function PaymentsPage() {
 
         // Backend format: { success: true, data: { payments: [...], total, page, pages } }
         invoicesArray =
-          (Array.isArray(invoicesData) ? invoicesData : []) ||
           invoices?.data?.payments ||
           invoices?.data?.invoices ||
           invoices?.payments ||
           invoices?.invoices ||
+          (Array.isArray(invoicesData) ? invoicesData : []) ||
           [];
       }
       setInvoices(invoicesArray);
@@ -539,12 +562,6 @@ export default function PaymentsPage() {
                   Amount
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  Due Date
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  Payment Date
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
                   Status
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
@@ -580,8 +597,11 @@ export default function PaymentsPage() {
                       : "";
                   const invoiceDescription =
                     typeof invoice.description === "string"
-                      ? invoice.description
-                      : "-";
+                      ? invoice.description.trim().toLowerCase() ===
+                        "manual payout"
+                        ? "Transferred successfully"
+                        : invoice.description
+                      : "Transferred successfully";
 
                   return (
                     <tr
@@ -603,20 +623,6 @@ export default function PaymentsPage() {
                       <td className="py-4 px-4 font-semibold text-primary-purple">
                         ${(invoice.amount || 0) as number}
                       </td>
-                      <td className="py-4 px-4 text-gray-600">
-                        {invoice.dueDate
-                          ? new Date(
-                              invoice.dueDate as string | Date
-                            ).toLocaleDateString()
-                          : "-"}
-                      </td>
-                      <td className="py-4 px-4 text-gray-600">
-                        {invoice.paymentDate
-                          ? new Date(
-                              invoice.paymentDate as string | Date
-                            ).toLocaleDateString()
-                          : "-"}
-                      </td>
                       <td className="py-4 px-4">
                         <Badge
                           variant={getStatusBadge(invoice.status as string)}>
@@ -625,12 +631,16 @@ export default function PaymentsPage() {
                       </td>
                       <td className="py-4 px-4">
                         <button
-                          onClick={() => {
-                            if (invoiceId)
-                              paymentsApi.downloadInvoice(String(invoiceId));
-                          }}
+                          onClick={() =>
+                            handleDownloadInvoice(
+                              invoiceId ? String(invoiceId) : undefined,
+                              typeof invoice.invoiceNumber === "string"
+                                ? invoice.invoiceNumber
+                                : undefined
+                            )
+                          }
                           className="text-primary-purple hover:text-accent-teal font-medium text-sm transition-colors">
-                          Download PDF
+                          Download Invoice
                         </button>
                       </td>
                     </tr>

@@ -50,11 +50,24 @@ export default function AdminPaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [publishers, setPublishers] = useState<PublisherSummary[]>([]);
   const [loadingPublishers, setLoadingPublishers] = useState(false);
+  const [publisherStats, setPublisherStats] = useState<
+    Record<
+      string,
+      {
+        awaitingPayout?: number;
+        paidAmount?: number;
+        completedEarnings?: number;
+      }
+    >
+  >({});
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<"pay" | "history">("pay");
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
 
   useEffect(() => {
     loadPayments();
+    loadPublishers();
   }, [statusFilter]);
 
   const loadPayments = async () => {
@@ -133,11 +146,7 @@ export default function AdminPaymentsPage() {
       setPayments(paymentsData);
 
       // If there are no payments yet, show publishers' payout info directly from users collection
-      if (paymentsData.length === 0) {
-        await loadPublishers();
-      } else {
-        setPublishers([]);
-      }
+      // We always show publishers tab, so keep publishers list loaded separately
     } catch (error) {
       console.error("Failed to load payments:", error);
       toast.error("Failed to load payments");
@@ -164,6 +173,34 @@ export default function AdminPaymentsPage() {
         (Array.isArray(response as any) && (response as any)) ||
         [];
       setPublishers(list);
+
+      // Fetch per-publisher payment stats to show awaiting payout and paid totals
+      const statsEntries = await Promise.all(
+        list
+          .filter((p: PublisherSummary) => p?._id)
+          .map(async (p: PublisherSummary) => {
+            try {
+              const statsResp = (await adminApi.getUserPaymentStats(p!._id!)) as any;
+              const stats = (statsResp?.data || statsResp || {}) as {
+                awaitingPayout?: number;
+                paidAmount?: number;
+                completedEarnings?: number;
+              };
+              return [
+                p!._id!,
+                {
+                  awaitingPayout: stats.awaitingPayout ?? 0,
+                  paidAmount: stats.paidAmount ?? 0,
+                  completedEarnings: stats.completedEarnings ?? 0,
+                },
+              ] as const;
+            } catch (err) {
+              console.error("Failed to load stats for publisher", p?._id, err);
+              return [p!._id!, { awaitingPayout: 0, paidAmount: 0, completedEarnings: 0 }] as const;
+            }
+          })
+      );
+      setPublisherStats(Object.fromEntries(statsEntries));
     } catch (error) {
       console.error("Failed to load publishers for payments view:", error);
     } finally {
@@ -199,6 +236,34 @@ export default function AdminPaymentsPage() {
     }
   };
 
+  const handleManualPay = async (payment: Payment) => {
+    const paymentId = payment._id || payment.id;
+    if (!paymentId) {
+      toast.error("Payment ID is missing");
+      return;
+    }
+    const defaultAmount = payment.amount || 0;
+    const input = window.prompt(
+      "Enter amount to mark as paid:",
+      defaultAmount ? String(defaultAmount) : ""
+    );
+    if (input === null) return; // cancelled
+    const amount = parseFloat(input);
+    if (Number.isNaN(amount) || amount <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+    try {
+      await adminApi.manualPay(paymentId, amount);
+      toast.success("Payment marked as paid");
+      await loadPayments();
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to mark payment as paid";
+      toast.error(errorMessage);
+    }
+  };
+
   const getStatusBadge = (status?: string) => {
     if (!status) return { variant: "default" as const, label: "Unknown" };
     
@@ -214,244 +279,381 @@ export default function AdminPaymentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-primary-purple mb-2">
+          <h1 className="text-3xl font-bold text-primary-purple mb-1">
             Payment Management
           </h1>
-          <p className="text-gray-600">Process and manage all payments to publishers.</p>
+          <p className="text-gray-600">Pay publishers and see payment history.</p>
         </div>
-        
-        {/* Status Filter */}
-        <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-gray-700">Filter:</label>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary-purple focus:border-primary-purple bg-white">
-            <option value="">All Statuses</option>
-            <option value="pending">Submitted for Payment</option>
-            <option value="processing">Processing</option>
-            <option value="paid">Paid</option>
-            <option value="failed">Failed</option>
-          </select>
+        <div className="flex items-center gap-3">
+          <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+            <button
+              className={`px-4 py-2 text-sm font-semibold ${activeTab === "pay" ? "bg-primary-purple text-white" : "bg-white text-gray-700"}`}
+              onClick={() => setActiveTab("pay")}>
+              Pay Publishers
+            </button>
+            <button
+              className={`px-4 py-2 text-sm font-semibold ${activeTab === "history" ? "bg-primary-purple text-white" : "bg-white text-gray-700"}`}
+              onClick={() => setActiveTab("history")}>
+              Payment History
+            </button>
+          </div>
+          {/* Status Filter (for history) */}
+          {activeTab === "history" && (
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">Filter:</label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary-purple focus:border-primary-purple bg-white">
+                <option value="">All</option>
+                <option value="pending">Submitted</option>
+                <option value="processing">Processing</option>
+                <option value="paid">Paid</option>
+                <option value="failed">Failed</option>
+              </select>
+            </div>
+          )}
         </div>
       </div>
 
-      {loading ? (
+      {loading && (
         <div className="flex items-center justify-center py-20">
           <Loader size="lg" text="Loading payments..." />
         </div>
-      ) : payments.length === 0 ? (
+      )}
+
+      {!loading && activeTab === "pay" && (
         <Card>
-          <div className="py-12 text-center">
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400 mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            <p className="text-gray-500 text-lg font-medium mb-2">No payments found</p>
-            <p className="text-gray-400 text-sm">
-              {statusFilter
-                ? `No payments with status "${statusFilter}" found. Try changing the filter.`
-                : "There are no payments to display at this time."}
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Pay Publishers</h2>
+            <p className="text-sm text-gray-600">
+              Select a publisher and enter an amount to create and mark a payment as paid.
             </p>
           </div>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {payments.map((payment) => {
-            const statusInfo = getStatusBadge(payment.status);
-            const paypalEmail = payment.paypalEmail || payment.userId?.paypalEmail;
-            const paymentMethod = payment.paymentMethod || payment.userId?.paymentMethod || "PayPal";
-            const amount = ((payment.amount || 0) as number).toLocaleString(undefined, { 
-              minimumFractionDigits: 2, 
-              maximumFractionDigits: 2 
-            });
-            
-            if (process.env.NODE_ENV === "development") {
-              console.log("Payment data:", {
-                id: payment._id || payment.id,
-                paymentMethod: payment.paymentMethod,
-                userIdPaymentMethod: payment.userId?.paymentMethod,
-                finalPaymentMethod: paymentMethod,
-                paypalEmail: payment.paypalEmail,
-                userIdPaypalEmail: payment.userId?.paypalEmail,
-                finalPaypalEmail: paypalEmail,
-                userId: payment.userId
-              });
-            }
-            
-            return (
-              <Card key={payment._id || payment.id} className="hover:shadow-lg transition-shadow">
-                <div className="space-y-4">
-                  {/* Header */}
-                  <div className="flex items-start justify-between border-b border-gray-200 pb-4">
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900">
-                        Invoice #{payment.invoiceNumber || "N/A"}
-                      </h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        {payment.invoiceDate
-                          ? new Date(payment.invoiceDate as string | Date).toLocaleDateString()
-                          : "-"}
-                      </p>
-                    </div>
-                    <Badge variant={statusInfo.variant} className="text-sm">
-                      {statusInfo.label}
-                    </Badge>
-                  </div>
-
-                  {/* Publisher Info */}
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          {loadingPublishers ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader size="md" text="Loading publishers..." />
+            </div>
+          ) : publishers.length === 0 ? (
+            <div className="py-12 text-center text-gray-500">No publishers found.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
                         Publisher
-                      </label>
-                      <div className="mt-1">
-                        <p className="text-base font-semibold text-gray-900">
+                      </th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                        Payment Method
+                      </th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                        Total Earned
+                      </th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                        Awaiting Payout
+                      </th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                        Paid Total
+                      </th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                        Actions
+                      </th>
+                    </tr>
+                </thead>
+                <tbody>
+                  {publishers.map((p) => {
+                    const name =
+                      `${p.firstName || ""} ${p.lastName || ""}`.trim() ||
+                      p.email ||
+                      "-";
+                    const stats = p._id ? publisherStats[p._id] : undefined;
+                    return (
+                      <tr
+                        key={p._id || p.email}
+                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td className="py-3 px-4">
+                          <div className="font-semibold text-gray-900">{name}</div>
+                          <div className="text-xs text-gray-600">{p.email}</div>
+                        </td>
+                        <td className="py-3 px-4 text-gray-700">
+                          {p.paymentMethod || "PayPal"}
+                        </td>
+                        <td className="py-3 px-4 font-semibold text-primary-purple">
+                          ${(p.totalEarnings || 0).toLocaleString()}
+                        </td>
+                        <td className="py-3 px-4 font-semibold text-blue-700">
+                          ${((stats?.awaitingPayout ?? 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                        <td className="py-3 px-4 font-semibold text-gray-800">
+                          ${((stats?.paidAmount ?? 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                        <td className="py-3 px-4">
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => {
+                              if (!p._id) {
+                                toast.error("User ID missing for this publisher");
+                                return;
+                              }
+                              const input = window.prompt(
+                                "Enter amount to pay this publisher:",
+                                p.totalEarnings ? String(p.totalEarnings) : ""
+                              );
+                              if (input === null) return;
+                              const amount = parseFloat(input);
+                              if (Number.isNaN(amount) || amount <= 0) {
+                                toast.error("Please enter a valid amount");
+                                return;
+                              }
+                              adminApi
+                                .manualPayCreate({
+                                  userId: p._id,
+                                  amount,
+                                  paymentMethod: p.paymentMethod,
+                                  paypalEmail: p.paypalEmail,
+                                })
+                                .then(() => {
+                                  toast.success("Paid and emailed user");
+                                  loadPayments();
+                                })
+                                .catch((err: any) => {
+                                  const message =
+                                    err?.message ||
+                                    err?.response?.data?.message ||
+                                    "Failed to pay this publisher";
+                                  toast.error(message);
+                                });
+                            }}>
+                            Pay now
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
+      )}
+
+      {!loading && activeTab === "history" && (
+        payments.length === 0 ? (
+          <Card>
+            <div className="py-12 text-center">
+              <svg
+                className="mx-auto h-12 w-12 text-gray-400 mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              <p className="text-gray-500 text-lg font-medium mb-2">No payments found</p>
+              <p className="text-gray-400 text-sm">
+                {statusFilter
+                  ? `No payments with status "${statusFilter}" found. Try changing the filter.`
+                  : "There are no payments to display at this time."}
+              </p>
+            </div>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            <div className="overflow-x-auto bg-white border border-gray-200 rounded-lg">
+              <table className="min-w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Invoice #</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Publisher</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Amount</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Invoice Date</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Paid Date</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {payments.map((payment) => {
+                    const statusInfo = getStatusBadge(payment.status);
+                    const amount = ((payment.amount || 0) as number).toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    });
+                    return (
+                      <tr key={payment._id || payment.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm font-semibold text-gray-900">
+                          {payment.invoiceNumber || "N/A"}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-800">
                           {payment.userId?.firstName || ""} {payment.userId?.lastName || ""}
-                        </p>
-                        {payment.userId?.email && (
-                          <p className="text-sm text-gray-600 mt-0.5">
-                            {payment.userId.email}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Payment Method & PayPal Email */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
-                      <div>
-                        <label className="text-xs font-semibold text-blue-700 uppercase tracking-wide">
-                          Payment Method
-                        </label>
-                        <p className="mt-1 text-base font-semibold text-blue-900">
-                          {paymentMethod}
-                        </p>
-                      </div>
-                      <div className="border-t border-blue-200 pt-2">
-                        <label className="text-xs font-semibold text-blue-700 uppercase tracking-wide">
-                          Payment Email (from User Profile)
-                        </label>
-                        <p className="mt-1 text-base font-medium text-blue-900 break-all">
-                          {paypalEmail ? (
-                            <span className="font-semibold">{paypalEmail}</span>
-                          ) : (
-                            <span className="text-yellow-700 italic font-medium">⚠️ Payment email not set by user</span>
+                          {payment.userId?.email && (
+                            <div className="text-xs text-gray-500">{payment.userId.email}</div>
                           )}
-                        </p>
-                        {!paypalEmail && (
-                          <p className="text-xs text-yellow-700 mt-1">
-                            User needs to add PayPal email in their profile settings
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Amount */}
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                        Amount to Pay
-                      </label>
-                      <p className="mt-1 text-2xl font-bold text-primary-purple">
-                        {payment.currency || "USD"} ${amount}
-                      </p>
-                    </div>
-
-                    {/* Order Count */}
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Orders:</span>
-                      <span className="font-medium text-gray-900">
-                        {payment.orderIds && Array.isArray(payment.orderIds) 
-                          ? payment.orderIds.length 
-                          : 0} order{payment.orderIds && payment.orderIds.length !== 1 ? "s" : ""}
-                      </span>
-                    </div>
-
-                    {/* Dates */}
-                    <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
-                      <div>
-                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                          Due Date
-                        </label>
-                        <p className="mt-1 text-sm text-gray-700">
-                          {payment.dueDate
-                            ? new Date(payment.dueDate as string | Date).toLocaleDateString()
+                        </td>
+                        <td className="px-4 py-3 text-sm font-semibold text-gray-900">
+                          {payment.currency || "USD"} ${amount}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Badge variant={statusInfo.variant} className="text-xs">
+                            {statusInfo.label}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-700">
+                          {payment.invoiceDate
+                            ? new Date(payment.invoiceDate as string | Date).toLocaleDateString()
                             : "-"}
-                        </p>
-                      </div>
-                      {payment.paymentDate && (
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-700">
+                          {payment.paymentDate
+                            ? new Date(payment.paymentDate as string | Date).toLocaleDateString()
+                            : "-"}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-right">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => setSelectedPayment(payment)}>
+                            View Details
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {selectedPayment && (
+              <Card className="border border-gray-200 shadow-sm">
+                {(() => {
+                  const payment = selectedPayment;
+                  const statusInfo = getStatusBadge(payment.status);
+                  const paypalEmail = payment.paypalEmail || payment.userId?.paypalEmail;
+                  const paymentMethod = payment.paymentMethod || payment.userId?.paymentMethod || "PayPal";
+                  const amount = ((payment.amount || 0) as number).toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  });
+                  return (
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between border-b border-gray-200 pb-4">
                         <div>
-                          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                            Paid Date
-                          </label>
-                          <p className="mt-1 text-sm text-gray-700">
-                            {new Date(payment.paymentDate as string | Date).toLocaleDateString()}
+                          <h3 className="text-lg font-bold text-gray-900">
+                            Invoice #{payment.invoiceNumber || "N/A"}
+                          </h3>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {payment.invoiceDate
+                              ? new Date(payment.invoiceDate as string | Date).toLocaleDateString()
+                              : "-"}
                           </p>
                         </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="pt-4 border-t border-gray-200">
-                    {payment.status === "pending" && (
-                      <Button
-                        variant="primary"
-                        className="w-full"
-                        onClick={() => {
-                          const paymentId = payment._id || payment.id;
-                          if (paymentId) handleProcessPayment(paymentId);
-                        }}>
-                        Process Payment
-                      </Button>
-                    )}
-                    {payment.status === "processing" && (
-                      <div className="space-y-2">
-                        <p className="text-sm text-gray-600 text-center mb-2">
-                          Payment is being processed. After completing the payment, mark it as paid.
-                        </p>
-                        <Button
-                          variant="primary"
-                          className="w-full bg-green-600 hover:bg-green-700"
-                          onClick={() => {
-                            const paymentId = payment._id || payment.id;
-                            if (paymentId) handleMarkAsPaid(paymentId);
-                          }}>
-                          Mark as Paid
-                        </Button>
+                        <Badge variant={statusInfo.variant} className="text-sm">
+                          {statusInfo.label}
+                        </Badge>
                       </div>
-                    )}
-                    {payment.status === "paid" && (
-                      <div className="text-center py-2">
-                        <span className="inline-flex items-center px-4 py-2 bg-green-50 text-green-700 rounded-lg font-medium">
-                          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          Payment Completed
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Publisher
+                          </p>
+                          <p className="text-base font-semibold text-gray-900">
+                            {payment.userId?.firstName || ""} {payment.userId?.lastName || ""}
+                          </p>
+                          {payment.userId?.email && (
+                            <p className="text-sm text-gray-600">{payment.userId.email}</p>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Payment Method
+                          </p>
+                          <p className="text-base font-semibold text-gray-900">{paymentMethod}</p>
+                          <p className="text-xs text-gray-600">Payment Email (from profile)</p>
+                          <p className="text-sm font-semibold text-gray-800 break-all">
+                            {paypalEmail || "Not set"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Amount
+                          </p>
+                          <p className="text-2xl font-bold text-primary-purple">
+                            {payment.currency || "USD"} ${amount}
+                          </p>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Invoice Date
+                          </p>
+                          <p className="text-sm text-gray-800">
+                            {payment.invoiceDate
+                              ? new Date(payment.invoiceDate as string | Date).toLocaleDateString()
+                              : "-"}
+                          </p>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Paid Date
+                          </p>
+                          <p className="text-sm text-gray-800">
+                            {payment.paymentDate
+                              ? new Date(payment.paymentDate as string | Date).toLocaleDateString()
+                              : "-"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Orders:</span>
+                        <span className="font-medium text-gray-900">
+                          {payment.orderIds && Array.isArray(payment.orderIds)
+                            ? payment.orderIds.length
+                            : 0}{" "}
+                          order{payment.orderIds && payment.orderIds.length !== 1 ? "s" : ""}
                         </span>
                       </div>
-                    )}
-                    {payment.status === "failed" && (
-                      <div className="text-center py-2">
-                        <span className="text-red-600 font-medium">Payment Failed</span>
+
+                      <div className="flex items-center gap-2 justify-end">
+                        {(payment.status === "pending" || payment.status === "processing") && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleManualPay(payment)}>
+                            Manual Pay
+                          </Button>
+                        )}
+                        {payment.status === "processing" && (
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => {
+                              const paymentId = payment._id || payment.id;
+                              if (paymentId) handleMarkAsPaid(paymentId);
+                            }}>
+                            Mark as Paid
+                          </Button>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </div>
+                    </div>
+                  );
+                })()}
               </Card>
-            );
-          })}
-        </div>
-      )}
+            )}
+          </div>
+      )
+    )}
     </div>
   );
 }
