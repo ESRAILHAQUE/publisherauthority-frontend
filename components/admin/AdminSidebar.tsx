@@ -296,57 +296,58 @@ export const AdminSidebar: React.FC = () => {
       </nav>
 
       <div
-        className={`p-4 border-t border-gray-800 space-y-2 ${
+        className={`p-4 border-t border-gray-800 ${
           isCollapsed ? "px-2" : ""
         }`}>
-        <button
-          onClick={handleLogout}
-          className={`w-full flex items-center ${
-            isCollapsed ? "justify-center" : "space-x-3"
-          } ${
-            isCollapsed ? "px-2" : "px-4"
-          } py-3 rounded-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 transition-colors`}
-          title={isCollapsed ? "Logout" : undefined}>
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-            />
-          </svg>
-          {!isCollapsed && (
-            <span className="font-medium whitespace-nowrap">Logout</span>
-          )}
-        </button>
-        <Link
-          href="/"
-          className={`flex items-center ${
-            isCollapsed ? "justify-center" : "space-x-3"
-          } ${
-            isCollapsed ? "px-2" : "px-4"
-          } py-3 rounded-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors`}
-          title={isCollapsed ? "Back to Home" : undefined}>
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10 19l-7-7m0 0l7-7m-7 7h18"
-            />
-          </svg>
-          {!isCollapsed && (
-            <span className="font-medium whitespace-nowrap">Back to Home</span>
-          )}
-        </Link>
+        <div className="flex items-center justify-between gap-2">
+          <Link
+            href="/"
+            className={`flex items-center justify-center gap-2 ${
+              isCollapsed ? "px-3 py-2" : "px-3 py-2"
+            } rounded-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors w-1/2`}
+            title="Back to Home">
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
+            </svg>
+            {!isCollapsed && (
+              <span className="font-medium whitespace-nowrap">
+                Back to Home
+              </span>
+            )}
+          </Link>
+
+          <button
+            onClick={handleLogout}
+            className={`flex items-center justify-center gap-2 ${
+              isCollapsed ? "px-3 py-2" : "px-3 py-2"
+            } rounded-sm text-red-300 hover:bg-red-900/20 hover:text-red-200 transition-colors w-1/2`}
+            title="Logout">
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
+            </svg>
+            {!isCollapsed && (
+              <span className="font-medium whitespace-nowrap">Logout</span>
+            )}
+          </button>
+        </div>
       </div>
     </aside>
   );

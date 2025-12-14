@@ -175,6 +175,7 @@ export const Sidebar: React.FC = () => {
   const router = useRouter();
   const { isCollapsed, setIsCollapsed } = useDashboardSidebar();
   const [userEmail, setUserEmail] = useState<string>("");
+  const [userName, setUserName] = useState<string>("");
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -187,13 +188,17 @@ export const Sidebar: React.FC = () => {
     const loadUser = async () => {
       try {
         const response = (await authApi.getMe()) as {
-          data?: { user?: { email?: string } };
-          user?: { email?: string };
+          data?: { user?: { email?: string; firstName?: string; lastName?: string } };
+          user?: { email?: string; firstName?: string; lastName?: string };
           [key: string]: unknown;
         };
         const user = response.data?.user || response.user;
         if (user?.email) {
           setUserEmail(user.email);
+        }
+        if (user?.firstName || user?.lastName) {
+          const name = `${user.firstName || ""} ${user.lastName || ""}`.trim();
+          if (name) setUserName(name);
         }
       } catch (error) {
         // Ignore errors; keep UI functional
@@ -328,7 +333,7 @@ export const Sidebar: React.FC = () => {
         {!isCollapsed && (
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs text-gray-600 truncate">
-              {userEmail || "Loading..."}
+              {userName || userEmail || "Loading..."}
             </span>
             <button
               onClick={handleLogout}
