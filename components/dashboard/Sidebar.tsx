@@ -151,6 +151,24 @@ const menuItems: MenuItem[] = [
     ),
   },
   {
+    name: "Support",
+    href: "/dashboard/support",
+    icon: (
+      <svg
+        className="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24">
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M18 10c0-3.866-3.582-7-8-7S2 6.134 2 10c0 2.761 2.239 5 5 5h1v3l4-3h2c2.761 0 5-2.239 5-5z"
+        />
+      </svg>
+    ),
+  },
+  {
     name: "Profile",
     href: "/dashboard/profile",
     icon: (

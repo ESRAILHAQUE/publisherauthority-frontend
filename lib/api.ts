@@ -639,8 +639,11 @@ export const supportApi = {
   getTickets: () => apiRequest("/support/tickets", { method: "GET" }),
   getTicket: (id: string) =>
     apiRequest(`/support/tickets/${id}`, { method: "GET" }),
-  updateTicket: (id: string, data: SupportTicketData) =>
-    apiRequest(`/support/tickets/${id}`, { method: "PUT", body: data }),
+  addMessage: (id: string, message: string) =>
+    apiRequest(`/support/tickets/${id}/messages`, {
+      method: "POST",
+      body: { message },
+    }),
 };
 
 export default apiRequest;
