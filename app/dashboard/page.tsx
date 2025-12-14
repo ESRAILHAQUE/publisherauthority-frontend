@@ -239,7 +239,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              ACCOUNT LEVEL
+              Account Level
             </h2>
             <Badge
               variant={
@@ -287,7 +287,7 @@ export default function DashboardPage() {
             <div className="space-y-3 flex-1 flex flex-col">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">PENDING ORDERS</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Pending Orders</h3>
                 <p className="text-sm text-gray-500">Orders waiting to be processed.</p>
               </div>
             </div>
@@ -325,7 +325,7 @@ export default function DashboardPage() {
             <div className="space-y-3 flex-1 flex flex-col">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">READY TO POST</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Ready To Post</h3>
                 <p className="text-sm text-gray-500">Jobs ready to post on your sites.</p>
               </div>
               {stats.readyToPost > 0 && (
@@ -369,7 +369,7 @@ export default function DashboardPage() {
             <div className="space-y-3 flex-1 flex flex-col">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">VERIFYING</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Verifying</h3>
                 <p className="text-sm text-gray-500">Orders currently being verified.</p>
               </div>
             </div>
@@ -407,7 +407,7 @@ export default function DashboardPage() {
             <div className="space-y-3 flex-1 flex flex-col">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">COMPLETED</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Completed</h3>
                 <p className="text-sm text-gray-500">Jobs that you've completed.</p>
               </div>
             </div>
@@ -448,7 +448,7 @@ export default function DashboardPage() {
             <div className="space-y-3 flex-1 flex flex-col">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">ACTIVE WEBSITES</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Active Websites</h3>
                 <p className="text-sm text-gray-500">Your verified and active websites.</p>
               </div>
             </div>
@@ -483,7 +483,7 @@ export default function DashboardPage() {
             <div className="space-y-3 flex-1 flex flex-col">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">COUNTER OFFERS</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Counter Offers</h3>
                 <p className="text-sm text-gray-500">Pending counter offer negotiations.</p>
               </div>
             </div>

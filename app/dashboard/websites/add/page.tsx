@@ -215,10 +215,18 @@ export default function AddWebsitePage() {
         router.push("/dashboard/websites");
       }, 2000);
     } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Failed to upload websites. Please check CSV format.";
+      let errorMessage = "Failed to upload websites. Please check CSV format.";
+      
+      if (err instanceof Error) {
+        errorMessage = err.message;
+        // Check for duplicate error messages
+        if (errorMessage.toLowerCase().includes("already been added") || 
+            errorMessage.toLowerCase().includes("duplicate") ||
+            errorMessage.toLowerCase().includes("already exists")) {
+          errorMessage = "Some websites have already been added. Each website can only be added once.";
+        }
+      }
+      
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -232,6 +240,33 @@ export default function AddWebsitePage() {
     setIsSubmitting(true);
 
     try {
+      // Normalize URL for duplicate checking
+      const normalizedUrl = normalizeUrl(formData.url).toLowerCase().trim();
+      
+      // Check for duplicate before submitting
+      try {
+        const existingWebsites = await websitesApi.getWebsites();
+        const websites = Array.isArray(existingWebsites)
+          ? existingWebsites
+          : (existingWebsites as { data?: { websites?: unknown[] }; websites?: unknown[] })?.data?.websites ||
+            (existingWebsites as { websites?: unknown[] })?.websites ||
+            [];
+        
+        const duplicate = (websites as { url?: string }[]).find(
+          (w) => w.url?.toLowerCase().trim() === normalizedUrl
+        );
+        
+        if (duplicate) {
+          toast.error("This website has already been added. Each website can only be added once.");
+          setError("This website has already been added. Each website can only be added once.");
+          setIsSubmitting(false);
+          return;
+        }
+      } catch (checkError) {
+        // If check fails, continue with submission - backend will catch duplicates
+        console.warn("Could not check for duplicates:", checkError);
+      }
+
       await websitesApi.addWebsite({
         url: formData.url,
         domainAuthority: parseInt(formData.domainAuthority),
@@ -241,16 +276,26 @@ export default function AddWebsitePage() {
         price: parseFloat(formData.price),
       });
 
+      toast.success("Website added successfully!");
       setSuccess(true);
       setTimeout(() => {
         router.push("/dashboard/websites");
       }, 2000);
     } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Failed to submit website. Please try again.";
+      let errorMessage = "Failed to submit website. Please try again.";
+      
+      if (err instanceof Error) {
+        errorMessage = err.message;
+        // Check for duplicate error messages
+        if (errorMessage.toLowerCase().includes("already been added") || 
+            errorMessage.toLowerCase().includes("duplicate") ||
+            errorMessage.toLowerCase().includes("already exists")) {
+          errorMessage = "This website has already been added. Each website can only be added once.";
+        }
+      }
+      
       setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

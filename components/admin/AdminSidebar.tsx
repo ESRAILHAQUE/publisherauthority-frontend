@@ -210,28 +210,38 @@ export const AdminSidebar: React.FC = () => {
   };
 
   return (
-    <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-gray-900 text-white h-screen fixed left-0 top-0 overflow-y-auto flex flex-col transition-all duration-300`}>
-      <div className={`p-6 border-b border-gray-800 ${isCollapsed ? 'px-4' : ''}`}>
+    <aside
+      className={`${
+        isCollapsed ? "w-20" : "w-64"
+      } bg-gray-900 text-white h-screen fixed left-0 top-0 overflow-y-auto flex flex-col transition-all duration-300`}>
+      <div
+        className={`p-6 border-b border-gray-800 ${isCollapsed ? "px-4" : ""}`}>
         <div className="flex items-center justify-between">
-          <Link href="/admin" className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'}`}>
+          <Link
+            href="/admin"
+            className={`flex items-center ${
+              isCollapsed ? "justify-center" : "space-x-2"
+            }`}>
             <img
               src="/logo/logo.png"
               alt="Publisher Authority Logo"
-              className={`${isCollapsed ? "h-16 w-auto" : "h-20 w-auto"} bg-white/10 p-2 rounded-lg shadow-lg border border-white/20`}
+              className={`${isCollapsed ? "h-20 w-auto" : "h-24 w-auto"}`}
             />
-            {!isCollapsed && <span className="text-xl font-bold whitespace-nowrap">Admin Panel</span>}
+            {!isCollapsed && (
+              <span className="text-xl font-bold whitespace-nowrap">
+                Admin Panel
+              </span>
+            )}
           </Link>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-sm hover:bg-gray-800 transition-colors shrink-0"
-            aria-label="Toggle sidebar"
-          >
+            aria-label="Toggle sidebar">
             <svg
               className="w-5 h-5"
               fill="none"
               stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+              viewBox="0 0 24 24">
               {isCollapsed ? (
                 <path
                   strokeLinecap="round"
@@ -252,40 +262,54 @@ export const AdminSidebar: React.FC = () => {
         </div>
       </div>
 
-      <nav className={`p-4 space-y-2 flex-1 ${isCollapsed ? 'px-2' : ''}`}>
+      <nav className={`p-4 space-y-2 flex-1 ${isCollapsed ? "px-2" : ""}`}>
         {menuItems.map((item) => {
           // For exact match or if pathname starts with the href followed by /
           // Special case: /admin should only match exactly /admin or /admin/, not /admin/applications
-          const isActive = item.href === "/admin"
-            ? pathname === "/admin" || pathname === "/admin/"
-            : pathname === item.href || pathname?.startsWith(item.href + "/");
+          const isActive =
+            item.href === "/admin"
+              ? pathname === "/admin" || pathname === "/admin/"
+              : pathname === item.href || pathname?.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
               href={item.href}
               className={`
-                flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${isCollapsed ? 'px-2' : 'px-4'} py-3 rounded-sm transition-colors
+                flex items-center ${
+                  isCollapsed ? "justify-center" : "space-x-3"
+                } ${
+                isCollapsed ? "px-2" : "px-4"
+              } py-3 rounded-sm transition-colors
                 ${
                   isActive
                     ? "bg-primary-purple text-white"
                     : "text-gray-300 hover:bg-gray-800 hover:text-white"
                 }
               `}
-              title={isCollapsed ? item.name : undefined}
-            >
+              title={isCollapsed ? item.name : undefined}>
               {item.icon}
-              {!isCollapsed && <span className="font-medium whitespace-nowrap">{item.name}</span>}
+              {!isCollapsed && (
+                <span className="font-medium whitespace-nowrap">
+                  {item.name}
+                </span>
+              )}
             </Link>
           );
         })}
       </nav>
 
-      <div className={`p-4 border-t border-gray-800 space-y-2 ${isCollapsed ? 'px-2' : ''}`}>
+      <div
+        className={`p-4 border-t border-gray-800 space-y-2 ${
+          isCollapsed ? "px-2" : ""
+        }`}>
         <button
           onClick={handleLogout}
-          className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${isCollapsed ? 'px-2' : 'px-4'} py-3 rounded-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 transition-colors`}
-          title={isCollapsed ? "Logout" : undefined}
-        >
+          className={`w-full flex items-center ${
+            isCollapsed ? "justify-center" : "space-x-3"
+          } ${
+            isCollapsed ? "px-2" : "px-4"
+          } py-3 rounded-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 transition-colors`}
+          title={isCollapsed ? "Logout" : undefined}>
           <svg
             className="w-5 h-5"
             fill="none"
@@ -298,13 +322,18 @@ export const AdminSidebar: React.FC = () => {
               d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
             />
           </svg>
-          {!isCollapsed && <span className="font-medium whitespace-nowrap">Logout</span>}
+          {!isCollapsed && (
+            <span className="font-medium whitespace-nowrap">Logout</span>
+          )}
         </button>
         <Link
           href="/"
-          className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${isCollapsed ? 'px-2' : 'px-4'} py-3 rounded-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors`}
-          title={isCollapsed ? "Back to Home" : undefined}
-        >
+          className={`flex items-center ${
+            isCollapsed ? "justify-center" : "space-x-3"
+          } ${
+            isCollapsed ? "px-2" : "px-4"
+          } py-3 rounded-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors`}
+          title={isCollapsed ? "Back to Home" : undefined}>
           <svg
             className="w-5 h-5"
             fill="none"
@@ -317,7 +346,9 @@ export const AdminSidebar: React.FC = () => {
               d="M10 19l-7-7m0 0l7-7m-7 7h18"
             />
           </svg>
-          {!isCollapsed && <span className="font-medium whitespace-nowrap">Back to Home</span>}
+          {!isCollapsed && (
+            <span className="font-medium whitespace-nowrap">Back to Home</span>
+          )}
         </Link>
       </div>
     </aside>

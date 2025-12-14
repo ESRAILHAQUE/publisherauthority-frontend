@@ -44,17 +44,17 @@ export const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-30 border-b border-[#243b6b] bg-[#12244f]/95 backdrop-blur-xl">
-      <nav className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 md:py-5">
+      <nav className="mx-auto flex w-full max-w-7xl items-center justify-between px-1 py-1 ">
         {/* Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2 text-base font-semibold tracking-tight text-white md:text-lg">
+          className="flex items-center text-base font-semibold tracking-tight text-white md:text-lg">
           <img
             src="/logo/logo.png"
             alt="Publisher Authority Logo"
-            className="h-16 w-auto md:h-20 bg-white/10 p-2 rounded-lg shadow-lg"
+            className="h-28 w-auto md:h-32 -mr-2"
           />
-          <span className="flex flex-col leading-tight">
+          <span className="flex flex-col leading-tight -ml-2">
             <span>publisher authority</span>
             <span className="text-[11px] font-normal text-slate-200 md:text-xs">
               Publisher Marketplace
