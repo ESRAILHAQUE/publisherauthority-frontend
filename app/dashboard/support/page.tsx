@@ -100,6 +100,26 @@ export default function DashboardSupportPage() {
     }
   }, [selectedId]);
 
+  // Periodically refresh the selected ticket so admin replies show up without manual reload
+  useEffect(() => {
+    if (!selectedId) return;
+    const interval = setInterval(() => {
+      loadTicket(selectedId);
+    }, 8000); // 8s poll
+    return () => clearInterval(interval);
+  }, [selectedId]);
+
+  // Refresh when window gains focus
+  useEffect(() => {
+    const onFocus = () => {
+      if (selectedId) {
+        loadTicket(selectedId);
+      }
+    };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [selectedId]);
+
   const handleSendReply = async () => {
     if (!selectedId || !reply.trim()) {
       toast.error("Message cannot be empty");
