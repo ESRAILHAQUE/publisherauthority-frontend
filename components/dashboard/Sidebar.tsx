@@ -213,7 +213,7 @@ export const Sidebar: React.FC = () => {
             <img
               src="/logo/logo.png"
               alt="Publisher Authority Logo"
-              className={`${isCollapsed ? "h-8 w-auto" : "h-8 w-auto"}`}
+              className={`${isCollapsed ? "h-12 w-auto" : "h-14 w-auto"} bg-white p-2 rounded-lg shadow-md border border-gray-200`}
             />
             {!isCollapsed && (
               <span className="text-xl font-bold text-primary-purple whitespace-nowrap">

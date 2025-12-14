@@ -217,7 +217,7 @@ export const AdminSidebar: React.FC = () => {
             <img
               src="/logo/logo.png"
               alt="Publisher Authority Logo"
-              className={`${isCollapsed ? "h-8 w-auto" : "h-8 w-auto"}`}
+              className={`${isCollapsed ? "h-12 w-auto" : "h-14 w-auto"} bg-white/10 p-2 rounded-lg shadow-lg border border-white/20`}
             />
             {!isCollapsed && <span className="text-xl font-bold whitespace-nowrap">Admin Panel</span>}
           </Link>

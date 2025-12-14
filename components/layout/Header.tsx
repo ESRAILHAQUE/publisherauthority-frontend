@@ -52,7 +52,7 @@ export const Header: React.FC = () => {
           <img
             src="/logo/logo.png"
             alt="Publisher Authority Logo"
-            className="h-9 w-auto md:h-10"
+            className="h-12 w-auto md:h-14 bg-white/10 p-1.5 rounded-lg shadow-lg"
           />
           <span className="flex flex-col leading-tight">
             <span>publisher authority</span>
