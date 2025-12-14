@@ -55,7 +55,7 @@ export const Header: React.FC = () => {
             className="h-20 w-auto md:h-24 -mr-2"
           />
           <span className="flex flex-col leading-tight -ml-2">
-            <span>publisher authority</span>
+            <span>Publisher Authority</span>
             <span className="text-[11px] font-normal text-slate-200 md:text-xs">
               Publisher Marketplace
             </span>
