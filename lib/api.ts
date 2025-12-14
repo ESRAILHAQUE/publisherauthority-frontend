@@ -586,6 +586,11 @@ export const adminApi = {
       method: "PUT",
       body: { status },
     }),
+  replyToSupportTicket: (id: string, message: string) =>
+    apiRequest(`/admin/support/tickets/${id}/messages`, {
+      method: "POST",
+      body: { message },
+    }),
   getSettings: () => apiRequest("/admin/settings", { method: "GET" }),
   updateSettings: (data: {
     platformName?: string;

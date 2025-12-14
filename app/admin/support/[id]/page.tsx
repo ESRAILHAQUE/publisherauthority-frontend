@@ -108,7 +108,7 @@ export default function AdminTicketDetailPage() {
 
     try {
       setSubmitting(true);
-      // TODO: Add admin API method to send message
+      await adminApi.replyToSupportTicket(ticketId, newMessage.trim());
       toast.success("Message sent successfully");
       setNewMessage("");
       await loadTicket();
