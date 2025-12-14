@@ -252,7 +252,7 @@ export default function OrderDetailPage() {
                   const contentStr = content ? (typeof content === "string" ? content : String(content)) : "";
                   return contentStr.trim() ? (
                     <div>
-                      <p className="text-sm font-medium text-gray-700 mb-2">Topic/Content:</p>
+                      <p className="text-sm font-medium text-gray-700 mb-2">Content:</p>
                       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                         <p className="text-gray-700 whitespace-pre-line">{contentStr}</p>
                       </div>

@@ -238,7 +238,7 @@ export default function AdminOrderDetailPage() {
                   const contentStr = content ? (typeof content === "string" ? content : String(content)) : "";
                   return contentStr.trim() ? (
                     <div>
-                      <p className="text-sm text-gray-600">Content/Topic</p>
+                      <p className="text-sm text-gray-600">Content</p>
                       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-2">
                         <p className="text-gray-700 whitespace-pre-line">{contentStr}</p>
                       </div>
