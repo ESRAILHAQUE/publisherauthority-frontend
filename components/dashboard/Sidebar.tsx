@@ -174,12 +174,35 @@ export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { isCollapsed, setIsCollapsed } = useDashboardSidebar();
+  const [userEmail, setUserEmail] = useState<string>("");
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
     // Dispatch custom event for same-tab updates
     window.dispatchEvent(new Event("dashboardSidebarToggle"));
   };
+
+  // Load logged-in user's email to show beside logout
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const response = (await authApi.getMe()) as {
+          data?: { user?: { email?: string } };
+          user?: { email?: string };
+          [key: string]: unknown;
+        };
+        const user = response.data?.user || response.user;
+        if (user?.email) {
+          setUserEmail(user.email);
+        }
+      } catch (error) {
+        // Ignore errors; keep UI functional
+        console.error("Failed to load user email for sidebar:", error);
+      }
+    };
+
+    loadUser();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -302,28 +325,52 @@ export const Sidebar: React.FC = () => {
         className={`p-4 border-t border-gray-200 bg-white space-y-2 ${
           isCollapsed ? "px-2" : ""
         }`}>
-        <button
-          onClick={handleLogout}
-          className={`w-full flex items-center ${
-            isCollapsed ? "justify-center" : "justify-center space-x-3"
-          } ${
-            isCollapsed ? "px-2" : "px-4"
-          } py-3 rounded-sm text-white bg-red-600 hover:bg-red-700 transition-colors font-medium shadow-md hover:shadow-lg`}
-          title={isCollapsed ? "Logout" : undefined}>
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-            />
-          </svg>
-          {!isCollapsed && <span>Logout</span>}
-        </button>
+        {!isCollapsed && (
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs text-gray-600 truncate">
+              {userEmail || "Loading..."}
+            </span>
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-sm text-white bg-red-600 hover:bg-red-700 transition-colors text-sm font-medium shadow-md hover:shadow-lg"
+              title="Logout">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+              </svg>
+              <span>Logout</span>
+            </button>
+          </div>
+        )}
+
+        {isCollapsed && (
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center px-2 py-2 rounded-sm text-white bg-red-600 hover:bg-red-700 transition-colors text-sm font-medium shadow-md hover:shadow-lg"
+            title="Logout">
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
+            </svg>
+          </button>
+        )}
+
         <Link
           href="/"
           className={`flex items-center ${

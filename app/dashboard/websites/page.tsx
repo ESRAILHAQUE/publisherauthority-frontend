@@ -646,8 +646,10 @@ function WebsitesPageContent() {
                           )}
                         </td>
                         <td className="py-4 px-4 text-gray-600">
-                          {website.verifiedAt || website.status === "active" ? (
+                          {website.status === "active" ? (
                             <span className="text-green-600 font-medium">Verified</span>
+                          ) : website.verificationMethod ? (
+                            <span className="text-yellow-600 font-medium">Pending Verification</span>
                           ) : (
                             <button
                               onClick={() => {

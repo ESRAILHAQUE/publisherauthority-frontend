@@ -140,7 +140,7 @@ export default function DashboardPage() {
               ? (statsData.counterOffers as number)
               : typeof websitesData?.counterOffers === "number"
                 ? (websitesData.counterOffers as number)
-                : 0,
+              : 0,
       });
 
       setLevelProgress({
@@ -285,8 +285,8 @@ export default function DashboardPage() {
         <div onClick={() => router.push("/dashboard/orders?status=pending")} className="cursor-pointer h-full flex flex-col">
           <Card hover className="h-full flex flex-col">
             <div className="space-y-3 flex-1 flex flex-col">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="flex items-center justify-between">
+            <div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Pending Orders</h3>
                 <p className="text-sm text-gray-500">Orders waiting to be processed.</p>
               </div>
@@ -298,33 +298,33 @@ export default function DashboardPage() {
                 </p>
                 <p className="text-sm text-gray-500">
                   ${(stats.pendingEarnings || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-              </div>
+              </p>
+            </div>
               <div className="w-8 h-8 border-2 border-primary-purple rounded-full flex items-center justify-center">
-                <svg
+              <svg
                   className="w-4 h-4 text-primary-purple"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
                     d="M9 5l7 7-7 7"
-                  />
-                </svg>
+                />
+              </svg>
               </div>
             </div>
           </div>
-          </Card>
+        </Card>
         </div>
 
         {/* Ready To Post Card */}
         <div onClick={() => router.push("/dashboard/orders?status=ready-to-post")} className="cursor-pointer h-full flex flex-col">
           <Card hover className="h-full flex flex-col">
             <div className="space-y-3 flex-1 flex flex-col">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="flex items-center justify-between">
+            <div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Ready To Post</h3>
                 <p className="text-sm text-gray-500">Jobs ready to post on your sites.</p>
               </div>
@@ -342,33 +342,33 @@ export default function DashboardPage() {
                 </p>
                 <p className="text-sm text-gray-500">
                   ${(stats.readyToPostEarnings || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-              </div>
+              </p>
+            </div>
               <div className="w-8 h-8 border-2 border-primary-purple rounded-full flex items-center justify-center bg-white">
-                <svg
+              <svg
                   className="w-4 h-4 text-primary-purple"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
                     d="M9 5l7 7-7 7"
-                  />
-                </svg>
+                />
+              </svg>
               </div>
             </div>
           </div>
-          </Card>
+        </Card>
         </div>
 
         {/* Verifying Card */}
         <div onClick={() => router.push("/dashboard/orders?status=verifying")} className="cursor-pointer h-full flex flex-col">
           <Card hover className="h-full flex flex-col">
             <div className="space-y-3 flex-1 flex flex-col">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="flex items-center justify-between">
+            <div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Verifying</h3>
                 <p className="text-sm text-gray-500">Orders currently being verified.</p>
               </div>
@@ -380,33 +380,33 @@ export default function DashboardPage() {
                 </p>
                 <p className="text-sm text-gray-500">
                   ${(stats.verifyingEarnings || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-              </div>
+              </p>
+            </div>
               <div className="w-8 h-8 border-2 border-primary-purple rounded-full flex items-center justify-center">
-                <svg
+              <svg
                   className="w-4 h-4 text-primary-purple"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
                     d="M9 5l7 7-7 7"
-                  />
-                </svg>
+                />
+              </svg>
               </div>
             </div>
           </div>
-          </Card>
+        </Card>
         </div>
 
         {/* COMPLETED Card */}
         <div onClick={() => router.push("/dashboard/orders?status=completed")} className="cursor-pointer h-full flex flex-col">
           <Card hover className="h-full flex flex-col">
             <div className="space-y-3 flex-1 flex flex-col">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="flex items-center justify-between">
+            <div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Completed</h3>
                 <p className="text-sm text-gray-500">Jobs that you've completed.</p>
               </div>
@@ -418,25 +418,25 @@ export default function DashboardPage() {
                 </p>
                 <p className="text-sm text-gray-500">
                   ${(stats.completedEarnings || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-              </div>
+              </p>
+            </div>
               <div className="w-8 h-8 border-2 border-primary-purple rounded-full flex items-center justify-center">
-                <svg
+              <svg
                   className="w-4 h-4 text-primary-purple"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
                     d="M9 5l7 7-7 7"
-                  />
-                </svg>
+                />
+              </svg>
               </div>
             </div>
           </div>
-          </Card>
+        </Card>
         </div>
       </div>
 
@@ -446,8 +446,8 @@ export default function DashboardPage() {
         <div onClick={() => router.push("/dashboard/websites?status=active")} className="cursor-pointer h-full flex flex-col">
           <Card hover className="h-full flex flex-col">
             <div className="space-y-3 flex-1 flex flex-col">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="flex items-center justify-between">
+            <div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Active Websites</h3>
                 <p className="text-sm text-gray-500">Your verified and active websites.</p>
               </div>
@@ -456,25 +456,25 @@ export default function DashboardPage() {
               <div>
                 <p className="text-3xl font-bold text-gray-900 mb-1">
                   {stats.activeWebsites}
-                </p>
-              </div>
+              </p>
+            </div>
               <div className="w-8 h-8 border-2 border-primary-purple rounded-full flex items-center justify-center bg-white">
-                <svg
+              <svg
                   className="w-4 h-4 text-primary-purple"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
                     d="M9 5l7 7-7 7"
-                  />
-                </svg>
+                />
+              </svg>
               </div>
             </div>
           </div>
-          </Card>
+        </Card>
         </div>
 
         {/* Counter Offers Card */}

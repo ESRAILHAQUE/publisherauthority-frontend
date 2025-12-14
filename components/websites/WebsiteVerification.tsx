@@ -60,6 +60,30 @@ export function WebsiteVerification({
     );
   }
 
+  // Show pending state if verification has been submitted but not yet approved
+  if (website.verificationMethod) {
+    return (
+      <Card>
+        <div className="space-y-4">
+          <div className="flex items-center space-x-3">
+            <Badge variant="warning">Pending Verification</Badge>
+            <span className="text-gray-600">
+              Verification submitted via{" "}
+              {website.verificationMethod === "tag"
+                ? "HTML Tag"
+                : "Verification Article"}
+            </span>
+          </div>
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <p className="text-sm text-yellow-800">
+              <strong>Waiting for Admin Approval:</strong> Your verification has been submitted and is pending review by our admin team. You will be notified once your website is verified.
+            </p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <h3 className="text-lg font-semibold text-primary-purple mb-4">

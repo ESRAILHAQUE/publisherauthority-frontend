@@ -220,14 +220,11 @@ export const AdminSidebar: React.FC = () => {
           <Link
             href="/admin"
             className={`flex items-center ${
-              isCollapsed ? "justify-center" : "space-x-2"
+              isCollapsed ? "justify-center" : "justify-start"
             }`}>
-            <img
-              src="/logo/logo.png"
-              alt="Publisher Authority Logo"
-              className={`${isCollapsed ? "h-20 w-auto" : "h-24 w-auto"}`}
-            />
-            {!isCollapsed && (
+            {isCollapsed ? (
+              <span className="text-lg font-bold text-white">AP</span>
+            ) : (
               <span className="text-xl font-bold whitespace-nowrap">
                 Admin Panel
               </span>
