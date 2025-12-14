@@ -22,8 +22,10 @@ export default function PaymentsPage() {
     paidPayments?: number;
     totalAmount?: number;
     pendingAmount?: number;
+    paidAmount?: number;
     completedOrders?: number;
     completedEarnings?: number;
+    awaitingPayout?: number;
   }>({});
 
   useEffect(() => {
@@ -117,12 +119,20 @@ export default function PaymentsPage() {
           paidPayments?: number;
           totalAmount?: number;
           pendingAmount?: number;
+          paidAmount?: number;
+          awaitingPayout?: number;
+          completedOrders?: number;
+          completedEarnings?: number;
         };
         totalPayments?: number;
         pendingPayments?: number;
         paidPayments?: number;
         totalAmount?: number;
         pendingAmount?: number;
+        paidAmount?: number;
+        awaitingPayout?: number;
+        completedOrders?: number;
+        completedEarnings?: number;
         };
       setPaymentStats(stats?.data || stats || {});
       
@@ -230,6 +240,14 @@ export default function PaymentsPage() {
     }
   };
 
+  const awaitingPayout =
+    paymentStats.awaitingPayout ??
+    Math.max(
+      (paymentStats.completedEarnings || 0) - (paymentStats.paidAmount || 0),
+      0
+    );
+  const totalEarned = paymentStats.paidAmount ?? 0;
+
   const getStatusBadge = (status?: string) => {
     if (!status) return "default";
     const variants: Record<
@@ -253,6 +271,24 @@ export default function PaymentsPage() {
         <p className="text-gray-600">
           Manage your payment settings and view invoice history.
         </p>
+      </div>
+
+      {/* Payout Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">Awaiting Payout</h3>
+          <p className="text-3xl font-bold text-primary-purple">
+            ${(awaitingPayout || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </p>
+          <p className="text-xs text-gray-500 mt-1">Completed orders not paid yet</p>
+        </Card>
+        <Card>
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">Total Earned</h3>
+          <p className="text-3xl font-bold text-primary-purple">
+            ${(totalEarned || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </p>
+          <p className="text-xs text-gray-500 mt-1">All earnings already paid out</p>
+        </Card>
       </div>
 
       {/* Payment Information - Combined View & Edit */}
@@ -304,7 +340,12 @@ export default function PaymentsPage() {
                 </div>
                 
                 {/* Payment Statistics */}
-                {(paymentStats.totalPayments !== undefined || paymentStats.totalAmount !== undefined || paymentStats.completedOrders !== undefined || paymentStats.completedEarnings !== undefined) && (
+                {(paymentStats.totalPayments !== undefined ||
+                  paymentStats.totalAmount !== undefined ||
+                  paymentStats.completedOrders !== undefined ||
+                  paymentStats.completedEarnings !== undefined ||
+                  paymentStats.awaitingPayout !== undefined ||
+                  paymentStats.paidAmount !== undefined) && (
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <h4 className="text-sm font-semibold text-gray-700 mb-3">Payment Statistics</h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -326,13 +367,29 @@ export default function PaymentsPage() {
                           <p className="text-lg font-bold text-green-600">{paymentStats.paidPayments}</p>
                         </div>
                       )}
+                      {paymentStats.awaitingPayout !== undefined && (
+                        <div className="text-center">
+                          <p className="text-xs text-gray-600">Awaiting Payout</p>
+                          <p className="text-lg font-bold text-yellow-700">
+                            ${(paymentStats.awaitingPayout || 0).toLocaleString()}
+                          </p>
+                        </div>
+                      )}
                       {paymentStats.completedOrders !== undefined && (
                         <div className="text-center">
                           <p className="text-xs text-gray-600">Completed Orders</p>
                           <p className="text-lg font-bold text-primary-purple">{paymentStats.completedOrders}</p>
                         </div>
                       )}
-                      {paymentStats.totalAmount !== undefined && (
+                      {paymentStats.paidAmount !== undefined && (
+                        <div className="text-center">
+                          <p className="text-xs text-gray-600">Total Earned</p>
+                          <p className="text-lg font-bold text-primary-purple">
+                            ${(paymentStats.paidAmount || 0).toLocaleString()}
+                          </p>
+                        </div>
+                      )}
+                      {paymentStats.totalAmount !== undefined && paymentStats.paidAmount === undefined && (
                         <div className="text-center">
                           <p className="text-xs text-gray-600">Total Amount</p>
                           <p className="text-lg font-bold text-primary-purple">
