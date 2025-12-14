@@ -134,7 +134,7 @@ export default function DashboardSupportPage() {
   }, [selectedTicket?.status]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 pb-2">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold text-primary-purple">Support</h1>
         <p className="text-gray-600">
