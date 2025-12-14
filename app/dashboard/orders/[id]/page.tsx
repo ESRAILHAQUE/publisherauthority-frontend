@@ -116,6 +116,7 @@ export default function OrderDetailPage() {
   const orderStatus = order ? String(order.status || "") : "";
   const isPending = orderStatus === "pending";
   const canSubmit = orderStatus === "ready-to-post";
+  const isRevisionRequested = orderStatus === "revision-requested";
   const isCompleted = orderStatus === "completed";
   const isVerifying = orderStatus === "verifying";
 
@@ -296,8 +297,97 @@ export default function OrderDetailPage() {
             </Card>
           )}
 
+          {/* Revision Requested Section */}
+          {isRevisionRequested && (
+            <Card>
+              <h2 className="text-xl font-semibold text-primary-purple mb-4">
+                Revision Requested
+              </h2>
+              <div className="space-y-4">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                  <p className="text-sm font-semibold text-red-800 mb-2">
+                    Revision Required
+                  </p>
+                  {order.revisionNotes ? (
+                    <div>
+                      <p className="text-sm text-gray-700 mb-2">
+                        <strong>Admin's Revision Notes:</strong>
+                      </p>
+                      <p className="text-sm text-gray-800 bg-white border border-gray-200 rounded p-3 whitespace-pre-line">
+                        {typeof order.revisionNotes === "string"
+                          ? order.revisionNotes
+                          : String(order.revisionNotes || "")}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-700">
+                      Please review the order and make the necessary revisions.
+                    </p>
+                  )}
+                </div>
+                
+                {(() => {
+                  const submittedUrl = order.submittedUrl;
+                  return submittedUrl ? (
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-600 mb-1">Previously Submitted URL:</p>
+                      <a
+                        href={
+                          typeof submittedUrl === "string"
+                            ? submittedUrl
+                            : String(submittedUrl || "")
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-purple hover:underline break-all">
+                        {typeof submittedUrl === "string"
+                          ? submittedUrl
+                          : String(submittedUrl || "")}
+                      </a>
+                    </div>
+                  ) : null;
+                })()}
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <Input
+                    label="Revised Article URL"
+                    type="url"
+                    value={submissionData.articleUrl}
+                    onChange={(e) =>
+                      setSubmissionData({
+                        ...submissionData,
+                        articleUrl: e.target.value,
+                      })
+                    }
+                    placeholder="https://example.com/revised-article"
+                    required
+                  />
+                  <Textarea
+                    label="Notes (Optional)"
+                    value={submissionData.notes}
+                    onChange={(e) =>
+                      setSubmissionData({
+                        ...submissionData,
+                        notes: e.target.value,
+                      })
+                    }
+                    rows={4}
+                    placeholder="Any additional notes about the revision..."
+                  />
+                  <Button
+                    type="submit"
+                    isLoading={submitting}
+                    disabled={submitting}
+                    className="w-full">
+                    Resubmit Order
+                  </Button>
+                </form>
+              </div>
+            </Card>
+          )}
+
           {/* Submission Form */}
-          {canSubmit && !isCompleted && (
+          {canSubmit && !isCompleted && !isRevisionRequested && (
             <Card>
               <h2 className="text-xl font-semibold text-primary-purple mb-4">
                 Submit Order
