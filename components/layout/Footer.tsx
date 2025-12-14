@@ -10,6 +10,15 @@ export const Footer: React.FC = () => {
         <a href="/auth/login" className="hover:text-white transition-colors">
           Login
         </a>
+        <a href="/blog" className="hover:text-white transition-colors">
+          Blog
+        </a>
+        <a href="/support" className="hover:text-white transition-colors">
+          Support
+        </a>
+        <a href="/terms" className="hover:text-white transition-colors">
+          Terms
+        </a>
       </div>
     </footer>
   );
