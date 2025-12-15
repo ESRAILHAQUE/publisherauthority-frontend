@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "@/components/shared/Card";
 import { Button } from "@/components/shared/Button";
 import { Badge } from "@/components/shared/Badge";
 import { Input } from "@/components/shared/Input";
+import { publicApi } from "@/lib/api";
 
 interface WebsiteVerificationProps {
   website: {
@@ -26,6 +27,31 @@ export function WebsiteVerification({
     "tag" | "article" | null
   >(null);
   const [articleUrl, setArticleUrl] = useState("");
+  const [anchorText, setAnchorText] = useState("Publisher Authority");
+  const [verificationLink, setVerificationLink] = useState("https://publisherauthority.com");
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const resp = (await publicApi.getVerificationSettings()) as any;
+        const settings =
+          resp?.data?.settings ||
+          resp?.settings ||
+          resp?.data ||
+          {};
+        if (settings.verificationAnchorText) {
+          setAnchorText(settings.verificationAnchorText);
+        }
+        if (settings.verificationLink) {
+          setVerificationLink(settings.verificationLink);
+        }
+      } catch (error) {
+        console.error("Failed to load verification settings", error);
+      }
+    };
+
+    loadSettings();
+  }, []);
 
   const handleVerify = async (method: "tag" | "article") => {
     if (method === "article" && !articleUrl.trim()) {
@@ -164,12 +190,12 @@ export function WebsiteVerification({
             <div className="bg-gray-50 rounded p-4 mb-3 space-y-2">
               <div>
                 <p className="text-sm font-medium text-gray-700 mb-1">
-                  Anchor text: <span className="font-normal">Publisher Authority</span>
+                  Anchor text: <span className="font-normal">{anchorText}</span>
                 </p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700 mb-1">
-                  Link: <a href="https://publisherauthority.com" target="_blank" rel="noopener noreferrer" className="text-primary-purple hover:underline font-normal">https://publisherauthority.com</a>
+                  Link: <a href={verificationLink} target="_blank" rel="noopener noreferrer" className="text-primary-purple hover:underline font-normal">{verificationLink}</a>
                 </p>
               </div>
             </div>

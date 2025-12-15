@@ -14,6 +14,8 @@ interface Settings {
   supportEmail: string;
   paymentSchedule: string;
   minimumPayout: number;
+  verificationAnchorText?: string;
+  verificationLink?: string;
 }
 
 export default function AdminSettingsPage() {
@@ -23,6 +25,8 @@ export default function AdminSettingsPage() {
     supportEmail: "",
     paymentSchedule: "",
     minimumPayout: 50,
+    verificationAnchorText: "Publisher Authority",
+    verificationLink: "https://publisherauthority.com",
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -81,6 +85,23 @@ export default function AdminSettingsPage() {
         minimumPayout: settings.minimumPayout,
       });
       toast.success("Payment settings saved successfully");
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to save settings";
+      toast.error(errorMessage);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveVerification = async () => {
+    try {
+      setSaving(true);
+      await adminApi.updateSettings({
+        verificationAnchorText: settings.verificationAnchorText,
+        verificationLink: settings.verificationLink,
+      });
+      toast.success("Verification settings saved successfully");
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to save settings";
@@ -166,6 +187,40 @@ export default function AdminSettingsPage() {
           />
           <Button onClick={handleSavePayment} isLoading={saving}>
             Save Settings
+          </Button>
+        </div>
+      </Card>
+
+      <Card>
+        <h2 className="text-xl font-semibold text-primary-purple mb-6">
+          Verification Settings
+        </h2>
+        <div className="space-y-6">
+          <Input
+            label="Verification Anchor Text"
+            value={settings.verificationAnchorText || ""}
+            onChange={(e) =>
+              setSettings({
+                ...settings,
+                verificationAnchorText: e.target.value,
+              })
+            }
+            helperText="This text must be used as the anchor in the verification article."
+          />
+          <Input
+            label="Verification Link URL"
+            type="url"
+            value={settings.verificationLink || ""}
+            onChange={(e) =>
+              setSettings({
+                ...settings,
+                verificationLink: e.target.value,
+              })
+            }
+            helperText="The URL that the anchor should link to (including https://)."
+          />
+          <Button onClick={handleSaveVerification} isLoading={saving}>
+            Save Verification Settings
           </Button>
         </div>
       </Card>

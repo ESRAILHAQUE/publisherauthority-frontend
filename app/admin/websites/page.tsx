@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { createPortal } from "react-dom";
 import { Card } from "@/components/shared/Card";
 import { Badge } from "@/components/shared/Badge";
@@ -72,6 +73,10 @@ export default function AdminWebsitesPage() {
   } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const limit = 20;
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
   const filterRef = useRef<HTMLDivElement | null>(null);
@@ -130,20 +135,42 @@ export default function AdminWebsitesPage() {
 
 
 
-  const loadWebsites = async () => {
+  const loadWebsites = async (targetPage = page) => {
     try {
       setLoading(true);
-      const response = (await adminApi.getAllWebsites({}, 1, 100)) as {
+      const response = (await adminApi.getAllWebsites({}, targetPage, limit)) as {
         data?: {
           websites?: Website[];
+          total?: number;
+          page?: number;
+          pages?: number;
           [key: string]: unknown;
         };
         websites?: Website[];
+        total?: number;
+        page?: number;
+        pages?: number;
         [key: string]: unknown;
       };
       // Handle different response structures
       const websites = response?.data?.websites || response?.websites || [];
+      const totalCount =
+        (response as any)?.data?.total ??
+        (response as any)?.total ??
+        websites.length;
+      const pageNum =
+        (response as any)?.data?.page ??
+        (response as any)?.page ??
+        targetPage;
+      const totalPages =
+        (response as any)?.data?.pages ??
+        (response as any)?.pages ??
+        Math.max(1, Math.ceil((totalCount || websites.length) / limit));
+
       setWebsites(websites);
+      setTotal(totalCount || websites.length);
+      setPage(Number(pageNum) || 1);
+      setPages(Number(totalPages) || 1);
     } catch (error) {
       console.error("Failed to load websites:", error);
       toast.error("Failed to load websites");
@@ -162,7 +189,7 @@ export default function AdminWebsitesPage() {
       // Use admin API endpoint for verification (no ownership check)
       await adminApi.verifyWebsite(websiteId, method);
       toast.success("Website verified successfully");
-      await loadWebsites();
+      await loadWebsites(page);
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Verification failed";
@@ -184,7 +211,7 @@ export default function AdminWebsitesPage() {
       try {
         await adminApi.updateWebsiteStatus(websiteId, status);
         toast.success("Website status updated");
-        await loadWebsites();
+        await loadWebsites(page);
       } catch (error: unknown) {
         const errorMessage =
           error instanceof Error ? error.message : "Failed to update status";
@@ -209,7 +236,7 @@ export default function AdminWebsitesPage() {
       setShowRejectionModal(false);
       setSelectedWebsiteForRejection(null);
       setRejectionReason("");
-      await loadWebsites();
+      await loadWebsites(page);
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to reject website";
@@ -230,7 +257,7 @@ export default function AdminWebsitesPage() {
     try {
       await adminApi.sendCounterOffer(selectedWebsiteForCounterOffer.id, data);
       toast.success("Counter offer sent successfully");
-      await loadWebsites();
+      await loadWebsites(page);
       setShowCounterOfferModal(false);
       setSelectedWebsiteForCounterOffer(null);
     } catch (error: unknown) {
@@ -247,7 +274,7 @@ export default function AdminWebsitesPage() {
     try {
       await adminApi.acceptUserCounterOffer(websiteId);
       toast.success("Counter offer accepted");
-      await loadWebsites();
+      await loadWebsites(page);
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to accept counter offer";
@@ -278,7 +305,7 @@ export default function AdminWebsitesPage() {
         status: "ready-to-post",
       });
       toast.success("Order created successfully!");
-      await loadWebsites();
+      await loadWebsites(page);
       setShowAddOrderModal(false);
       setSelectedWebsiteForOrder(null);
     } catch (error: unknown) {
@@ -591,32 +618,15 @@ export default function AdminWebsitesPage() {
                                 )}
                                 {website.status === "pending" && (
                                   <>
-                                    <button
+                                    <Link
+                                      href={`/admin/websites/${website._id || website.id || ""}`}
+                                      className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50"
                                       onClick={() => {
-                                        const websiteId =
-                                          website._id || website.id;
-                                        if (websiteId) {
-                                          handleVerify(websiteId, "tag");
-                                          setShowActions(null);
-                                          setDropdownPosition(null);
-                                        }
-                                      }}
-                                      className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50">
-                                      Verify (HTML Tag)
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        const websiteId =
-                                          website._id || website.id;
-                                        if (websiteId) {
-                                          handleVerify(websiteId, "article");
-                                          setShowActions(null);
-                                          setDropdownPosition(null);
-                                        }
-                                      }}
-                                      className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50">
-                                      Verify (Article)
-                                    </button>
+                                        setShowActions(null);
+                                        setDropdownPosition(null);
+                                      }}>
+                                      Review Verification
+                                    </Link>
                                     <button
                                       onClick={() => {
                                         const websiteId =
@@ -698,6 +708,45 @@ export default function AdminWebsitesPage() {
             </table>
           </div>
         )}
+        {/* Pagination */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-4">
+          <p className="text-sm text-gray-600">
+            Showing{" "}
+            {total === 0
+              ? "0"
+              : `${(page - 1) * limit + 1}–${(page - 1) * limit + websites.length}`}{" "}
+            of {total || websites.length} websites
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => {
+                const newPage = Math.max(1, page - 1);
+                setPage(newPage);
+                loadWebsites(newPage);
+              }}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-gray-700">
+              Page {page} of {pages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= pages}
+              onClick={() => {
+                const newPage = Math.min(pages, page + 1);
+                setPage(newPage);
+                loadWebsites(newPage);
+              }}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       </Card>
 
       {/* Counter Offer Modal */}

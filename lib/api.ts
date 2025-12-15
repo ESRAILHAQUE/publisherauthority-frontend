@@ -476,6 +476,10 @@ export const adminApi = {
       method: "GET",
     });
   },
+  getWebsite: (id: string) =>
+    apiRequest(`/admin/websites/${id}`, {
+      method: "GET",
+    }),
   verifyWebsite: (id: string, method: "tag" | "article") =>
     apiRequest(`/admin/websites/${id}/verify`, {
       method: "PUT",
@@ -608,7 +612,15 @@ export const adminApi = {
     supportEmail?: string;
     paymentSchedule?: string;
     minimumPayout?: number;
+    verificationAnchorText?: string;
+    verificationLink?: string;
   }) => apiRequest("/admin/settings", { method: "PUT", body: data }),
+};
+
+// Public settings (non-auth)
+export const publicApi = {
+  getVerificationSettings: () =>
+    apiRequest("/settings/public", { method: "GET", requiresAuth: false }),
 };
 
 // Blog API
