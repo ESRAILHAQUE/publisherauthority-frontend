@@ -659,7 +659,7 @@ export default function AdminPublishersPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                PayPal Email (required)
+                PayPal Email
               </label>
               <input
                 type="email"
@@ -667,13 +667,9 @@ export default function AdminPublishersPage() {
                 onChange={(e) =>
                   setCreateForm((prev) => ({ ...prev, paypalEmail: e.target.value }))
                 }
-                placeholder="Defaults to user email if left blank"
+                placeholder="If blank, user can add later"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
-                required
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Payment method is PayPal only. Provide the PayPal email to pay the user.
-              </p>
             </div>
           </div>
         </form>
