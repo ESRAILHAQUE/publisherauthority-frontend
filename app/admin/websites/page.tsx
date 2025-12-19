@@ -76,12 +76,26 @@ export default function AdminWebsitesPage() {
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [total, setTotal] = useState(0);
-  const limit = 20;
+  const limit = 25;
+  const [counts, setCounts] = useState({
+    pending: 0,
+    active: 0,
+    rejected: 0,
+    counterOffer: 0,
+  });
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
   const filterRef = useRef<HTMLDivElement | null>(null);
 
   const [showFilter, setShowFilter] = useState(false);
+  const [minDa, setMinDa] = useState<number | "">("");
+  const [maxDa, setMaxDa] = useState<number | "">("");
+  const [minTraffic, setMinTraffic] = useState<number | "">("");
+  const [maxTraffic, setMaxTraffic] = useState<number | "">("");
+  const [minPrice, setMinPrice] = useState<number | "">("");
+  const [maxPrice, setMaxPrice] = useState<number | "">("");
+  const [nicheFilter, setNicheFilter] = useState("");
+  const [verifiedFilter, setVerifiedFilter] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -138,18 +152,52 @@ export default function AdminWebsitesPage() {
   const loadWebsites = async (targetPage = page) => {
     try {
       setLoading(true);
-      const response = (await adminApi.getAllWebsites({}, targetPage, limit)) as {
+      const response = (await adminApi.getAllWebsites(
+        {
+          status: statusFilter.length === 1 ? statusFilter[0] : undefined,
+          search: searchQuery || undefined,
+          minDa: minDa === "" ? undefined : String(minDa),
+          maxDa: maxDa === "" ? undefined : String(maxDa),
+          minTraffic: minTraffic === "" ? undefined : String(minTraffic),
+          maxTraffic: maxTraffic === "" ? undefined : String(maxTraffic),
+          minPrice: minPrice === "" ? undefined : String(minPrice),
+          maxPrice: maxPrice === "" ? undefined : String(maxPrice),
+          niche: nicheFilter || undefined,
+          verified:
+            verifiedFilter === null
+              ? undefined
+              : verifiedFilter === "verified"
+              ? "true"
+              : verifiedFilter === "unverified"
+              ? "false"
+              : undefined,
+        },
+        targetPage,
+        limit
+      )) as {
         data?: {
           websites?: Website[];
           total?: number;
           page?: number;
           pages?: number;
+          counts?: {
+            pending?: number;
+            active?: number;
+            rejected?: number;
+            counterOffer?: number;
+          };
           [key: string]: unknown;
         };
         websites?: Website[];
         total?: number;
         page?: number;
         pages?: number;
+        counts?: {
+          pending?: number;
+          active?: number;
+          rejected?: number;
+          counterOffer?: number;
+        };
         [key: string]: unknown;
       };
       // Handle different response structures
@@ -166,11 +214,25 @@ export default function AdminWebsitesPage() {
         (response as any)?.data?.pages ??
         (response as any)?.pages ??
         Math.max(1, Math.ceil((totalCount || websites.length) / limit));
+      const statusCounts =
+        (response as any)?.data?.counts ??
+        (response as any)?.counts ?? {
+          pending: 0,
+          active: 0,
+          rejected: 0,
+          counterOffer: 0,
+        };
 
       setWebsites(websites);
       setTotal(totalCount || websites.length);
       setPage(Number(pageNum) || 1);
       setPages(Number(totalPages) || 1);
+      setCounts({
+        pending: statusCounts.pending || 0,
+        active: statusCounts.active || 0,
+        rejected: statusCounts.rejected || 0,
+        counterOffer: statusCounts.counterOffer || 0,
+      });
     } catch (error) {
       console.error("Failed to load websites:", error);
       toast.error("Failed to load websites");
@@ -339,18 +401,7 @@ export default function AdminWebsitesPage() {
       .join(" ");
   };
 
-  const filteredWebsites = websites.filter((w) => {
-    const matchesSearch =
-      (w.url || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (w.userId?.email || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (w.userId?.firstName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (w.userId?.lastName || "").toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesStatus =
-      statusFilter.length === 0 ? true : statusFilter.includes((w.status || "").toLowerCase());
-
-    return matchesSearch && matchesStatus;
-  });
+  const filteredWebsites = websites;
 
 
   return (
@@ -365,6 +416,25 @@ export default function AdminWebsitesPage() {
       </div>
 
       <div className="flex items-center justify-between mb-6 gap-4">
+        {/* Status summary */}
+        <div className="flex flex-wrap gap-3">
+          <div className="px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm">
+            <span className="font-semibold text-gray-800">Pending:</span>{" "}
+            <span className="text-gray-700">{counts.pending}</span>
+          </div>
+          <div className="px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm">
+            <span className="font-semibold text-gray-800">Active (Verified):</span>{" "}
+            <span className="text-green-700">{counts.active}</span>
+          </div>
+          <div className="px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm">
+            <span className="font-semibold text-gray-800">Counter Offers:</span>{" "}
+            <span className="text-blue-700">{counts.counterOffer}</span>
+          </div>
+          <div className="px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm">
+            <span className="font-semibold text-gray-800">Rejected:</span>{" "}
+            <span className="text-red-700">{counts.rejected}</span>
+          </div>
+        </div>
 
         {/* Search Input */}
         <input
@@ -372,6 +442,11 @@ export default function AdminWebsitesPage() {
           placeholder="Search websites..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              loadWebsites(1);
+            }
+          }}
           className="w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
         />
 
@@ -424,6 +499,108 @@ export default function AdminWebsitesPage() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Advanced Filters */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              placeholder="Min DA"
+              value={minDa === "" ? "" : minDa}
+              onChange={(e) => setMinDa(e.target.value === "" ? "" : Number(e.target.value))}
+              className="w-24 px-2 py-2 border border-gray-300 rounded-md text-sm"
+            />
+            <input
+              type="number"
+              placeholder="Max DA"
+              value={maxDa === "" ? "" : maxDa}
+              onChange={(e) => setMaxDa(e.target.value === "" ? "" : Number(e.target.value))}
+              className="w-24 px-2 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              placeholder="Min Traffic"
+              value={minTraffic === "" ? "" : minTraffic}
+              onChange={(e) =>
+                setMinTraffic(e.target.value === "" ? "" : Number(e.target.value))
+              }
+              className="w-28 px-2 py-2 border border-gray-300 rounded-md text-sm"
+            />
+            <input
+              type="number"
+              placeholder="Max Traffic"
+              value={maxTraffic === "" ? "" : maxTraffic}
+              onChange={(e) =>
+                setMaxTraffic(e.target.value === "" ? "" : Number(e.target.value))
+              }
+              className="w-28 px-2 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              placeholder="Min Price"
+              value={minPrice === "" ? "" : minPrice}
+              onChange={(e) => setMinPrice(e.target.value === "" ? "" : Number(e.target.value))}
+              className="w-24 px-2 py-2 border border-gray-300 rounded-md text-sm"
+            />
+            <input
+              type="number"
+              placeholder="Max Price"
+              value={maxPrice === "" ? "" : maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value === "" ? "" : Number(e.target.value))}
+              className="w-24 px-2 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+          <input
+            type="text"
+            placeholder="Niche"
+            value={nicheFilter}
+            onChange={(e) => setNicheFilter(e.target.value)}
+            className="w-32 px-3 py-2 border border-gray-300 rounded-md text-sm"
+          />
+          <select
+            value={verifiedFilter || ""}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === "") setVerifiedFilter(null);
+              else if (val === "verified") setVerifiedFilter("verified");
+              else setVerifiedFilter("unverified");
+            }}
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
+          >
+            <option value="">Verified: All</option>
+            <option value="verified">Verified</option>
+            <option value="unverified">Unverified</option>
+          </select>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setStatusFilter([]);
+              setMinDa("");
+              setMaxDa("");
+              setMinTraffic("");
+              setMaxTraffic("");
+              setMinPrice("");
+              setMaxPrice("");
+              setNicheFilter("");
+              setVerifiedFilter(null);
+              loadWebsites(1);
+            }}
+          >
+            Clear Filters
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => loadWebsites(1)}
+          >
+            Apply
+          </Button>
         </div>
 
       </div>

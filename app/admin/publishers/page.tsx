@@ -31,8 +31,13 @@ interface Publisher {
 export default function AdminPublishersPage() {
   const [publishers, setPublishers] = useState<Publisher[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const limit = 25;
   const [showManageModal, setShowManageModal] = useState(false);
   const [showWebsitesModal, setShowWebsitesModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedPublisher, setSelectedPublisher] = useState<Publisher | null>(
     null
   );
@@ -45,6 +50,15 @@ export default function AdminPublishersPage() {
   const [showLevelFilter, setShowLevelFilter] = useState(false);
   const statusFilterRef = useRef<HTMLDivElement | null>(null);
   const levelFilterRef = useRef<HTMLDivElement | null>(null);
+  const [createForm, setCreateForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    country: "",
+    password: "",
+    paypalEmail: "",
+  });
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     loadPublishers();
@@ -63,33 +77,48 @@ export default function AdminPublishersPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showStatusFilter, showLevelFilter]);
 
-  const loadPublishers = async () => {
+  const loadPublishers = async (targetPage = page) => {
     try {
       setLoading(true);
-      const response = (await adminApi.getAllPublishers({}, 1, 100)) as {
+      const response = (await adminApi.getAllPublishers({}, targetPage, limit)) as {
         success?: boolean;
         data?: {
           publishers?: Publisher[];
+          total?: number;
+          page?: number;
+          pages?: number;
           [key: string]: unknown;
         };
         publishers?: Publisher[];
+        total?: number;
+        page?: number;
+        pages?: number;
         [key: string]: unknown;
       };
 
       // Handle different response structures
-      let publishersData: Publisher[] = [];
-      if (Array.isArray(response)) {
-        publishersData = response;
-      } else if (
-        response?.data?.publishers &&
-        Array.isArray(response.data.publishers)
-      ) {
-        publishersData = response.data.publishers;
-      } else if (response?.publishers && Array.isArray(response.publishers)) {
-        publishersData = response.publishers;
-      }
+      let publishersData: Publisher[] =
+        (response?.data?.publishers as Publisher[]) ||
+        (response?.publishers as Publisher[]) ||
+        [];
+
+      const totalCount =
+        (response as any)?.data?.total ??
+        (response as any)?.total ??
+        publishersData.length;
+      const pageNum =
+        (response as any)?.data?.page ??
+        (response as any)?.page ??
+        targetPage;
+      const totalPages =
+        (response as any)?.data?.pages ??
+        (response as any)?.pages ??
+        Math.max(1, Math.ceil((totalCount || publishersData.length) / limit));
 
       setPublishers(publishersData);
+      setTotal(totalCount || publishersData.length);
+      setPage(Number(pageNum) || 1);
+      setPages(Number(totalPages) || 1);
     } catch (error) {
       console.error("Failed to load publishers:", error);
       toast.error("Failed to load publishers");
@@ -173,7 +202,47 @@ export default function AdminPublishersPage() {
   };
 
   const handleUpdate = async () => {
-    await loadPublishers();
+    await loadPublishers(page);
+  };
+
+  const handleCreatePublisher = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreating(true);
+    try {
+      if (!createForm.firstName || !createForm.lastName || !createForm.email || !createForm.country || !createForm.password) {
+        toast.error("All required fields must be filled");
+        setCreating(false);
+        return;
+      }
+      if (createForm.password.length < 6) {
+        toast.error("Password must be at least 6 characters");
+        setCreating(false);
+        return;
+      }
+      const resp = (await adminApi.createPublisher({
+        firstName: createForm.firstName.trim(),
+        lastName: createForm.lastName.trim(),
+        email: createForm.email.trim().toLowerCase(),
+        country: createForm.country.trim(),
+        password: createForm.password,
+        paypalEmail: createForm.paypalEmail.trim() || createForm.email.trim().toLowerCase(),
+      })) as any;
+      toast.success("Publisher created. Share the email and password with the user.");
+      setCreateForm({
+        firstName: "",
+        lastName: "",
+        email: "",
+        country: "",
+        password: "",
+        paypalEmail: "",
+      });
+      await loadPublishers(1);
+    } catch (error: any) {
+      const msg = error?.message || "Failed to create publisher";
+      toast.error(msg);
+    } finally {
+      setCreating(false);
+    }
   };
 
   const filteredPublishers = publishers.filter((publisher) => {
@@ -208,8 +277,9 @@ export default function AdminPublishersPage() {
         </p>
       </div>
 
-      {/* Filters */}
+      {/* Actions / Filters */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
         {/* Search Input */}
         <input
           type="text"
@@ -304,6 +374,11 @@ export default function AdminPublishersPage() {
             </div>
           )}
         </div>
+        </div>
+
+        <Button variant="primary" onClick={() => setShowCreateModal(true)}>
+          Create Publisher
+        </Button>
       </div>
 
       <Card>
@@ -435,6 +510,34 @@ export default function AdminPublishersPage() {
         )}
       </Card>
 
+      {/* Pagination */}
+      {pages > 1 && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-600">
+            Showing page {page} of {pages} ({total} total)
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => loadPublishers(page - 1)}>
+              Previous
+            </Button>
+            <span className="text-sm text-gray-700">
+              Page {page} / {pages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= pages}
+              onClick={() => loadPublishers(page + 1)}>
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Publisher Manage Modal */}
       {selectedPublisher && (
         <PublisherManageModal
@@ -455,6 +558,126 @@ export default function AdminPublishersPage() {
           loading={loadingWebsites}
         />
       )}
+
+      {/* Create Publisher Modal */}
+      <Modal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        title="Create Publisher"
+        footer={
+          <div className="flex items-center justify-end w-full gap-2">
+            <Button variant="ghost" onClick={() => setShowCreateModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleCreatePublisher}
+              isLoading={creating}>
+              Create
+            </Button>
+          </div>
+        }>
+        <form onSubmit={handleCreatePublisher} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                First Name *
+              </label>
+              <input
+                type="text"
+                value={createForm.firstName}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({ ...prev, firstName: e.target.value }))
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Last Name *
+              </label>
+              <input
+                type="text"
+                value={createForm.lastName}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({ ...prev, lastName: e.target.value }))
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
+                required
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email *
+              </label>
+              <input
+                type="email"
+                value={createForm.email}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({ ...prev, email: e.target.value }))
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Country *
+              </label>
+              <input
+                type="text"
+                value={createForm.country}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({ ...prev, country: e.target.value }))
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
+                required
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Password *
+              </label>
+              <input
+                type="text"
+                value={createForm.password}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({ ...prev, password: e.target.value }))
+                }
+                minLength={6}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Admin sets the password (min 6 characters) and shares with the user.
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                PayPal Email (required)
+              </label>
+              <input
+                type="email"
+                value={createForm.paypalEmail}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({ ...prev, paypalEmail: e.target.value }))
+                }
+                placeholder="Defaults to user email if left blank"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Payment method is PayPal only. Provide the PayPal email to pay the user.
+              </p>
+            </div>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

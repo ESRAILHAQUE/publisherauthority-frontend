@@ -109,7 +109,11 @@ async function apiRequest<T>(
     const response = await fetch(`${API_URL}${endpoint}`, config);
 
     if (!response.ok) {
-      let error: { message?: string; error?: { message?: string }; [key: string]: unknown };
+      let error: {
+        message?: string;
+        error?: { message?: string };
+        [key: string]: unknown;
+      };
       try {
         const text = await response.text();
         if (text) {
@@ -117,25 +121,33 @@ async function apiRequest<T>(
             error = JSON.parse(text);
           } catch (parseErr) {
             // If it's not JSON, use the text as error message
-            error = { message: text || `HTTP error! status: ${response.status}` };
+            error = {
+              message: text || `HTTP error! status: ${response.status}`,
+            };
           }
         } else {
-          error = { message: `HTTP error! status: ${response.status} ${response.statusText || ""}`.trim() };
+          error = {
+            message: `HTTP error! status: ${response.status} ${
+              response.statusText || ""
+            }`.trim(),
+          };
         }
       } catch (parseError) {
         // If text() fails, create a meaningful error message
-        error = { 
-          message: `HTTP error! status: ${response.status} ${response.statusText || ""}`.trim()
+        error = {
+          message: `HTTP error! status: ${response.status} ${
+            response.statusText || ""
+          }`.trim(),
         };
       }
-      
+
       // Extract error message from backend response format
       // Backend returns: { success: false, message: "...", error: {...} }
       const errorMessage =
         error.message ||
         error.error?.message ||
         `HTTP error! status: ${response.status}`;
-      
+
       // Log more details in development only
       if (process.env.NODE_ENV === "development") {
         try {
@@ -145,20 +157,24 @@ async function apiRequest<T>(
             url: `${API_URL}${endpoint}`,
             errorMessage: errorMessage || "Unknown error",
           };
-          
+
           // Only add errorObject if it has meaningful content
-          if (error && typeof error === "object" && Object.keys(error).length > 0) {
+          if (
+            error &&
+            typeof error === "object" &&
+            Object.keys(error).length > 0
+          ) {
             errorDetails.errorObject = error;
           } else if (error) {
             errorDetails.errorObject = String(error);
           }
-          
+
           console.error("API Error Details:", errorDetails);
         } catch (logError) {
           // Silently ignore logging errors
         }
       }
-      
+
       throw new Error(errorMessage);
     }
 
@@ -176,8 +192,8 @@ async function apiRequest<T>(
     ) {
       const networkError = new Error(
         `Unable to connect to backend server at ${API_URL}. ` +
-        `Please ensure the backend is running on port 5003. ` +
-        `Error: ${apiError.message || "Unknown error"}`
+          `Please ensure the backend is running on port 5003. ` +
+          `Error: ${apiError.message || "Unknown error"}`
       );
       // Safe error logging - only in development
       if (process.env.NODE_ENV === "development") {
@@ -189,13 +205,14 @@ async function apiRequest<T>(
       }
       throw networkError;
     }
-    
+
     // For other errors, log in development
     if (process.env.NODE_ENV === "development") {
       try {
-        const errorInfo = error instanceof Error 
-          ? { message: error.message, name: error.name, stack: error.stack }
-          : { error: String(error || "Unknown error") };
+        const errorInfo =
+          error instanceof Error
+            ? { message: error.message, name: error.name, stack: error.stack }
+            : { error: String(error || "Unknown error") };
         console.error("API request failed:", errorInfo);
         console.error("Endpoint:", endpoint);
         console.error("Full URL:", `${API_URL}${endpoint}`);
@@ -206,7 +223,7 @@ async function apiRequest<T>(
         // Silently ignore logging errors
       }
     }
-    
+
     throw error;
   }
 }
@@ -441,7 +458,6 @@ export const applicationsApi = {
           return {}; // fallback for non-JSON
         }
       });
-
     }
 
     // Otherwise use regular apiRequest
@@ -466,12 +482,28 @@ export const applicationsApi = {
 // Admin API
 export const adminApi = {
   getDashboard: () => apiRequest("/admin/dashboard", { method: "GET" }),
-  getAllWebsites: (filters?: Filters, page = 1, limit = 20) => {
+  getAllWebsites: (filters?: Filters, page = 1, limit = 25) => {
     const params = new URLSearchParams({
       page: String(page),
       limit: String(limit),
     });
     if (filters?.status) params.append("status", filters.status);
+    if (filters?.search) params.append("search", filters.search);
+    if (filters?.minDa !== undefined)
+      params.append("minDa", String(filters.minDa));
+    if (filters?.maxDa !== undefined)
+      params.append("maxDa", String(filters.maxDa));
+    if (filters?.minTraffic !== undefined)
+      params.append("minTraffic", String(filters.minTraffic));
+    if (filters?.maxTraffic !== undefined)
+      params.append("maxTraffic", String(filters.maxTraffic));
+    if (filters?.minPrice !== undefined)
+      params.append("minPrice", String(filters.minPrice));
+    if (filters?.maxPrice !== undefined)
+      params.append("maxPrice", String(filters.maxPrice));
+    if (filters?.niche) params.append("niche", filters.niche);
+    if (filters?.verified !== undefined)
+      params.append("verified", String(filters.verified));
     return apiRequest(`/admin/websites?${params.toString()}`, {
       method: "GET",
     });
@@ -502,7 +534,7 @@ export const adminApi = {
     apiRequest(`/admin/websites/${id}/counter-offer/accept`, {
       method: "POST",
     }),
-  getAllPublishers: (filters?: Filters, page = 1, limit = 100) => {
+  getAllPublishers: (filters?: Filters, page = 1, limit = 25) => {
     const params = new URLSearchParams({
       page: String(page),
       limit: String(limit),
@@ -515,6 +547,18 @@ export const adminApi = {
       method: "GET",
     });
   },
+  createPublisher: (data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    country: string;
+    password: string;
+    paypalEmail?: string;
+  }) =>
+    apiRequest(`/admin/publishers`, {
+      method: "POST",
+      body: data,
+    }),
   getAllOrders: (filters?: Filters) => {
     const params = new URLSearchParams();
     if (filters?.status) params.append("status", filters.status);
@@ -522,7 +566,8 @@ export const adminApi = {
     const query = params.toString() ? `?${params.toString()}` : "";
     return apiRequest(`/admin/orders${query}`, { method: "GET" });
   },
-  getOrder: (id: string) => apiRequest(`/admin/orders/${id}`, { method: "GET" }),
+  getOrder: (id: string) =>
+    apiRequest(`/admin/orders/${id}`, { method: "GET" }),
   getAllPayments: (filters?: Filters, page = 1, limit = 100) => {
     const params = new URLSearchParams({
       page: String(page),
@@ -533,7 +578,12 @@ export const adminApi = {
       method: "GET",
     });
   },
-  getUserPayments: (userId: string, filters?: Filters, page = 1, limit = 100) => {
+  getUserPayments: (
+    userId: string,
+    filters?: Filters,
+    page = 1,
+    limit = 100
+  ) => {
     const params = new URLSearchParams({
       page: String(page),
       limit: String(limit),
@@ -600,7 +650,12 @@ export const adminApi = {
       method: "POST",
       body: { amount },
     }),
-  manualPayCreate: (payload: { userId: string; amount: number; paymentMethod?: string; paypalEmail?: string }) =>
+  manualPayCreate: (payload: {
+    userId: string;
+    amount: number;
+    paymentMethod?: string;
+    paypalEmail?: string;
+  }) =>
     apiRequest(`/admin/payments/manual/create-and-pay`, {
       method: "POST",
       body: payload,
