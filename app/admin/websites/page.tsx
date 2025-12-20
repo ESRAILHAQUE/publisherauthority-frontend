@@ -182,7 +182,7 @@ export default function AdminWebsitesPage() {
       setLoading(true);
       const response = (await adminApi.getAllWebsites(
         {
-          status: statusFilter.length === 1 ? statusFilter[0] : undefined,
+          status: statusFilter.length ? statusFilter.join(",") : undefined,
           search: searchQuery || undefined,
           minDa: minDa === "" ? undefined : String(minDa),
           maxDa: maxDa === "" ? undefined : String(maxDa),
