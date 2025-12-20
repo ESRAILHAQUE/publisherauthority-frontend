@@ -96,6 +96,7 @@ export default function AdminWebsitesPage() {
   const [maxPrice, setMaxPrice] = useState<number | "">("");
   const [nicheFilter, setNicheFilter] = useState("");
   const [verifiedFilter, setVerifiedFilter] = useState<string | null>(null);
+  const filterDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
 
   useEffect(() => {
@@ -136,6 +137,33 @@ export default function AdminWebsitesPage() {
   useEffect(() => {
     loadWebsites();
   }, []);
+
+  // Auto-apply filters/search without an Apply button (debounced)
+  useEffect(() => {
+    if (filterDebounceRef.current) {
+      clearTimeout(filterDebounceRef.current);
+    }
+    filterDebounceRef.current = setTimeout(() => {
+      loadWebsites(1);
+    }, 250);
+
+    return () => {
+      if (filterDebounceRef.current) {
+        clearTimeout(filterDebounceRef.current);
+      }
+    };
+  }, [
+    searchQuery,
+    statusFilter,
+    minDa,
+    maxDa,
+    minTraffic,
+    maxTraffic,
+    minPrice,
+    maxPrice,
+    nicheFilter,
+    verifiedFilter,
+  ]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -442,11 +470,6 @@ export default function AdminWebsitesPage() {
           placeholder="Search websites..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              loadWebsites(1);
-            }
-          }}
           className="w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
         />
 
@@ -589,17 +612,9 @@ export default function AdminWebsitesPage() {
               setMaxPrice("");
               setNicheFilter("");
               setVerifiedFilter(null);
-              loadWebsites(1);
             }}
           >
             Clear Filters
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => loadWebsites(1)}
-          >
-            Apply
           </Button>
         </div>
 
