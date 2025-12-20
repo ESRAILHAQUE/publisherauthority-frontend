@@ -533,6 +533,10 @@ function WebsitesPageContent() {
               typeof selectedWebsite.verificationMethod === "string"
                 ? (selectedWebsite.verificationMethod as "tag" | "article")
                 : undefined,
+            rejectedReason:
+              typeof selectedWebsite.rejectedReason === "string"
+                ? selectedWebsite.rejectedReason
+                : undefined,
           }}
           onVerify={async (method, articleUrl) => {
             const websiteId = selectedWebsite._id || selectedWebsite.id;
@@ -669,6 +673,37 @@ function WebsitesPageContent() {
                         <td className="py-4 px-4 text-gray-600">
                           {website.status === "active" ? (
                             <span className="text-green-600 font-medium">Verified</span>
+                          ) : website.status === "rejected" ? (
+                            <div className="space-y-2">
+                              <span className="text-red-600 font-medium">Rejected</span>
+                              {website.rejectedReason && (
+                                <div className="text-xs text-red-700 bg-red-50 border border-red-200 rounded p-2">
+                                  <p className="font-semibold">Reason:</p>
+                                  <p>{website.rejectedReason}</p>
+                                </div>
+                              )}
+                              <button
+                                onClick={() => {
+                                  const websiteId = website._id || website.id;
+                                  if (websiteId) {
+                                    const normalizedId = String(websiteId).trim();
+                                    const websiteInList = websites.find((w) => {
+                                      const wId = String(w._id || w.id || "").trim();
+                                      return wId === normalizedId;
+                                    });
+                                    if (websiteInList) {
+                                      setSelectedWebsite(websiteInList);
+                                    } else {
+                                      toast.error("Website not found. Please refresh the page.");
+                                      loadWebsites();
+                                    }
+                                  }
+                                }}
+                                className="text-green-600 hover:text-green-700 text-sm font-medium transition-colors cursor-pointer"
+                              >
+                                Resubmit verification
+                              </button>
+                            </div>
                           ) : website.verificationMethod ? (
                             <span className="text-yellow-600 font-medium">Pending Verification</span>
                           ) : (

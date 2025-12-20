@@ -14,6 +14,7 @@ interface WebsiteVerificationProps {
     verificationCode: string;
     status: string;
     verificationMethod?: "tag" | "article";
+    rejectedReason?: string;
   };
   onVerify: (method: "tag" | "article", articleUrl?: string) => Promise<void>;
 }
@@ -29,6 +30,12 @@ export function WebsiteVerification({
   const [articleUrl, setArticleUrl] = useState("");
   const [anchorText, setAnchorText] = useState("Publisher Authority");
   const [verificationLink, setVerificationLink] = useState("https://publisherauthority.com");
+
+  // Reset local state when switching between websites or after rejection
+  useEffect(() => {
+    setSelectedMethod(null);
+    setArticleUrl("");
+  }, [website._id, website.status]);
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -86,8 +93,12 @@ export function WebsiteVerification({
     );
   }
 
-  // Show pending state if verification has been submitted but not yet approved
-  if (website.verificationMethod) {
+  const isRejected = website.status === "rejected";
+  const isPendingVerification =
+    website.verificationMethod && !isRejected && website.status !== "active";
+
+  // Show pending state if verification has been submitted but not yet approved (and not rejected)
+  if (isPendingVerification) {
     return (
       <Card>
         <div className="space-y-4">
@@ -112,6 +123,22 @@ export function WebsiteVerification({
 
   return (
     <Card>
+      {isRejected && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-start gap-2">
+            <Badge variant="danger">Rejected</Badge>
+            <div className="text-sm text-red-800">
+              <p className="font-semibold mb-1">Previous verification was rejected.</p>
+              {website.rejectedReason ? (
+                <p className="mb-1">{website.rejectedReason}</p>
+              ) : (
+                <p className="mb-1">Please fix the issue and resubmit verification.</p>
+              )}
+              <p className="text-red-700">Submit again after adding the tag or article.</p>
+            </div>
+          </div>
+        </div>
+      )}
       <h3 className="text-lg font-semibold text-primary-purple mb-4">
         Website Verification
       </h3>

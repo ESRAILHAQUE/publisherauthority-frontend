@@ -41,7 +41,9 @@ export default function AdminPublishersPage() {
   const [selectedPublisher, setSelectedPublisher] = useState<Publisher | null>(
     null
   );
-  const [publisherWebsites, setPublisherWebsites] = useState<Record<string, unknown>[]>([]);
+  const [publisherWebsites, setPublisherWebsites] = useState<
+    Record<string, unknown>[]
+  >([]);
   const [loadingWebsites, setLoadingWebsites] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
@@ -66,10 +68,18 @@ export default function AdminPublishersPage() {
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (showStatusFilter && statusFilterRef.current && !statusFilterRef.current.contains(e.target as Node)) {
+      if (
+        showStatusFilter &&
+        statusFilterRef.current &&
+        !statusFilterRef.current.contains(e.target as Node)
+      ) {
         setShowStatusFilter(false);
       }
-      if (showLevelFilter && levelFilterRef.current && !levelFilterRef.current.contains(e.target as Node)) {
+      if (
+        showLevelFilter &&
+        levelFilterRef.current &&
+        !levelFilterRef.current.contains(e.target as Node)
+      ) {
         setShowLevelFilter(false);
       }
     }
@@ -80,7 +90,11 @@ export default function AdminPublishersPage() {
   const loadPublishers = async (targetPage = page) => {
     try {
       setLoading(true);
-      const response = (await adminApi.getAllPublishers({}, targetPage, limit)) as {
+      const response = (await adminApi.getAllPublishers(
+        {},
+        targetPage,
+        limit
+      )) as {
         success?: boolean;
         data?: {
           publishers?: Publisher[];
@@ -107,9 +121,7 @@ export default function AdminPublishersPage() {
         (response as any)?.total ??
         publishersData.length;
       const pageNum =
-        (response as any)?.data?.page ??
-        (response as any)?.page ??
-        targetPage;
+        (response as any)?.data?.page ?? (response as any)?.page ?? targetPage;
       const totalPages =
         (response as any)?.data?.pages ??
         (response as any)?.pages ??
@@ -169,7 +181,7 @@ export default function AdminPublishersPage() {
       let websites: Record<string, unknown>[] = [];
       if (response?.data?.websites && Array.isArray(response.data.websites)) {
         websites = response.data.websites;
-      } else if (response?.data && typeof response.data === 'object') {
+      } else if (response?.data && typeof response.data === "object") {
         // Try to find websites in nested structure
         const data = response.data as Record<string, unknown>;
         if (Array.isArray(data.websites)) {
@@ -209,7 +221,13 @@ export default function AdminPublishersPage() {
     e.preventDefault();
     setCreating(true);
     try {
-      if (!createForm.firstName || !createForm.lastName || !createForm.email || !createForm.country || !createForm.password) {
+      if (
+        !createForm.firstName ||
+        !createForm.lastName ||
+        !createForm.email ||
+        !createForm.country ||
+        !createForm.password
+      ) {
         toast.error("All required fields must be filled");
         setCreating(false);
         return;
@@ -225,9 +243,13 @@ export default function AdminPublishersPage() {
         email: createForm.email.trim().toLowerCase(),
         country: createForm.country.trim(),
         password: createForm.password,
-        paypalEmail: createForm.paypalEmail.trim() || createForm.email.trim().toLowerCase(),
+        paypalEmail:
+          createForm.paypalEmail.trim() ||
+          createForm.email.trim().toLowerCase(),
       })) as any;
-      toast.success("Publisher created. Share the email and password with the user.");
+      toast.success(
+        "Publisher created. Share the email and password with the user."
+      );
       setCreateForm({
         firstName: "",
         lastName: "",
@@ -248,18 +270,32 @@ export default function AdminPublishersPage() {
   const filteredPublishers = publishers.filter((publisher) => {
     // Search filter
     const matchesSearch =
-      (publisher.firstName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (publisher.lastName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (publisher.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (publisher.firstName || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      (publisher.lastName || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      (publisher.name || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
       (publisher.email || "").toLowerCase().includes(searchQuery.toLowerCase());
 
     // Status filter
-    const publisherStatus = (publisher.accountStatus || publisher.status || "active").toLowerCase();
+    const publisherStatus = (
+      publisher.accountStatus ||
+      publisher.status ||
+      "active"
+    ).toLowerCase();
     const matchesStatus =
       statusFilter.length === 0 || statusFilter.includes(publisherStatus);
 
     // Level filter
-    const publisherLevel = (publisher.accountLevel || publisher.level || "silver").toLowerCase();
+    const publisherLevel = (
+      publisher.accountLevel ||
+      publisher.level ||
+      "silver"
+    ).toLowerCase();
     const matchesLevel =
       levelFilter.length === 0 || levelFilter.includes(publisherLevel);
 
@@ -280,100 +316,101 @@ export default function AdminPublishersPage() {
       {/* Actions / Filters */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3 flex-wrap">
-        {/* Search Input */}
-        <input
-          type="text"
-          placeholder="Search by name or email..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1 min-w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
-        />
+          {/* Search Input */}
+          <input
+            type="text"
+            placeholder="Search by name or email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1 min-w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
+          />
 
-        {/* Status Filter */}
-        <div className="relative" ref={statusFilterRef}>
-          <button
-            onClick={() => setShowStatusFilter(!showStatusFilter)}
-            className={`px-3 py-2 border rounded-md text-sm bg-white hover:bg-gray-50 ${
-              statusFilter.length > 0
-                ? "border-primary-purple bg-purple-50 text-primary-purple"
-                : "border-gray-300"
-            }`}>
-            Status Filter {statusFilter.length > 0 && `(${statusFilter.length})`}
-          </button>
+          {/* Status Filter */}
+          <div className="relative" ref={statusFilterRef}>
+            <button
+              onClick={() => setShowStatusFilter(!showStatusFilter)}
+              className={`px-3 py-2 border rounded-md text-sm bg-white hover:bg-gray-50 ${
+                statusFilter.length > 0
+                  ? "border-primary-purple bg-purple-50 text-primary-purple"
+                  : "border-gray-300"
+              }`}>
+              Status Filter{" "}
+              {statusFilter.length > 0 && `(${statusFilter.length})`}
+            </button>
 
-          {showStatusFilter && (
-            <div className="absolute mt-2 w-48 bg-white shadow-lg rounded-lg border border-gray-200 z-50 right-0">
-              <div className="p-2 text-sm">
-                {["active", "suspended", "deleted"].map((status) => (
-                  <label
-                    key={status}
-                    className="flex items-center gap-2 px-2 py-1 hover:bg-gray-50 rounded cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={statusFilter.includes(status)}
-                      onChange={() => {
-                        setStatusFilter((prev) =>
-                          prev.includes(status)
-                            ? prev.filter((s) => s !== status)
-                            : [...prev, status]
-                        );
-                      }}
-                    />
-                    <span className="capitalize">{status}</span>
-                  </label>
-                ))}
-                <button
-                  onClick={() => setStatusFilter([])}
-                  className="text-xs mt-2 text-gray-500 hover:underline ml-2">
-                  Clear filters
-                </button>
+            {showStatusFilter && (
+              <div className="absolute mt-2 w-48 bg-white shadow-lg rounded-lg border border-gray-200 z-50 right-0">
+                <div className="p-2 text-sm">
+                  {["active", "suspended", "deleted"].map((status) => (
+                    <label
+                      key={status}
+                      className="flex items-center gap-2 px-2 py-1 hover:bg-gray-50 rounded cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={statusFilter.includes(status)}
+                        onChange={() => {
+                          setStatusFilter((prev) =>
+                            prev.includes(status)
+                              ? prev.filter((s) => s !== status)
+                              : [...prev, status]
+                          );
+                        }}
+                      />
+                      <span className="capitalize">{status}</span>
+                    </label>
+                  ))}
+                  <button
+                    onClick={() => setStatusFilter([])}
+                    className="text-xs mt-2 text-gray-500 hover:underline ml-2">
+                    Clear filters
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
-        {/* Level Filter */}
-        <div className="relative" ref={levelFilterRef}>
-          <button
-            onClick={() => setShowLevelFilter(!showLevelFilter)}
-            className={`px-3 py-2 border rounded-md text-sm bg-white hover:bg-gray-50 ${
-              levelFilter.length > 0
-                ? "border-primary-purple bg-purple-50 text-primary-purple"
-                : "border-gray-300"
-            }`}>
-            Level Filter {levelFilter.length > 0 && `(${levelFilter.length})`}
-          </button>
+          {/* Level Filter */}
+          <div className="relative" ref={levelFilterRef}>
+            <button
+              onClick={() => setShowLevelFilter(!showLevelFilter)}
+              className={`px-3 py-2 border rounded-md text-sm bg-white hover:bg-gray-50 ${
+                levelFilter.length > 0
+                  ? "border-primary-purple bg-purple-50 text-primary-purple"
+                  : "border-gray-300"
+              }`}>
+              Level Filter {levelFilter.length > 0 && `(${levelFilter.length})`}
+            </button>
 
-          {showLevelFilter && (
-            <div className="absolute mt-2 w-48 bg-white shadow-lg rounded-lg border border-gray-200 z-50 right-0">
-              <div className="p-2 text-sm">
-                {["silver", "gold", "premium"].map((level) => (
-                  <label
-                    key={level}
-                    className="flex items-center gap-2 px-2 py-1 hover:bg-gray-50 rounded cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={levelFilter.includes(level)}
-                      onChange={() => {
-                        setLevelFilter((prev) =>
-                          prev.includes(level)
-                            ? prev.filter((l) => l !== level)
-                            : [...prev, level]
-                        );
-                      }}
-                    />
-                    <span className="capitalize">{level}</span>
-                  </label>
-                ))}
-                <button
-                  onClick={() => setLevelFilter([])}
-                  className="text-xs mt-2 text-gray-500 hover:underline ml-2">
-                  Clear filters
-                </button>
+            {showLevelFilter && (
+              <div className="absolute mt-2 w-48 bg-white shadow-lg rounded-lg border border-gray-200 z-50 right-0">
+                <div className="p-2 text-sm">
+                  {["silver", "gold", "premium"].map((level) => (
+                    <label
+                      key={level}
+                      className="flex items-center gap-2 px-2 py-1 hover:bg-gray-50 rounded cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={levelFilter.includes(level)}
+                        onChange={() => {
+                          setLevelFilter((prev) =>
+                            prev.includes(level)
+                              ? prev.filter((l) => l !== level)
+                              : [...prev, level]
+                          );
+                        }}
+                      />
+                      <span className="capitalize">{level}</span>
+                    </label>
+                  ))}
+                  <button
+                    onClick={() => setLevelFilter([])}
+                    className="text-xs mt-2 text-gray-500 hover:underline ml-2">
+                    Clear filters
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
         </div>
 
         <Button variant="primary" onClick={() => setShowCreateModal(true)}>
@@ -471,17 +508,26 @@ export default function AdminPublishersPage() {
                         <td className="py-4 px-4">
                           <Badge
                             variant={
-                              (publisher.accountStatus || publisher.status) === "suspended"
+                              (publisher.accountStatus || publisher.status) ===
+                              "suspended"
                                 ? "danger"
-                                : (publisher.accountStatus || publisher.status) === "deleted"
+                                : (publisher.accountStatus ||
+                                    publisher.status) === "deleted"
                                 ? "danger"
                                 : "success"
                             }>
-                            {((publisher.accountStatus || publisher.status) || "Active")
+                            {(
+                              publisher.accountStatus ||
+                              publisher.status ||
+                              "Active"
+                            )
                               .charAt(0)
                               .toUpperCase() +
-                              ((publisher.accountStatus || publisher.status) || "Active")
-                                .slice(1)}
+                              (
+                                publisher.accountStatus ||
+                                publisher.status ||
+                                "Active"
+                              ).slice(1)}
                           </Badge>
                         </td>
                         <td className="py-4 px-4">
@@ -587,7 +633,10 @@ export default function AdminPublishersPage() {
                 type="text"
                 value={createForm.firstName}
                 onChange={(e) =>
-                  setCreateForm((prev) => ({ ...prev, firstName: e.target.value }))
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    firstName: e.target.value,
+                  }))
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
                 required
@@ -601,7 +650,10 @@ export default function AdminPublishersPage() {
                 type="text"
                 value={createForm.lastName}
                 onChange={(e) =>
-                  setCreateForm((prev) => ({ ...prev, lastName: e.target.value }))
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    lastName: e.target.value,
+                  }))
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
                 required
@@ -631,7 +683,10 @@ export default function AdminPublishersPage() {
                 type="text"
                 value={createForm.country}
                 onChange={(e) =>
-                  setCreateForm((prev) => ({ ...prev, country: e.target.value }))
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    country: e.target.value,
+                  }))
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
                 required
@@ -647,14 +702,18 @@ export default function AdminPublishersPage() {
                 type="text"
                 value={createForm.password}
                 onChange={(e) =>
-                  setCreateForm((prev) => ({ ...prev, password: e.target.value }))
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    password: e.target.value,
+                  }))
                 }
                 minLength={6}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
-                Admin sets the password (min 6 characters) and shares with the user.
+                Admin sets the password (min 6 characters) and shares with the
+                user.
               </p>
             </div>
             <div>
@@ -665,7 +724,10 @@ export default function AdminPublishersPage() {
                 type="email"
                 value={createForm.paypalEmail}
                 onChange={(e) =>
-                  setCreateForm((prev) => ({ ...prev, paypalEmail: e.target.value }))
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    paypalEmail: e.target.value,
+                  }))
                 }
                 placeholder="If blank, user can add later"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-purple focus:border-primary-purple"
@@ -726,21 +788,20 @@ function PublisherWebsitesModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`${publisher.firstName || ""} ${publisher.lastName || ""}${publisher.name || ""} - Websites`}
+      title={`${publisher.firstName || ""} ${publisher.lastName || ""}${
+        publisher.name || ""
+      } - Websites`}
       size="xl"
       footer={
         <Button variant="primary" onClick={onClose}>
           Close
         </Button>
       }>
-
       {/* Summary Cards */}
       <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
           <p className="text-sm text-blue-600 mb-1">Total Websites</p>
-          <p className="text-2xl font-bold text-blue-900">
-            {websites.length}
-          </p>
+          <p className="text-2xl font-bold text-blue-900">{websites.length}</p>
         </div>
         <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
           <p className="text-sm text-yellow-600 mb-1">Pending Websites</p>
@@ -831,11 +892,14 @@ function PublisherWebsitesModal({
                       {(website.niche as string) || "-"}
                     </td>
                     <td className="py-4 px-4 text-gray-700">
-                      ${(typeof website.price === 'number' ? website.price : 0).toFixed(2)}
+                      $
+                      {(typeof website.price === "number"
+                        ? website.price
+                        : 0
+                      ).toFixed(2)}
                     </td>
                     <td className="py-4 px-4">
-                      <Badge
-                        variant={getStatusBadge(website.status as string)}>
+                      <Badge variant={getStatusBadge(website.status as string)}>
                         {formatStatus(website.status as string)}
                       </Badge>
                     </td>

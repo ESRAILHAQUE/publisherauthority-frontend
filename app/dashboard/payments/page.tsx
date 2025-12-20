@@ -448,10 +448,10 @@ export default function PaymentsPage() {
                       onChange={(e) => setPaymentMethod(e.target.value)}
                       options={[
                         { value: "PayPal", label: "PayPal" },
-                        { value: "Bank Transfer", label: "Bank Transfer" },
-                        { value: "Wise", label: "Wise" },
-                        { value: "Payoneer", label: "Payoneer" },
-                        { value: "Other", label: "Other" },
+                      
+                      
+                      
+                   
                       ]}
                       required
                     />
